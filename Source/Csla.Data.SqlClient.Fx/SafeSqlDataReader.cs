@@ -5,14 +5,13 @@
 // </copyright>
 // <summary>This is a SqlDataReader based on SafeDataReader</summary>
 //-----------------------------------------------------------------------
-using System;
+
 using System.Data;
 #if NETFX
 using System.Data.SqlClient;
 #else
 using Microsoft.Data.SqlClient;
 #endif
-using System.Threading.Tasks;
 
 namespace Csla.Data.SqlClient
 {
@@ -26,7 +25,7 @@ namespace Csla.Data.SqlClient
     /// Get a reference to the underlying
     /// SqlDataReader if present.
     /// </summary>
-    public SqlDataReader SqlDataReader { get; }
+    public SqlDataReader? SqlDataReader { get; }
 
     /// <summary>
     /// Initializes the SafeDataReader object to use data from
@@ -44,7 +43,6 @@ namespace Csla.Data.SqlClient
     /// </summary>
     /// <typeparam name="T">Type of value</typeparam>
     /// <param name="ordinal">Ordinal position of value</param>
-    /// <returns></returns>
     public Task<T> GetFieldValueAsync<T>(int ordinal)
     {
       if (SqlDataReader == null)
@@ -58,7 +56,7 @@ namespace Csla.Data.SqlClient
     /// <typeparam name="T">Type of value</typeparam>
     /// <param name="ordinal">Ordinal position of value</param>
     /// <param name="cancellationToken">Async cancellation token</param>
-    public Task<T> GetFieldValueAsync<T>(int ordinal, System.Threading.CancellationToken cancellationToken)
+    public Task<T> GetFieldValueAsync<T>(int ordinal, CancellationToken cancellationToken)
     {
       if (SqlDataReader == null)
         throw new NotSupportedException("GetFieldValueAsync");
@@ -70,7 +68,6 @@ namespace Csla.Data.SqlClient
     /// or missing value.
     /// </summary>
     /// <param name="ordinal">Ordinal position of value</param>
-    /// <returns></returns>
     public Task<bool> IsDbNullAsync(int ordinal)
     {
       if (SqlDataReader == null)
@@ -84,8 +81,7 @@ namespace Csla.Data.SqlClient
     /// </summary>
     /// <param name="ordinal">Ordinal position of value</param>
     /// <param name="cancellationToken">Async cancellation token</param>
-    /// <returns></returns>
-    public Task<bool> IsDbNullAsync(int ordinal, System.Threading.CancellationToken cancellationToken)
+    public Task<bool> IsDbNullAsync(int ordinal, CancellationToken cancellationToken)
     {
       if (SqlDataReader == null)
         throw new NotSupportedException("IsDbNullAsync");
@@ -95,7 +91,6 @@ namespace Csla.Data.SqlClient
     /// <summary>
     /// Advances the reader to the next result.
     /// </summary>
-    /// <returns></returns>
     public Task<bool> NextResultAsync()
     {
       if (SqlDataReader == null)
@@ -107,8 +102,7 @@ namespace Csla.Data.SqlClient
     /// Advances the reader to the next result.
     /// </summary>
     /// <param name="cancellationToken">Async cancellation token</param>
-    /// <returns></returns>
-    public Task<bool> NextResultAsync(System.Threading.CancellationToken cancellationToken)
+    public Task<bool> NextResultAsync(CancellationToken cancellationToken)
     {
       if (SqlDataReader == null)
         throw new NotSupportedException("NextResultAsync");
@@ -118,7 +112,6 @@ namespace Csla.Data.SqlClient
     /// <summary>
     /// Advances to the next record in a recordset.
     /// </summary>
-    /// <returns></returns>
     public Task<bool> ReadAsync()
     {
       if (SqlDataReader == null)
@@ -130,8 +123,7 @@ namespace Csla.Data.SqlClient
     /// Advances to the next record in a recordset.
     /// </summary>
     /// <param name="cancellationToken">Async cancellation token</param>
-    /// <returns></returns>
-    public Task<bool> ReadAsync(System.Threading.CancellationToken cancellationToken)
+    public Task<bool> ReadAsync(CancellationToken cancellationToken)
     {
       if (SqlDataReader == null)
         throw new NotSupportedException("NextResultAsync");

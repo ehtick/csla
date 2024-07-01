@@ -5,15 +5,13 @@
 // </copyright>
 // <summary>This is a base class from which readonly business classes</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
+
+using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Threading.Tasks;
 using Csla.Core;
 using Csla.Core.FieldManager;
 using Csla.Core.LoadManager;
@@ -23,7 +21,6 @@ using Csla.Rules;
 using Csla.Security;
 using Csla.Serialization.Mobile;
 using Csla.Server;
-using System.Collections.Concurrent;
 
 namespace Csla
 {
@@ -37,16 +34,10 @@ namespace Csla
   /// should only implement readonly properties.
   /// </remarks>
   /// <typeparam name="T">Type of the business object.</typeparam>
-  [Serializable()]
+  [Serializable]
   public abstract class ReadOnlyBase<T> : BindableBase,
-    ICloneable,
-    IReadOnlyObject,
-    ISerializationNotification,
-    IAuthorizeReadWrite,
     IDataPortalTarget,
     IManageProperties,
-    INotifyBusy,
-    IHostRules,
     IReadOnlyBase,
     IUseApplicationContext,
     IUseFieldManager,
@@ -88,8 +79,8 @@ namespace Csla
     /// Gets or sets the current ApplicationContext object.
     /// </summary>
     protected ApplicationContext ApplicationContext { get; set; }
-    ApplicationContext IUseApplicationContext.ApplicationContext 
-    { 
+    ApplicationContext IUseApplicationContext.ApplicationContext
+    {
       get => ApplicationContext;
       set
       {
@@ -135,19 +126,19 @@ namespace Csla
     /// </summary>
     protected virtual bool IsCanReadPropertyAuthorizationCheckDisabled { get; } = false;
 
-    [NotUndoable()]
-    [NonSerialized()]
+    [NotUndoable]
+    [NonSerialized]
     private ConcurrentDictionary<string, bool> _readResultCache;
-    [NotUndoable()]
-    [NonSerialized()]
+    [NotUndoable]
+    [NonSerialized]
     private ConcurrentDictionary<string, bool> _executeResultCache;
-    [NotUndoable()]
-    [NonSerialized()]
+    [NotUndoable]
+    [NonSerialized]
     private System.Security.Principal.IPrincipal _lastPrincipal;
 
     private void InitializeBusinessRules()
     {
-      var rules = BusinessRuleManager.GetRulesForType(this.GetType());
+      var rules = BusinessRuleManager.GetRulesForType(GetType());
       if (!rules.Initialized)
         lock (rules)
           if (!rules.Initialized)
@@ -159,13 +150,13 @@ namespace Csla
             }
             catch (Exception)
             {
-              BusinessRuleManager.CleanupRulesForType(this.GetType());
+              BusinessRuleManager.CleanupRulesForType(GetType());
               throw;  // and rethrow exception
             }
           }
     }
 
-    private Csla.Rules.BusinessRules _businessRules;
+    private BusinessRules _businessRules;
 
     /// <summary>
     /// Provides access to the broken rules functionality.
@@ -198,7 +189,7 @@ namespace Csla
     void IHostRules.RuleComplete(string property)
     { }
 
-    void Rules.IHostRules.AllRulesComplete()
+    void IHostRules.AllRulesComplete()
     { }
 
     /// <summary>
@@ -219,9 +210,10 @@ namespace Csla
     /// </summary>
     /// <param name="property">Property to check.</param>
     [EditorBrowsable(EditorBrowsableState.Advanced)]
-    public virtual bool CanReadProperty(Csla.Core.IPropertyInfo property)
+    public virtual bool CanReadProperty(IPropertyInfo property)
     {
-      if (IsCanReadPropertyAuthorizationCheckDisabled) {
+      if (IsCanReadPropertyAuthorizationCheckDisabled)
+      {
         return true;
       }
 
@@ -247,12 +239,12 @@ namespace Csla
     /// <param name="throwOnFalse">Indicates whether a negative
     /// result should cause an exception.</param>
     [EditorBrowsable(EditorBrowsableState.Advanced)]
-    public bool CanReadProperty(Csla.Core.IPropertyInfo property, bool throwOnFalse)
+    public bool CanReadProperty(IPropertyInfo property, bool throwOnFalse)
     {
       bool result = CanReadProperty(property);
       if (throwOnFalse && result == false)
       {
-        Csla.Security.SecurityException ex = new Csla.Security.SecurityException(
+        SecurityException ex = new SecurityException(
           String.Format("{0} ({1})",
           Resources.PropertyGetNotAllowed, property.Name));
         throw ex;
@@ -283,21 +275,20 @@ namespace Csla
       var propertyInfo = FieldManager.GetRegisteredProperties().FirstOrDefault(p => p.Name == propertyName);
       if (propertyInfo == null)
       {
-#if NETFX_CORE || (ANDROID || IOS)
-#else
-        Trace.TraceError("CanReadProperty: {0} is not a registered property of {1}.{2}", propertyName, this.GetType().Namespace, this.GetType().Name);
+#if !(ANDROID || IOS)
+        Trace.TraceError("CanReadProperty: {0} is not a registered property of {1}.{2}", propertyName, GetType().Namespace, GetType().Name);
 #endif
         return true;
       }
       return CanReadProperty(propertyInfo, throwOnFalse);
     }
 
-    bool Csla.Security.IAuthorizeReadWrite.CanWriteProperty(string propertyName)
+    bool IAuthorizeReadWrite.CanWriteProperty(string propertyName)
     {
       return false;
     }
 
-    bool Csla.Security.IAuthorizeReadWrite.CanWriteProperty(IPropertyInfo property)
+    bool IAuthorizeReadWrite.CanWriteProperty(IPropertyInfo property)
     {
       return false;
     }
@@ -324,7 +315,7 @@ namespace Csla
     /// <param name="method">Method to execute.</param>
     /// <returns>true if execute is allowed.</returns>
     [EditorBrowsable(EditorBrowsableState.Advanced)]
-    public virtual bool CanExecuteMethod(Csla.Core.IMemberInfo method)
+    public virtual bool CanExecuteMethod(IMemberInfo method)
     {
       bool result = true;
 
@@ -347,14 +338,14 @@ namespace Csla
     /// <param name="throwOnFalse">Indicates whether a negative
     /// result should cause an exception.</param>
     [EditorBrowsable(EditorBrowsableState.Advanced)]
-    public bool CanExecuteMethod(Csla.Core.IMemberInfo method, bool throwOnFalse)
+    public bool CanExecuteMethod(IMemberInfo method, bool throwOnFalse)
     {
 
       bool result = CanExecuteMethod(method);
       if (throwOnFalse && result == false)
       {
-        Csla.Security.SecurityException ex =
-          new Csla.Security.SecurityException(string.Format("{0} ({1})", Properties.Resources.MethodExecuteNotAllowed, method.Name));
+        SecurityException ex =
+          new SecurityException($"{Resources.MethodExecuteNotAllowed} ({method.Name})");
         throw ex;
       }
       return result;
@@ -380,15 +371,14 @@ namespace Csla
       bool result = CanExecuteMethod(new MethodInfo(methodName));
       if (throwOnFalse && result == false)
       {
-        Csla.Security.SecurityException ex = new Csla.Security.SecurityException(string.Format("{0} ({1})", Properties.Resources.MethodExecuteNotAllowed, methodName));
-        throw ex;
+        throw new SecurityException($"{Resources.MethodExecuteNotAllowed} ({methodName})");
       }
       return result;
     }
 
-#endregion
+    #endregion
 
-#region IClonable
+    #region IClonable
 
     object ICloneable.Clone()
     {
@@ -402,7 +392,7 @@ namespace Csla
     [EditorBrowsable(EditorBrowsableState.Advanced)]
     public virtual object GetClone()
     {
-      return Core.ObjectCloner.GetInstance(ApplicationContext).Clone(this);
+      return ObjectCloner.GetInstance(ApplicationContext).Clone(this);
     }
 
     /// <summary>
@@ -514,39 +504,27 @@ namespace Csla
     {
     }
 
-#endregion
+    #endregion
 
-#region Serialization Notification
+    #region Serialization Notification
 
     void ISerializationNotification.Deserialized()
     {
       OnDeserializedHandler(new System.Runtime.Serialization.StreamingContext());
     }
 
-    [System.Runtime.Serialization.OnDeserialized()]
+    [System.Runtime.Serialization.OnDeserialized]
     private void OnDeserializedHandler(System.Runtime.Serialization.StreamingContext context)
     {
       if (_fieldManager != null)
-        FieldManager.SetPropertyList(this.GetType());
+        FieldManager.SetPropertyList(GetType());
       InitializeBusinessRules();
-      OnDeserialized(context);
     }
 
-    /// <summary>
-    /// This method is called on a newly deserialized object
-    /// after deserialization is complete.
-    /// </summary>
-    /// <param name="context">Serialization context object.</param>
-    [EditorBrowsable(EditorBrowsableState.Advanced)]
-    protected virtual void OnDeserialized(System.Runtime.Serialization.StreamingContext context)
-    {
-      // do nothing - this is here so a subclass
-      // could override if needed
-    }
 
-#endregion
+    #endregion
 
-#region  Register Properties
+    #region  Register Properties
 
     /// <summary>
     /// Indicates that the specified property belongs
@@ -566,7 +544,7 @@ namespace Csla
     /// </returns>
     protected static PropertyInfo<P> RegisterProperty<P>(Type objectType, PropertyInfo<P> info)
     {
-      return Core.FieldManager.PropertyInfoManager.RegisterProperty<P>(objectType, info);
+      return PropertyInfoManager.RegisterProperty<P>(objectType, info);
     }
 
     /// <summary>
@@ -584,7 +562,7 @@ namespace Csla
     /// </returns>
     protected static PropertyInfo<P> RegisterProperty<P>(PropertyInfo<P> info)
     {
-      return Core.FieldManager.PropertyInfoManager.RegisterProperty<P>(typeof(T), info);
+      return PropertyInfoManager.RegisterProperty<P>(typeof(T), info);
     }
 
     /// <summary>
@@ -593,10 +571,9 @@ namespace Csla
     /// </summary>
     /// <typeparam name="P">Type of property</typeparam>
     /// <param name="propertyName">Property name from nameof()</param>
-    /// <returns></returns>
     protected static PropertyInfo<P> RegisterProperty<P>(string propertyName)
     {
-      return RegisterProperty(Csla.Core.FieldManager.PropertyInfoFactory.Factory.Create<P>(typeof(T), propertyName));
+      return RegisterProperty(PropertyInfoFactory.Factory.Create<P>(typeof(T), propertyName));
     }
 
     /// <summary>
@@ -605,7 +582,6 @@ namespace Csla
     /// </summary>
     /// <typeparam name="P">Type of property</typeparam>
     /// <param name="propertyLambdaExpression">Property Expression</param>
-    /// <returns></returns>
     protected static PropertyInfo<P> RegisterProperty<P>(Expression<Func<T, object>> propertyLambdaExpression)
     {
       PropertyInfo reflectedPropertyInfo = Reflect<T>.GetProperty(propertyLambdaExpression);
@@ -619,10 +595,9 @@ namespace Csla
     /// <typeparam name="P">Type of property</typeparam>
     /// <param name="propertyName">Property name from nameof()</param>
     /// <param name="friendlyName">Friendly description for a property to be used in databinding</param>
-    /// <returns></returns>
     protected static PropertyInfo<P> RegisterProperty<P>(string propertyName, string friendlyName)
     {
-      return RegisterProperty(Csla.Core.FieldManager.PropertyInfoFactory.Factory.Create<P>(typeof(T), propertyName, friendlyName));
+      return RegisterProperty(PropertyInfoFactory.Factory.Create<P>(typeof(T), propertyName, friendlyName));
     }
 
     /// <summary>
@@ -632,7 +607,6 @@ namespace Csla
     /// <typeparam name="P">Type of property</typeparam>
     /// <param name="propertyLambdaExpression">Property Expression</param>
     /// <param name="friendlyName">Friendly description for a property to be used in databinding</param>
-    /// <returns></returns>
     protected static PropertyInfo<P> RegisterProperty<P>(Expression<Func<T, object>> propertyLambdaExpression, string friendlyName)
     {
       PropertyInfo reflectedPropertyInfo = Reflect<T>.GetProperty(propertyLambdaExpression);
@@ -647,10 +621,9 @@ namespace Csla
     /// <param name="propertyName">Property name from nameof()</param>
     /// <param name="friendlyName">Friendly description for a property to be used in databinding</param>
     /// <param name="defaultValue">Default Value for the property</param>
-    /// <returns></returns>
     protected static PropertyInfo<P> RegisterProperty<P>(string propertyName, string friendlyName, P defaultValue)
     {
-      return RegisterProperty(Csla.Core.FieldManager.PropertyInfoFactory.Factory.Create<P>(typeof(T), propertyName, friendlyName, defaultValue));
+      return RegisterProperty(PropertyInfoFactory.Factory.Create<P>(typeof(T), propertyName, friendlyName, defaultValue));
     }
 
     /// <summary>
@@ -661,7 +634,6 @@ namespace Csla
     /// <param name="propertyLambdaExpression">Property Expression</param>
     /// <param name="friendlyName">Friendly description for a property to be used in databinding</param>
     /// <param name="defaultValue">Default Value for the property</param>
-    /// <returns></returns>
     protected static PropertyInfo<P> RegisterProperty<P>(Expression<Func<T, object>> propertyLambdaExpression, string friendlyName, P defaultValue)
     {
       PropertyInfo reflectedPropertyInfo = Reflect<T>.GetProperty(propertyLambdaExpression);
@@ -675,10 +647,9 @@ namespace Csla
     /// <typeparam name="P">Type of property</typeparam>
     /// <param name="propertyName">Property name from nameof()</param>
     /// <param name="relationship">Relationship with property value.</param>
-    /// <returns></returns>
     protected static PropertyInfo<P> RegisterProperty<P>(string propertyName, RelationshipTypes relationship)
     {
-      return RegisterProperty(Csla.Core.FieldManager.PropertyInfoFactory.Factory.Create<P>(typeof(T), propertyName, string.Empty, relationship));
+      return RegisterProperty(PropertyInfoFactory.Factory.Create<P>(typeof(T), propertyName, string.Empty, relationship));
     }
 
     /// <summary>
@@ -688,7 +659,6 @@ namespace Csla
     /// <typeparam name="P">Type of property</typeparam>
     /// <param name="propertyLambdaExpression">Property Expression</param>
     /// <param name="relationship">Relationship with property value.</param>
-    /// <returns></returns>
     protected static PropertyInfo<P> RegisterProperty<P>(Expression<Func<T, object>> propertyLambdaExpression, RelationshipTypes relationship)
     {
       PropertyInfo reflectedPropertyInfo = Reflect<T>.GetProperty(propertyLambdaExpression);
@@ -704,10 +674,9 @@ namespace Csla
     /// <param name="friendlyName">Friendly description for a property to be used in databinding</param>
     /// <param name="defaultValue">Default Value for the property</param>
     /// <param name="relationship">Relationship with property value.</param>
-    /// <returns></returns>
     protected static PropertyInfo<P> RegisterProperty<P>(string propertyName, string friendlyName, P defaultValue, RelationshipTypes relationship)
     {
-      return RegisterProperty(Csla.Core.FieldManager.PropertyInfoFactory.Factory.Create<P>(typeof(T), propertyName, friendlyName, defaultValue, relationship));
+      return RegisterProperty(PropertyInfoFactory.Factory.Create<P>(typeof(T), propertyName, friendlyName, defaultValue, relationship));
     }
 
     /// <summary>
@@ -719,7 +688,6 @@ namespace Csla
     /// <param name="friendlyName">Friendly description for a property to be used in databinding</param>
     /// <param name="defaultValue">Default Value for the property</param>
     /// <param name="relationship">Relationship with property value.</param>
-    /// <returns></returns>
     protected static PropertyInfo<P> RegisterProperty<P>(Expression<Func<T, object>> propertyLambdaExpression, string friendlyName, P defaultValue, RelationshipTypes relationship)
     {
       PropertyInfo reflectedPropertyInfo = Reflect<T>.GetProperty(propertyLambdaExpression);
@@ -742,11 +710,11 @@ namespace Csla
     /// <returns>
     /// The provided IMemberInfo object.
     /// </returns>
-    protected static Csla.Core.IMemberInfo RegisterMethod(Type objectType, IMemberInfo info)
+    protected static IMemberInfo RegisterMethod(Type objectType, IMemberInfo info)
     {
       var reflected = objectType.GetMethod(info.Name);
       if (reflected == null)
-        throw new ArgumentException(string.Format(Resources.NoSuchMethod, info.Name), "info");
+        throw new ArgumentException(string.Format(Resources.NoSuchMethod, info.Name), nameof(info));
       return info;
     }
 
@@ -774,7 +742,6 @@ namespace Csla
     /// Registers a method for use in Authorization.
     /// </summary>
     /// <param name="methodName">Method name from nameof()</param>
-    /// <returns></returns>
     protected static MethodInfo RegisterMethod(string methodName)
     {
       return RegisterMethod(typeof(T), methodName);
@@ -784,16 +751,15 @@ namespace Csla
     /// Registers the method.
     /// </summary>
     /// <param name="methodLambdaExpression">The method lambda expression.</param>
-    /// <returns></returns>
     protected static MethodInfo RegisterMethod(Expression<Action<T>> methodLambdaExpression)
     {
       System.Reflection.MethodInfo reflectedMethodInfo = Reflect<T>.GetMethod(methodLambdaExpression);
       return RegisterMethod(reflectedMethodInfo.Name);
     }
 
-#endregion
+    #endregion
 
-#region  Get Properties
+    #region  Get Properties
 
     /// <summary>
     /// Gets a property's value, first checking authorization.
@@ -815,7 +781,7 @@ namespace Csla
     /// </remarks>
     protected P GetProperty<P>(string propertyName, P field, P defaultValue)
     {
-      return GetProperty<P>(propertyName, field, defaultValue, Security.NoAccessBehavior.SuppressException);
+      return GetProperty<P>(propertyName, field, defaultValue, NoAccessBehavior.SuppressException);
     }
 
     /// <summary>
@@ -834,18 +800,18 @@ namespace Csla
     /// <param name="noAccess">
     /// True if an exception should be thrown when the
     /// user is not authorized to read this property.</param>
-    protected P GetProperty<P>(string propertyName, P field, P defaultValue, Security.NoAccessBehavior noAccess)
+    protected P GetProperty<P>(string propertyName, P field, P defaultValue, NoAccessBehavior noAccess)
     {
-#region Check to see if the property is marked with RelationshipTypes.PrivateField
+      #region Check to see if the property is marked with RelationshipTypes.PrivateField
 
       var propertyInfo = FieldManager.GetRegisteredProperty(propertyName);
 
       if ((propertyInfo.RelationshipType & RelationshipTypes.PrivateField) != RelationshipTypes.PrivateField)
         throw new InvalidOperationException(Resources.PrivateFieldException);
 
-#endregion
+      #endregion
 
-      if (CanReadProperty(propertyInfo, noAccess == Csla.Security.NoAccessBehavior.ThrowException))
+      if (CanReadProperty(propertyInfo, noAccess == NoAccessBehavior.ThrowException))
         return field;
 
       return defaultValue;
@@ -868,7 +834,7 @@ namespace Csla
     /// </remarks>
     protected P GetProperty<P>(PropertyInfo<P> propertyInfo, P field)
     {
-      return GetProperty<P>(propertyInfo.Name, field, propertyInfo.DefaultValue, Security.NoAccessBehavior.SuppressException);
+      return GetProperty<P>(propertyInfo.Name, field, propertyInfo.DefaultValue, NoAccessBehavior.SuppressException);
     }
 
     /// <summary>
@@ -887,7 +853,7 @@ namespace Csla
     /// <param name="noAccess">
     /// True if an exception should be thrown when the
     /// user is not authorized to read this property.</param>
-    protected P GetProperty<P>(PropertyInfo<P> propertyInfo, P field, P defaultValue, Security.NoAccessBehavior noAccess)
+    protected P GetProperty<P>(PropertyInfo<P> propertyInfo, P field, P defaultValue, NoAccessBehavior noAccess)
     {
       return GetProperty<P>(propertyInfo.Name, field, defaultValue, noAccess);
     }
@@ -899,7 +865,6 @@ namespace Csla
     /// <typeparam name="P">Type of the property.</typeparam>
     /// <param name="property">PropertyInfo object containing property metadata.</param>
     /// <param name="valueGenerator">Method returning the new value.</param>
-    /// <returns></returns>
     /// <remarks>
     /// If the user is not authorized to read the property
     /// value, the defaultValue value is returned as a
@@ -920,7 +885,6 @@ namespace Csla
     /// property is currently being retrieved.
     /// </summary>
     /// <param name="propertyInfo">Property to check.</param>
-    /// <returns></returns>
     protected bool PropertyIsLoading(IPropertyInfo propertyInfo)
     {
       return LoadManager.IsLoadingProperty(propertyInfo);
@@ -933,7 +897,6 @@ namespace Csla
     /// <typeparam name="P">Type of the property.</typeparam>
     /// <param name="property">PropertyInfo object containing property metadata.</param>
     /// <param name="factory">Async method returning the new value.</param>
-    /// <returns></returns>
     /// <remarks>
     /// <para>
     /// Note that the first value returned is almost certainly
@@ -976,7 +939,7 @@ namespace Csla
     /// </remarks>
     protected P GetPropertyConvert<F, P>(PropertyInfo<F> propertyInfo, F field)
     {
-      return Utilities.CoerceValue<P>(typeof(F), null, GetProperty<F>(propertyInfo.Name, field, propertyInfo.DefaultValue, Security.NoAccessBehavior.SuppressException));
+      return Utilities.CoerceValue<P>(typeof(F), null, GetProperty<F>(propertyInfo.Name, field, propertyInfo.DefaultValue, NoAccessBehavior.SuppressException));
     }
 
     /// <summary>
@@ -1001,7 +964,7 @@ namespace Csla
     /// value, the defaultValue value is returned as a
     /// result.
     /// </remarks>
-    protected P GetPropertyConvert<F, P>(PropertyInfo<F> propertyInfo, F field, Security.NoAccessBehavior noAccess)
+    protected P GetPropertyConvert<F, P>(PropertyInfo<F> propertyInfo, F field, NoAccessBehavior noAccess)
     {
       return Utilities.CoerceValue<P>(typeof(F), null, GetProperty<F>(propertyInfo.Name, field, propertyInfo.DefaultValue, noAccess));
     }
@@ -1022,7 +985,7 @@ namespace Csla
     /// </remarks>
     protected P GetProperty<P>(PropertyInfo<P> propertyInfo)
     {
-      return GetProperty<P>(propertyInfo, Security.NoAccessBehavior.SuppressException);
+      return GetProperty<P>(propertyInfo, NoAccessBehavior.SuppressException);
     }
 
     /// <summary>
@@ -1045,7 +1008,7 @@ namespace Csla
     /// </remarks>
     protected P GetPropertyConvert<F, P>(PropertyInfo<F> propertyInfo)
     {
-      return Utilities.CoerceValue<P>(typeof(F), null, GetProperty<F>(propertyInfo, Security.NoAccessBehavior.SuppressException));
+      return Utilities.CoerceValue<P>(typeof(F), null, GetProperty<F>(propertyInfo, NoAccessBehavior.SuppressException));
     }
 
     /// <summary>
@@ -1069,7 +1032,7 @@ namespace Csla
     /// value, the defaultValue value is returned as a
     /// result.
     /// </remarks>
-    protected P GetPropertyConvert<F, P>(PropertyInfo<F> propertyInfo, Security.NoAccessBehavior noAccess)
+    protected P GetPropertyConvert<F, P>(PropertyInfo<F> propertyInfo, NoAccessBehavior noAccess)
     {
       return Utilities.CoerceValue<P>(typeof(F), null, GetProperty<F>(propertyInfo, noAccess));
     }
@@ -1091,7 +1054,7 @@ namespace Csla
     /// value, the defaultValue value is returned as a
     /// result.
     /// </remarks>
-    protected P GetProperty<P>(PropertyInfo<P> propertyInfo, Security.NoAccessBehavior noAccess)
+    protected P GetProperty<P>(PropertyInfo<P> propertyInfo, NoAccessBehavior noAccess)
     {
       if (((propertyInfo.RelationshipType & RelationshipTypes.LazyLoad) == RelationshipTypes.LazyLoad) && !FieldManager.FieldExists(propertyInfo))
       {
@@ -1101,7 +1064,7 @@ namespace Csla
       }
 
       P result = default(P);
-      if (CanReadProperty(propertyInfo, noAccess == Csla.Security.NoAccessBehavior.ThrowException))
+      if (CanReadProperty(propertyInfo, noAccess == NoAccessBehavior.ThrowException))
         result = ReadProperty<P>(propertyInfo);
       else
         result = propertyInfo.DefaultValue;
@@ -1133,9 +1096,9 @@ namespace Csla
       return result;
     }
 
-#endregion
+    #endregion
 
-#region  Read Properties
+    #region  Read Properties
 
     /// <summary>
     /// Gets a property's value from the list of 
@@ -1176,8 +1139,7 @@ namespace Csla
       IFieldData data = FieldManager.GetFieldData(propertyInfo);
       if (data != null)
       {
-        IFieldData<P> fd = data as IFieldData<P>;
-        if (fd != null)
+        if (data is IFieldData<P> fd)
           result = fd.Value;
         else
           result = (P)data.Value;
@@ -1263,9 +1225,9 @@ namespace Csla
       return LazyReadPropertyAsync(propertyInfo, factory);
     }
 
-#endregion
+    #endregion
 
-#region  Load Properties
+    #region  Load Properties
 
     /// <summary>
     /// Loads a property's managed field with the 
@@ -1310,16 +1272,16 @@ namespace Csla
       }
       catch (Exception ex)
       {
-        throw new PropertyLoadException(string.Format(Properties.Resources.PropertyLoadException, propertyInfo.Name, ex.Message));
+        throw new PropertyLoadException(string.Format(Resources.PropertyLoadException, propertyInfo.Name, ex.Message));
       }
     }
 
-    void Core.IManageProperties.LoadProperty<P>(PropertyInfo<P> propertyInfo, P newValue)
+    void IManageProperties.LoadProperty<P>(PropertyInfo<P> propertyInfo, P newValue)
     {
       LoadProperty<P>(propertyInfo, newValue);
     }
 
-    bool Core.IManageProperties.FieldExists(Core.IPropertyInfo property)
+    bool IManageProperties.FieldExists(IPropertyInfo property)
     {
       return FieldManager.FieldExists(property);
     }
@@ -1370,7 +1332,7 @@ namespace Csla
       }
       catch (Exception ex)
       {
-        throw new PropertyLoadException(string.Format(Properties.Resources.PropertyLoadException, propertyInfo.Name, ex.Message));
+        throw new PropertyLoadException(string.Format(Resources.PropertyLoadException, propertyInfo.Name, ex.Message));
       }
     }
 
@@ -1391,7 +1353,7 @@ namespace Csla
     /// </remarks>
     protected virtual void LoadProperty(IPropertyInfo propertyInfo, object newValue)
     {
-      var t = this.GetType();
+      var t = GetType();
       var flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
       var method = t.GetMethods(flags).FirstOrDefault(c => c.Name == "LoadProperty" && c.IsGenericMethod);
       var gm = method.MakeGenericMethod(propertyInfo.Type);
@@ -1416,7 +1378,7 @@ namespace Csla
       }
     }
 
-    void loadManager_UnhandledAsyncException(object sender, Csla.Core.ErrorEventArgs e)
+    void loadManager_UnhandledAsyncException(object sender, Core.ErrorEventArgs e)
     {
       OnUnhandledAsyncException(e);
     }
@@ -1462,11 +1424,11 @@ namespace Csla
     {
       LoadManager.BeginLoad(new TaskLoader<R>(property, factory));
     }
-#endregion
+    #endregion
 
-#region  Field Manager
+    #region  Field Manager
 
-    [NotUndoable()]
+    [NotUndoable]
     private FieldDataManager _fieldManager;
 
     /// <summary>
@@ -1479,7 +1441,7 @@ namespace Csla
       {
         if (_fieldManager == null)
         {
-          _fieldManager = new FieldDataManager(ApplicationContext, this.GetType());
+          _fieldManager = new FieldDataManager(ApplicationContext, GetType());
         }
         return _fieldManager;
       }
@@ -1495,10 +1457,9 @@ namespace Csla
     /// Await this method to ensure business object
     /// is not busy running async rules.
     /// </summary>
-    /// <returns></returns>
     public async Task WaitForIdle()
     {
-      var cslaOptions = ApplicationContext.GetRequiredService<Csla.Configuration.CslaOptions>();
+      var cslaOptions = ApplicationContext.GetRequiredService<Configuration.CslaOptions>();
       await WaitForIdle(TimeSpan.FromSeconds(cslaOptions.DefaultWaitForIdleTimeoutInSeconds)).ConfigureAwait(false);
     }
 
@@ -1507,15 +1468,24 @@ namespace Csla
     /// is not busy running async rules.
     /// </summary>
     /// <param name="timeout">Timeout duration</param>
-    /// <returns></returns>
-    public async Task WaitForIdle(TimeSpan timeout)
+    public Task WaitForIdle(TimeSpan timeout)
     {
-      await BusyHelper.WaitForIdle(this, timeout).ConfigureAwait(false);
+      return BusyHelper.WaitForIdle(this, timeout);
+    }
+
+    /// <summary>
+    /// Waits for the object to become idle.
+    /// </summary>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    public Task WaitForIdle(CancellationToken ct)
+    {
+      return BusyHelper.WaitForIdle(this, ct);
     }
 
     [NonSerialized]
     [NotUndoable]
-    private bool _isBusy;
+    private int _isBusyCounter;
 
     /// <summary>
     /// Marks the object as being busy (it is
@@ -1524,11 +1494,12 @@ namespace Csla
     [EditorBrowsable(EditorBrowsableState.Advanced)]
     protected void MarkBusy()
     {
-      if (_isBusy)
-        throw new InvalidOperationException(Resources.BusyObjectsMayNotBeMarkedBusy);
+      int updatedValue = Interlocked.Increment(ref _isBusyCounter);
 
-      _isBusy = true;
-      OnBusyChanged(new BusyChangedEventArgs("", true));
+      if (updatedValue == 1)
+      {
+        OnBusyChanged(new BusyChangedEventArgs("", true));
+      }
     }
 
     /// <summary>
@@ -1538,8 +1509,15 @@ namespace Csla
     [EditorBrowsable(EditorBrowsableState.Advanced)]
     protected void MarkIdle()
     {
-      _isBusy = false;
-      OnBusyChanged(new BusyChangedEventArgs("", false));
+      int updatedValue = Interlocked.Decrement(ref _isBusyCounter);
+      if (updatedValue < 0)
+      {
+        _ = Interlocked.CompareExchange(ref _isBusyCounter, 0, updatedValue);
+      }
+      if (updatedValue == 0)
+      {
+        OnBusyChanged(new BusyChangedEventArgs("", false));
+      }
     }
 
     /// <summary>
@@ -1565,7 +1543,7 @@ namespace Csla
     [ScaffoldColumn(false)]
     public virtual bool IsSelfBusy
     {
-      get { return _isBusy || LoadManager.IsLoading; }
+      get { return _isBusyCounter > 0 || LoadManager.IsLoading; }
     }
 
     void Child_PropertyBusy(object sender, BusyChangedEventArgs e)
@@ -1606,61 +1584,60 @@ namespace Csla
     [EditorBrowsable(EditorBrowsableState.Advanced)]
     protected virtual void OnBusyChanged(BusyChangedEventArgs args)
     {
-      if (_propertyBusy != null)
-        _propertyBusy(this, args);
+      _propertyBusy?.Invoke(this, args);
     }
 
-#endregion
+    #endregion
 
-#region IDataPortalTarget Members
+    #region IDataPortalTarget Members
 
-    void Csla.Server.IDataPortalTarget.CheckRules()
+    void IDataPortalTarget.CheckRules()
     { }
 
-    Task Csla.Server.IDataPortalTarget.CheckRulesAsync() => Task.CompletedTask;
+    Task IDataPortalTarget.CheckRulesAsync() => Task.CompletedTask;
 
-    void Csla.Server.IDataPortalTarget.MarkAsChild()
+    void IDataPortalTarget.MarkAsChild()
     { }
 
-    void Csla.Server.IDataPortalTarget.MarkNew()
+    void IDataPortalTarget.MarkNew()
     { }
 
-    void Csla.Server.IDataPortalTarget.MarkOld()
+    void IDataPortalTarget.MarkOld()
     { }
 
-    void Csla.Server.IDataPortalTarget.DataPortal_OnDataPortalInvoke(DataPortalEventArgs e)
+    void IDataPortalTarget.DataPortal_OnDataPortalInvoke(DataPortalEventArgs e)
     {
-      this.DataPortal_OnDataPortalInvoke(e);
+      DataPortal_OnDataPortalInvoke(e);
     }
 
-    void Csla.Server.IDataPortalTarget.DataPortal_OnDataPortalInvokeComplete(DataPortalEventArgs e)
+    void IDataPortalTarget.DataPortal_OnDataPortalInvokeComplete(DataPortalEventArgs e)
     {
-      this.DataPortal_OnDataPortalInvokeComplete(e);
+      DataPortal_OnDataPortalInvokeComplete(e);
     }
 
-    void Csla.Server.IDataPortalTarget.DataPortal_OnDataPortalException(DataPortalEventArgs e, Exception ex)
+    void IDataPortalTarget.DataPortal_OnDataPortalException(DataPortalEventArgs e, Exception ex)
     {
-      this.DataPortal_OnDataPortalException(e, ex);
+      DataPortal_OnDataPortalException(e, ex);
     }
 
-    void Csla.Server.IDataPortalTarget.Child_OnDataPortalInvoke(DataPortalEventArgs e)
+    void IDataPortalTarget.Child_OnDataPortalInvoke(DataPortalEventArgs e)
     {
-      this.Child_OnDataPortalInvoke(e);
+      Child_OnDataPortalInvoke(e);
     }
 
-    void Csla.Server.IDataPortalTarget.Child_OnDataPortalInvokeComplete(DataPortalEventArgs e)
+    void IDataPortalTarget.Child_OnDataPortalInvokeComplete(DataPortalEventArgs e)
     {
-      this.Child_OnDataPortalInvokeComplete(e);
+      Child_OnDataPortalInvokeComplete(e);
     }
 
-    void Csla.Server.IDataPortalTarget.Child_OnDataPortalException(DataPortalEventArgs e, Exception ex)
+    void IDataPortalTarget.Child_OnDataPortalException(DataPortalEventArgs e, Exception ex)
     {
-      this.Child_OnDataPortalException(e, ex);
+      Child_OnDataPortalException(e, ex);
     }
 
-#endregion
+    #endregion
 
-#region IManageProperties Members
+    #region IManageProperties Members
 
     bool IManageProperties.HasManagedProperties
     {
@@ -1717,9 +1694,9 @@ namespace Csla
     {
       return FieldManager.GetChildren();
     }
-#endregion
+    #endregion
 
-#region MobileFormatter
+    #region MobileFormatter
 
     /// <summary>
     /// Override this method to insert your child object
@@ -1733,7 +1710,7 @@ namespace Csla
     /// convert child references to/from reference id values.
     /// </param>
     protected override void OnGetChildren(
-      Csla.Serialization.Mobile.SerializationInfo info, Csla.Serialization.Mobile.MobileFormatter formatter)
+      SerializationInfo info, MobileFormatter formatter)
     {
       base.OnGetChildren(info, formatter);
       if (_fieldManager != null)
@@ -1754,7 +1731,7 @@ namespace Csla
     /// Reference to MobileFormatter instance. Use this to
     /// convert child references to/from reference id values.
     /// </param>
-    protected override void OnSetChildren(Csla.Serialization.Mobile.SerializationInfo info, Csla.Serialization.Mobile.MobileFormatter formatter)
+    protected override void OnSetChildren(SerializationInfo info, MobileFormatter formatter)
     {
       if (info.Children.TryGetValue("_fieldManager", out var child))
       {
@@ -1763,22 +1740,22 @@ namespace Csla
       base.OnSetChildren(info, formatter);
     }
 
-#endregion
+    #endregion
 
-#region INotifyUnhandledAsyncException Members
+    #region INotifyUnhandledAsyncException Members
 
     [NotUndoable]
     [NonSerialized]
-    private EventHandler<Csla.Core.ErrorEventArgs> _unhandledAsyncException;
+    private EventHandler<Core.ErrorEventArgs> _unhandledAsyncException;
 
     /// <summary>
     /// Event raised when an exception occurs on a background
     /// thread during an asynchronous operation.
     /// </summary>
-    public event EventHandler<Csla.Core.ErrorEventArgs> UnhandledAsyncException
+    public event EventHandler<Core.ErrorEventArgs> UnhandledAsyncException
     {
-      add { _unhandledAsyncException = (EventHandler<Csla.Core.ErrorEventArgs>)Delegate.Combine(_unhandledAsyncException, value); }
-      remove { _unhandledAsyncException = (EventHandler<Csla.Core.ErrorEventArgs>)Delegate.Remove(_unhandledAsyncException, value); }
+      add { _unhandledAsyncException = (EventHandler<Core.ErrorEventArgs>)Delegate.Combine(_unhandledAsyncException, value); }
+      remove { _unhandledAsyncException = (EventHandler<Core.ErrorEventArgs>)Delegate.Remove(_unhandledAsyncException, value); }
     }
 
     /// <summary>
@@ -1786,10 +1763,9 @@ namespace Csla
     /// </summary>
     /// <param name="error">Error arguments.</param>
     [EditorBrowsable(EditorBrowsableState.Advanced)]
-    protected virtual void OnUnhandledAsyncException(Csla.Core.ErrorEventArgs error)
+    protected virtual void OnUnhandledAsyncException(Core.ErrorEventArgs error)
     {
-      if (_unhandledAsyncException != null)
-        _unhandledAsyncException(this, error);
+      _unhandledAsyncException?.Invoke(this, error);
     }
 
     /// <summary>
@@ -1801,9 +1777,9 @@ namespace Csla
     [EditorBrowsable(EditorBrowsableState.Advanced)]
     protected void OnUnhandledAsyncException(object originalSender, Exception error)
     {
-      OnUnhandledAsyncException(new Csla.Core.ErrorEventArgs(originalSender, error));
+      OnUnhandledAsyncException(new Core.ErrorEventArgs(originalSender, error));
     }
 
-#endregion
+    #endregion
   }
 }

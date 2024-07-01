@@ -5,13 +5,10 @@
 // </copyright>
 // <summary>Context information provided to a business rule</summary>
 //-----------------------------------------------------------------------
-using System;
+
 using System.ComponentModel;
-using System.Collections.Generic;
 using Csla.Core;
 using Csla.Properties;
-using System.Security.Principal;
-using System.Security.Claims;
 
 namespace Csla.Rules
 {
@@ -64,7 +61,7 @@ namespace Csla.Rules
     /// Gets a dictionary containing copies of property values from
     /// the target business object.
     /// </summary>
-    public Dictionary<Csla.Core.IPropertyInfo, object> InputPropertyValues { get; internal set; }
+    public Dictionary<IPropertyInfo, object> InputPropertyValues { get; internal set; }
 
     private LazySingleton<List<IPropertyInfo>> _dirtyProperties;
     /// <summary>
@@ -90,7 +87,7 @@ namespace Csla.Rules
     /// should be updated in the target object.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public Dictionary<Csla.Core.IPropertyInfo, object> OutputPropertyValues
+    public Dictionary<IPropertyInfo, object> OutputPropertyValues
     {
       get
       {
@@ -153,7 +150,7 @@ namespace Csla.Rules
         if (innerRule is IBusinessRule syncRule)
           syncRule.Execute(chainedContext);
         else if (innerRule is IBusinessRuleAsync asyncRule)
-          asyncRule.ExecuteAsync(chainedContext).ContinueWith((_) => { chainedContext.Complete(); });
+          asyncRule.ExecuteAsync(chainedContext).ContinueWith(_ => { chainedContext.Complete(); });
         else
           throw new ArgumentOutOfRangeException(innerRule.GetType().FullName);
       }
@@ -240,7 +237,7 @@ namespace Csla.Rules
     /// <param name="rule">Reference to the rule object.</param>
     /// <param name="target">Target business object.</param>
     /// <param name="inputPropertyValues">Input property values used by the rule.</param>
-    public RuleContext(ApplicationContext applicationContext, Action<IRuleContext> completeHandler, IBusinessRuleBase rule, object target, Dictionary<Csla.Core.IPropertyInfo, object> inputPropertyValues)
+    public RuleContext(ApplicationContext applicationContext, Action<IRuleContext> completeHandler, IBusinessRuleBase rule, object target, Dictionary<IPropertyInfo, object> inputPropertyValues)
       : this(applicationContext, completeHandler)
     {
       Rule = rule;
@@ -282,7 +279,7 @@ namespace Csla.Rules
     /// why the rule failed.</param>
     public void AddErrorResult(string description)
     {
-      Results.Add(new RuleResult(Rule.RuleName, Rule.PrimaryProperty, description));
+      Results.Add(new RuleResult(Rule.RuleName, Rule.PrimaryProperty, description, Rule.DisplayIndex));
     }
 
     /// <summary>
@@ -294,7 +291,7 @@ namespace Csla.Rules
     /// for the current property.</param>
     public void AddErrorResult(string description, bool stopProcessing)
     {
-      Results.Add(new RuleResult(Rule.RuleName, Rule.PrimaryProperty, description) { StopProcessing = stopProcessing });
+      Results.Add(new RuleResult(Rule.RuleName, Rule.PrimaryProperty, description, Rule.DisplayIndex) { StopProcessing = stopProcessing });
     }
 
     /// <summary>
@@ -305,11 +302,11 @@ namespace Csla.Rules
     /// <param name="description">Human-readable description of
     /// why the rule failed.</param>
     /// <exception cref="System.ArgumentOutOfRangeException">When property is not defined in AffectedProperties list.</exception>   
-    public void AddErrorResult(Csla.Core.IPropertyInfo property, string description)
+    public void AddErrorResult(IPropertyInfo property, string description)
     {
       if (!Rule.AffectedProperties.Contains(property))
         throw new ArgumentOutOfRangeException(property.Name, string.Format(Resources.PropertyNotInAffectedPropertiesException, property.Name));
-      Results.Add(new RuleResult(Rule.RuleName, property, description));
+      Results.Add(new RuleResult(Rule.RuleName, property, description, Rule.DisplayIndex));
     }
 
     /// <summary>
@@ -319,7 +316,7 @@ namespace Csla.Rules
     /// why the rule failed.</param>
     public void AddWarningResult(string description)
     {
-      Results.Add(new RuleResult(Rule.RuleName, Rule.PrimaryProperty, description) { Severity = RuleSeverity.Warning });
+      Results.Add(new RuleResult(Rule.RuleName, Rule.PrimaryProperty, description, Rule.DisplayIndex) { Severity = RuleSeverity.Warning });
     }
 
     /// <summary>
@@ -331,7 +328,7 @@ namespace Csla.Rules
     /// for the current property.</param>
     public void AddWarningResult(string description, bool stopProcessing)
     {
-      Results.Add(new RuleResult(Rule.RuleName, Rule.PrimaryProperty, description) { Severity = RuleSeverity.Warning, StopProcessing = stopProcessing });
+      Results.Add(new RuleResult(Rule.RuleName, Rule.PrimaryProperty, description, Rule.DisplayIndex) { Severity = RuleSeverity.Warning, StopProcessing = stopProcessing });
     }
 
 
@@ -342,11 +339,11 @@ namespace Csla.Rules
     /// <param name="property">Property to which the result applies.</param>
     /// <param name="description">Human-readable description of  why the rule failed.</param>
     /// <exception cref="System.ArgumentOutOfRangeException">When property is not defined in AffectedProperties list.</exception>    
-    public void AddWarningResult(Csla.Core.IPropertyInfo property, string description)
+    public void AddWarningResult(IPropertyInfo property, string description)
     {
       if (!Rule.AffectedProperties.Contains(property))
         throw new ArgumentOutOfRangeException(property.Name, string.Format(Resources.PropertyNotInAffectedPropertiesException, property.Name));
-      Results.Add(new RuleResult(Rule.RuleName, property, description) { Severity = RuleSeverity.Warning });
+      Results.Add(new RuleResult(Rule.RuleName, property, description, Rule.DisplayIndex) { Severity = RuleSeverity.Warning });
     }
 
     /// <summary>
@@ -356,7 +353,7 @@ namespace Csla.Rules
     /// why the rule failed.</param>
     public void AddInformationResult(string description)
     {
-      Results.Add(new RuleResult(Rule.RuleName, Rule.PrimaryProperty, description) { Severity = RuleSeverity.Information });
+      Results.Add(new RuleResult(Rule.RuleName, Rule.PrimaryProperty, description, Rule.DisplayIndex) { Severity = RuleSeverity.Information });
     }
 
     /// <summary>
@@ -366,7 +363,7 @@ namespace Csla.Rules
     /// <param name="stopProcessing">True if no further rules should be processed for the current property.</param>
     public void AddInformationResult(string description, bool stopProcessing)
     {
-      Results.Add(new RuleResult(Rule.RuleName, Rule.PrimaryProperty, description) { Severity = RuleSeverity.Information, StopProcessing = stopProcessing });
+      Results.Add(new RuleResult(Rule.RuleName, Rule.PrimaryProperty, description, Rule.DisplayIndex) { Severity = RuleSeverity.Information, StopProcessing = stopProcessing });
     }
 
     /// <summary>
@@ -376,11 +373,11 @@ namespace Csla.Rules
     /// <param name="property">Property to which the result applies.</param>
     /// <param name="description">Human-readable description of why the rule failed.</param>
     /// <exception cref="System.ArgumentOutOfRangeException">When property is not defined in AffectedProperties list.</exception>   
-    public void AddInformationResult(Csla.Core.IPropertyInfo property, string description)
+    public void AddInformationResult(IPropertyInfo property, string description)
     {
       if (!Rule.AffectedProperties.Contains(property))
         throw new ArgumentOutOfRangeException(property.Name, string.Format(Resources.PropertyNotInAffectedPropertiesException, property.Name));
-      Results.Add(new RuleResult(Rule.RuleName, property, description) { Severity = RuleSeverity.Information });
+      Results.Add(new RuleResult(Rule.RuleName, property, description, Rule.DisplayIndex) { Severity = RuleSeverity.Information });
     }
 
     /// <summary>
@@ -389,7 +386,7 @@ namespace Csla.Rules
     /// <param name="stopProcessing">True if no further rules should be processed for the current property.</param>
     public void AddSuccessResult(bool stopProcessing)
     {
-      Results.Add(new RuleResult(Rule.RuleName, Rule.PrimaryProperty) { Severity = RuleSeverity.Success, StopProcessing = stopProcessing });
+      Results.Add(new RuleResult(Rule.RuleName, Rule.PrimaryProperty, Rule.DisplayIndex) { Severity = RuleSeverity.Success, StopProcessing = stopProcessing });
     }
 
     /// <summary>
@@ -409,9 +406,9 @@ namespace Csla.Rules
     /// <param name="property">Property to update.</param>
     /// <param name="value">New property value.</param>
     /// <exception cref="System.ArgumentOutOfRangeException">When property is not defined in AffectedProperties list.</exception>   
-    public void AddOutValue(Csla.Core.IPropertyInfo property, object value)
+    public void AddOutValue(IPropertyInfo property, object value)
     {
-      _outputPropertyValues.Value[property] = value;
+      _outputPropertyValues.Value[property] = (value is null) ? property.DefaultValue : Utilities.CoerceValue(property.Type, value.GetType(), null, value);
     }
 
 
@@ -421,7 +418,7 @@ namespace Csla.Rules
     /// <param name="property">The property.</param>
     /// <exception cref="System.ArgumentOutOfRangeException"></exception>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public void AddDirtyProperty(Csla.Core.IPropertyInfo property)
+    public void AddDirtyProperty(IPropertyInfo property)
     {
       if (!Rule.AffectedProperties.Contains(property))
         throw new ArgumentOutOfRangeException(property.Name, string.Format(Resources.PropertyNotInAffectedPropertiesException, property.Name));
@@ -436,7 +433,7 @@ namespace Csla.Rules
     public void Complete()
     {
       if (Results.Count == 0)
-        Results.Add(new RuleResult(Rule.RuleName, Rule.PrimaryProperty));
+        Results.Add(new RuleResult(Rule.RuleName, Rule.PrimaryProperty, Rule.DisplayIndex));
       _completeHandler?.Invoke(this);
     }
 
@@ -445,7 +442,6 @@ namespace Csla.Rules
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="propertyInfo">The property info.</param>
-    /// <returns></returns>
     public  T GetInputValue<T>(PropertyInfo<T> propertyInfo)
     {
       return (T)InputPropertyValues[propertyInfo];
@@ -456,7 +452,6 @@ namespace Csla.Rules
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="propertyInfo">The generic property info.</param>
-    /// <returns></returns>
     public T GetInputValue<T>(IPropertyInfo propertyInfo)
     {
       return (T)InputPropertyValues[propertyInfo];

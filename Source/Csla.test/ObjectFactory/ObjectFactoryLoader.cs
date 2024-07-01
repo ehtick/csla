@@ -5,14 +5,10 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Csla.Test.ObjectFactory
 {
-  public class ObjectFactoryLoader : Csla.Server.IObjectFactoryLoader
+  public class ObjectFactoryLoader : Server.IObjectFactoryLoader
   {
     private int _mode;
     private readonly ApplicationContext _applicationContext;

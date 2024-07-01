@@ -5,12 +5,10 @@
 // </copyright>
 // <summary>Windows Forms extender control that automatically</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Drawing;
+
 using System.ComponentModel;
-using System.Collections.Generic;
-using System.Windows.Forms;
 using System.Reflection;
+using Csla.Security;
 
 namespace Csla.Windows
 {
@@ -32,8 +30,7 @@ namespace Csla.Windows
       public bool CanRead { get; set; }
     }
 
-    private readonly Dictionary<Control, ControlStatus> _sources =
-      new Dictionary<Control, ControlStatus>();
+    private readonly Dictionary<Control, ControlStatus> _sources = [];
 
     /// <summary>
     /// Creates an instance of the object.
@@ -121,9 +118,7 @@ namespace Csla.Windows
         if (binding.DataSource is BindingSource bs)
         {
           // get the BusinessObject if appropriate
-          Csla.Security.IAuthorizeReadWrite ds =
-            bs.Current as Csla.Security.IAuthorizeReadWrite;
-          if (ds != null)
+          if (bs.Current is IAuthorizeReadWrite ds)
           {
             // get the object property name
             string propertyName =

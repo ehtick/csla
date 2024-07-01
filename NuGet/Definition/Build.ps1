@@ -210,9 +210,9 @@ catch
     $baseException = $_.Exception.GetBaseException()
     if ( $_.Exception -ne $baseException )
     {
-      Write-Host $baseException.Message -ForegroundColor Magenta
+      Write-Host $baseException.ToString() -ForegroundColor Magenta
     }
-    Write-Host $_.Exception.Message -ForegroundColor Magenta
+    Write-Host $_.Exception.ToString() -ForegroundColor Magenta
     Pause
 } 
 finally 

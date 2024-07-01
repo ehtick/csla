@@ -5,7 +5,7 @@
 // </copyright>
 // <summary>Object containing information about the</summary>
 //-----------------------------------------------------------------------
-using System;
+
 using Csla.Rules;
 
 namespace Csla
@@ -32,7 +32,7 @@ namespace Csla
           // - this is the permission that the client DataPortal checks.
           return AuthorizationActions.EditObject;
         default:
-          throw new ArgumentOutOfRangeException("operation");
+          throw new ArgumentOutOfRangeException(nameof(operation));
       }
     }
 
@@ -51,7 +51,7 @@ namespace Csla
         case DataPortalOperations.Execute:
           return "execute";
         default:
-          throw new ArgumentOutOfRangeException("operation");
+          throw new ArgumentOutOfRangeException(nameof(operation));
       }
     }
   }

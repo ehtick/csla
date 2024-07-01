@@ -5,8 +5,6 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Threading.Tasks;
 
 namespace Csla.Server
 {
@@ -18,6 +16,7 @@ namespace Csla.Server
     void CheckRules();
     Task CheckRulesAsync();
     Task WaitForIdle(TimeSpan timeout);
+    Task WaitForIdle(CancellationToken ct);
     void DataPortal_OnDataPortalInvoke(DataPortalEventArgs e);
     void DataPortal_OnDataPortalInvokeComplete(DataPortalEventArgs e);
     void DataPortal_OnDataPortalException(DataPortalEventArgs e, Exception ex);

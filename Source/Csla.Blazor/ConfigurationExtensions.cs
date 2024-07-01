@@ -5,9 +5,9 @@
 // </copyright>
 // <summary>Implement extension methods for .NET Core configuration</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Linq;
+
 using Csla.Blazor;
+using Csla.Blazor.State;
 using Csla.Core;
 using Csla.State;
 using Microsoft.AspNetCore.Authorization;
@@ -25,7 +25,6 @@ namespace Csla.Configuration
     /// Configures services to provide CSLA Blazor server support
     /// </summary>
     /// <param name="config">CslaOptions instance</param>
-    /// <returns></returns>
     public static CslaOptions AddServerSideBlazor(this CslaOptions config)
     {
       return AddServerSideBlazor(config, null);
@@ -36,7 +35,6 @@ namespace Csla.Configuration
     /// </summary>
     /// <param name="config">CslaOptions instance</param>
     /// <param name="options">Options object</param>
-    /// <returns></returns>
     public static CslaOptions AddServerSideBlazor(this CslaOptions config, Action<BlazorServerConfigurationOptions> options)
     {
       var blazorOptions = new BlazorServerConfigurationOptions();
@@ -53,16 +51,24 @@ namespace Csla.Configuration
       var managerType = Type.GetType(managerTypeName);
       if (managerType is null)
         throw new TypeLoadException(managerTypeName);
-      var contextManagerType = typeof(Core.IContextManager);
+      var contextManagerType = typeof(IContextManager);
       var managers = config.Services.Where(i => i.ServiceType.Equals(contextManagerType)).ToList();
       foreach ( var manager in managers )
         config.Services.Remove(manager);
       config.Services.AddScoped(typeof(IContextManager), managerType);
 
-      // use Blazor state management
-      config.Services.AddTransient(typeof(ISessionIdManager), blazorOptions.SessionIdManagerType);
-      config.Services.AddSingleton(typeof(ISessionManager), blazorOptions.SessionManagerType);
-      config.Services.AddTransient<Blazor.State.StateManager>();
+      if (blazorOptions.UseInMemoryApplicationContextManager)
+      {
+        // do not use any Blazor state management
+        config.Services.AddSingleton<ISessionManager, NoOpSessionManager>();
+      }
+      else
+      {
+        // use Blazor state management
+        config.Services.AddTransient(typeof(ISessionIdManager), blazorOptions.SessionIdManagerType);
+        config.Services.AddSingleton(typeof(ISessionManager), blazorOptions.SessionManagerType);
+        config.Services.AddTransient<StateManager>();
+      }
 
       // use Blazor viewmodel
       config.Services.TryAddTransient(typeof(ViewModel<>), typeof(ViewModel<>));

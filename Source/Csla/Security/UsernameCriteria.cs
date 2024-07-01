@@ -5,8 +5,6 @@
 // </copyright>
 // <summary>Criteria class for passing a</summary>
 //-----------------------------------------------------------------------
-using System;
-using Csla;
 
 namespace Csla.Security
 {
@@ -55,14 +53,14 @@ namespace Csla.Security
     /// </param>
     public UsernameCriteria(string username, string password)
     {
-      this.Username = username;
-      this.Password = password;
+      Username = username;
+      Password = password;
     }
 
     /// <summary>
     /// Creates a new instance of the object.
     /// </summary>
-#if (ANDROID || IOS) || NETFX_CORE
+#if ANDROID || IOS
     public UsernameCriteria()
     { }
 #else

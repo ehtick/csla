@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Csla.Test.Authorization
+﻿namespace Csla.Test.Authorization
 {
   public class RootException : BusinessBase<RootException>
   {
@@ -16,7 +11,7 @@ namespace Csla.Test.Authorization
 
     public static void AddObjectAuthorizationRules()
     {
-      System.Threading.Interlocked.Increment(ref _counter);
+      Interlocked.Increment(ref _counter);
       throw new ArgumentException();
     }
   }

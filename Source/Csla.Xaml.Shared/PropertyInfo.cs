@@ -5,23 +5,21 @@
 // </copyright>
 // <summary>Expose metastate information about a property.</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Linq;
+
 using System.ComponentModel;
 using Csla.Reflection;
 using Csla.Core;
 using Csla.Rules;
 using System.Reflection;
 using System.Collections.ObjectModel;
+
 #if NETFX_CORE
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Data;
 #elif XAMARIN
 using Xamarin.Forms;
-using System.Collections.Generic;
 #elif MAUI
 #else
-using System.Windows.Controls;
 using System.Windows;
 using System.Windows.Data;
 #endif
@@ -233,12 +231,12 @@ namespace Csla.Xaml
           p.PropertyChanged -= P_PropertyChanged;
       }
 
-      public PropertyInfo Parent { get; private set; }
-      public object Source { get; private set; }
-      public string PropertyName { get; private set; }
+      public PropertyInfo Parent { get; }
+      public object Source { get; }
+      public string PropertyName { get; }
     }
 
-    private List<SourceReference> _sources = new List<SourceReference>();
+    private readonly List<SourceReference> _sources = new List<SourceReference>();
 
     private void SetSource()
     {
@@ -335,7 +333,7 @@ namespace Csla.Xaml
 #if NETFX_CORE
           fi = type.GetField(string.Format("{0}{1}", path, _dependencyPropertySuffix), BindingFlags.Instance | BindingFlags.Public);
 #else
-          fi = type.GetField(string.Format("{0}{1}", path, _dependencyPropertySuffix));
+          fi = type.GetField($"{path}{_dependencyPropertySuffix}");
 #endif
 
           if (fi != null)
@@ -457,11 +455,9 @@ namespace Csla.Xaml
     /// </summary>
     /// <param name="source">The source.</param>
     /// <param name="bindingPath">The binding path.</param>
-    /// <returns></returns>
     protected object GetRealSource(object source, string bindingPath)
     {
-      var icv = source as ICollectionView;
-      if (icv != null)
+      if (source is ICollectionView icv)
         source = icv.CurrentItem;
       if (source != null && bindingPath.IndexOf('.') > 0)
       {
@@ -483,7 +479,6 @@ namespace Csla.Xaml
     /// </summary>
     /// <param name="source">The source.</param>
     /// <param name="bindingPath">The binding path.</param>
-    /// <returns></returns>
     protected PropertyPath GetRelativePath(object source, string bindingPath)
     {
       if (source != null)
@@ -512,8 +507,7 @@ namespace Csla.Xaml
       {
         DetachSource(old);
         AttachSource(source);
-        BusinessBase bb = Source as BusinessBase;
-        if (bb != null && !string.IsNullOrWhiteSpace(BindingPath))
+        if (Source is BusinessBase bb && !string.IsNullOrWhiteSpace(BindingPath))
         {
           IsBusy = bb.IsPropertyBusy(BindingPath);
         }
@@ -522,21 +516,17 @@ namespace Csla.Xaml
 
     private void DetachSource(object source)
     {
-      var p = source as INotifyPropertyChanged;
-      if (p != null)
+      if (source is INotifyPropertyChanged p)
         p.PropertyChanged -= source_PropertyChanged;
-      INotifyBusy busy = source as INotifyBusy;
-      if (busy != null)
+      if (source is INotifyBusy busy)
         busy.BusyChanged -= source_BusyChanged;
     }
 
     private void AttachSource(object source)
     {
-      var p = source as INotifyPropertyChanged;
-      if (p != null)
+      if (source is INotifyPropertyChanged p)
         p.PropertyChanged += source_PropertyChanged;
-      INotifyBusy busy = source as INotifyBusy;
-      if (busy != null)
+      if (source is INotifyBusy busy)
         busy.BusyChanged += source_BusyChanged;
     }
 
@@ -554,8 +544,7 @@ namespace Csla.Xaml
       if (e.PropertyName == BindingPath || string.IsNullOrEmpty(e.PropertyName))
       {
         bool busy = e.Busy;
-        BusinessBase bb = Source as BusinessBase;
-        if (bb != null)
+        if (Source is BusinessBase bb)
           busy = bb.IsPropertyBusy(BindingPath);
 
         if (busy != IsBusy)
@@ -574,13 +563,12 @@ namespace Csla.Xaml
     /// Gets the validation error messages for a
     /// property on the Model
     /// </summary>
-    /// <returns></returns>
     public string ErrorText
     {
       get
       {
         var result = string.Empty;
-        if (Source is Core.BusinessBase obj && !string.IsNullOrEmpty(BindingPath))
+        if (Source is BusinessBase obj && !string.IsNullOrEmpty(BindingPath))
           result = obj.BrokenRulesCollection.ToString(",", RuleSeverity.Error, BindingPath);
         return result;
       }
@@ -590,13 +578,12 @@ namespace Csla.Xaml
     /// Gets the validation warning messages for a
     /// property on the Model
     /// </summary>
-    /// <returns></returns>
     public string WarningText
     {
       get
       {
         var result = string.Empty;
-        if (Source is Core.BusinessBase obj && !string.IsNullOrEmpty(BindingPath))
+        if (Source is BusinessBase obj && !string.IsNullOrEmpty(BindingPath))
           result = obj.BrokenRulesCollection.ToString(",", RuleSeverity.Warning, BindingPath);
         return result;
       }
@@ -606,13 +593,12 @@ namespace Csla.Xaml
     /// Gets the validation information messages for a
     /// property on the Model
     /// </summary>
-    /// <returns></returns>
     public string InformationText
     {
       get
       {
         var result = string.Empty;
-        if (Source is Core.BusinessBase obj && !string.IsNullOrEmpty(BindingPath))
+        if (Source is BusinessBase obj && !string.IsNullOrEmpty(BindingPath))
           result = obj.BrokenRulesCollection.ToString(",", RuleSeverity.Information, BindingPath);
         return result;
       }
@@ -806,7 +792,7 @@ namespace Csla.Xaml
       }
       else
       {
-        if (Source is Csla.Security.IAuthorizeReadWrite iarw)
+        if (Source is Security.IAuthorizeReadWrite iarw)
         {
           CanWrite = iarw.CanWriteProperty(BindingPath);
           CanRead = iarw.CanReadProperty(BindingPath);
@@ -881,8 +867,7 @@ namespace Csla.Xaml
     /// <param name="propertyName">Name of the changed property.</param>
     protected virtual void OnPropertyChanged(string propertyName)
     {
-      if (PropertyChanged != null)
-        PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+      PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 #endif
 

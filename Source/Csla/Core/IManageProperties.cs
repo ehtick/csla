@@ -5,17 +5,13 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using Csla.Core.FieldManager;
-using System.Threading.Tasks;
 
 namespace Csla.Core
 {
   internal interface IManageProperties
   {
     bool HasManagedProperties { get; }
-    bool FieldExists(Csla.Core.IPropertyInfo property);
+    bool FieldExists(IPropertyInfo property);
     List<IPropertyInfo> GetManagedProperties();
     object GetProperty(IPropertyInfo propertyInfo);
     object LazyGetProperty<P>(PropertyInfo<P> propertyInfo, Func<P> valueGenerator);

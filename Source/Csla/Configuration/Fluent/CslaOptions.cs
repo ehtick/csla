@@ -7,7 +7,6 @@
 //-----------------------------------------------------------------------
 using Csla.Core;
 using Microsoft.Extensions.DependencyInjection;
-using System;
 
 namespace Csla.Configuration
 {
@@ -24,18 +23,29 @@ namespace Csla.Configuration
     {
       Services = services;
       DataPortalOptions = new DataPortalOptions(this);
+      SerializationOptions = new SerializationOptions(this);
     }
 
     /// <summary>
     /// Gets a reference to the current services collection.
     /// </summary>
-    public IServiceCollection Services { get; private set; }
+    public IServiceCollection Services { get; }
 
     /// <summary>
-    /// Gets or sets the type for the IContextManager to
+    /// Sets the type for the IContextManager to 
     /// be used by ApplicationContext.
     /// </summary>
-    public Type ContextManagerType { get; set; }
+    public CslaOptions UseContextManager<T>() where T : IContextManager
+    {
+      ContextManagerType = typeof(T);
+      return this;
+    }
+
+    /// <summary>
+    /// Gets the type for the IContextManager 
+    /// used by ApplicationContext.
+    /// </summary>
+    public Type ContextManagerType { get; private set; }
 
     /// <summary>
     /// Sets a value indicating whether CSLA
@@ -67,26 +77,26 @@ namespace Csla.Configuration
     /// <summary>
     /// Gets the SecurityOptions instance.
     /// </summary>
-    internal SecurityOptions SecurityOptions { get; private set; } = new SecurityOptions();
+    internal SecurityOptions SecurityOptions { get; } = new SecurityOptions();
     /// <summary>
     /// Gets the SerializationOptions instance.
     /// </summary>
-    internal SerializationOptions SerializationOptions { get; private set; } = new SerializationOptions();
+    public SerializationOptions SerializationOptions { get; }
     /// <summary>
     /// Gets the DataPortalClientOptions instance.
     /// </summary>
-    internal DataPortalOptions DataPortalOptions { get; private set; }
+    internal DataPortalOptions DataPortalOptions { get; }
     /// <summary>
     /// Gets the DataOptions instance.
     /// </summary>
-    public DataOptions DataOptions { get; private set; } = new DataOptions();
+    public DataOptions DataOptions { get; } = new DataOptions();
     /// <summary>
     /// Gets the DataOptions instance.
     /// </summary>
-    public BindingOptions BindingOptions { get; private set; } = new BindingOptions();
+    public BindingOptions BindingOptions { get; } = new BindingOptions();
     /// <summary>
     /// Gets the CoreOptions instance.
     /// </summary>
-    internal CoreOptions CoreOptions { get; private set; } = new CoreOptions();
+    internal CoreOptions CoreOptions { get; } = new CoreOptions();
   }
 }

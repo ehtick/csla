@@ -5,11 +5,8 @@
 // </copyright>
 // <summary>Model binder for use with CSLA .NET editable business objects.</summary>
 //-----------------------------------------------------------------------
-#if NETSTANDARD2_0 || NET5_0_OR_GREATER || NETCOREAPP3_1
-using System;
+#if NETSTANDARD2_0 || NET8_0_OR_GREATER 
 using System.Collections;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -129,12 +126,10 @@ namespace Csla.Web.Mvc
   }
 }
 #elif !NETSTANDARD
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Web.Mvc;
 using System.ComponentModel;
 using System.Collections;
+using Csla.Core;
 
 namespace Csla.Web.Mvc
 {
@@ -163,11 +158,10 @@ namespace Csla.Web.Mvc
     /// <returns>Bound object</returns>
     public override object BindModel(ControllerContext controllerContext, ModelBindingContext bindingContext)
     {
-      if (typeof(Core.IEditableCollection).IsAssignableFrom((bindingContext.ModelType)))
+      if (typeof(IEditableCollection).IsAssignableFrom((bindingContext.ModelType)))
         return BindCslaCollection(controllerContext, bindingContext);
 
-      var suppress = bindingContext.Model as Core.ICheckRules;
-      if (suppress != null)
+      if (bindingContext.Model is ICheckRules suppress)
         suppress.SuppressRuleChecking();
       var result = base.BindModel(controllerContext, bindingContext);
       return result;
@@ -184,17 +178,16 @@ namespace Csla.Web.Mvc
       if (bindingContext.Model == null)
         bindingContext.ModelMetadata.Model = CreateModel(controllerContext, bindingContext, bindingContext.ModelType);
 
-      var collection = (IList)bindingContext.Model;
+      var collection = (IList)bindingContext.Model!;
       for (int currIdx = 0; currIdx < collection.Count; currIdx++)
       {
         string subIndexKey = CreateSubIndexName(bindingContext.ModelName, currIdx);
         if (!bindingContext.ValueProvider.ContainsPrefix(subIndexKey))
           continue;      //no value to update skip
         var elementModel = collection[currIdx];
-        var suppress = elementModel as Core.ICheckRules;
-        if (suppress != null)
+        if (elementModel is ICheckRules suppress)
           suppress.SuppressRuleChecking();
-        var elementContext = new ModelBindingContext()
+        var elementContext = new ModelBindingContext
         {
           ModelMetadata = ModelMetadataProviders.Current.GetMetadataForType(() => elementModel, elementModel.GetType()),
           ModelName = subIndexKey,
@@ -214,7 +207,7 @@ namespace Csla.Web.Mvc
         }
       }
 
-      return bindingContext.Model;
+      return bindingContext.Model!;
     }
 
     /// <summary>
@@ -226,8 +219,7 @@ namespace Csla.Web.Mvc
     /// <param name="modelType">Type of model object</param>
     protected override object CreateModel(ControllerContext controllerContext, ModelBindingContext bindingContext, Type modelType)
     {
-      var controller = controllerContext.Controller as IModelCreator;
-      if (controller != null)
+      if (controllerContext.Controller is IModelCreator controller)
         return controller.CreateModel(modelType);
       else
         return base.CreateModel(controllerContext, bindingContext, modelType);
@@ -241,13 +233,11 @@ namespace Csla.Web.Mvc
     /// <param name="bindingContext">Binding context</param>
     protected override void OnModelUpdated(ControllerContext controllerContext, ModelBindingContext bindingContext)
     {
-      var obj = bindingContext.Model as Core.BusinessBase;
-      if (obj != null)
+      if (bindingContext.Model is BusinessBase obj)
       {
-        if (this._checkRulesOnModelUpdated)
+        if (_checkRulesOnModelUpdated)
         {
-          var suppress = obj as Core.ICheckRules;
-          if (suppress != null)
+          if (obj is ICheckRules suppress)
           {
             suppress.ResumeRuleChecking();
             suppress.CheckRules();
@@ -284,9 +274,9 @@ namespace Csla.Web.Mvc
     /// <param name="bindingContext">Binding context</param>
     /// <param name="propertyDescriptor">Property descriptor</param>
     /// <param name="value">Value</param>
-    protected override void OnPropertyValidated(ControllerContext controllerContext, ModelBindingContext bindingContext, System.ComponentModel.PropertyDescriptor propertyDescriptor, object value)
+    protected override void OnPropertyValidated(ControllerContext controllerContext, ModelBindingContext bindingContext, PropertyDescriptor propertyDescriptor, object value)
     {
-      if (!(bindingContext.Model is Core.BusinessBase))
+      if (!(bindingContext.Model is BusinessBase))
         base.OnPropertyValidated(controllerContext, bindingContext, propertyDescriptor, value);
     }
   }

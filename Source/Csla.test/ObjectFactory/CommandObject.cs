@@ -5,14 +5,10 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Csla;
 
 namespace Csla.Test.ObjectFactory
 {
-  [Csla.Server.ObjectFactory("Csla.Test.ObjectFactory.CommandObjectFactory, Csla.Tests")]
+  [Server.ObjectFactory("Csla.Test.ObjectFactory.CommandObjectFactory, Csla.Tests")]
   [Serializable]
   public class CommandObject : CommandBase<CommandObject>
   {

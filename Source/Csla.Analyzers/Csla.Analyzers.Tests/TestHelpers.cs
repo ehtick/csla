@@ -4,12 +4,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Csla.Analyzers.Tests
 {
@@ -56,27 +50,25 @@ namespace Csla.Analyzers.Tests
       var projectName = "Test";
       var projectId = ProjectId.CreateNewId(projectName);
 
-      using (var workspace = new AdhocWorkspace())
-      {
-        var solution = workspace.CurrentSolution
-          .AddProject(projectId, projectName, projectName, LanguageNames.CSharp)
-          .WithProjectCompilationOptions(projectId, new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
-          .AddMetadataReferences(projectId, AssemblyReferences.GetMetadataReferences(new[]
-          {
-              typeof(object).Assembly,
-              typeof(Enumerable).Assembly,
-              typeof(CSharpCompilation).Assembly,
-              typeof(Compilation).Assembly,
-              typeof(Attribute).Assembly,
-              typeof(Task<>).Assembly,
-              typeof(BusinessBase<>).Assembly
-          }));
+      using var workspace = new AdhocWorkspace();
+      var solution = workspace.CurrentSolution
+        .AddProject(projectId, projectName, projectName, LanguageNames.CSharp)
+        .WithProjectCompilationOptions(projectId, new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
+        .AddMetadataReferences(projectId, AssemblyReferences.GetMetadataReferences(new[]
+        {
+          typeof(object).Assembly,
+          typeof(Enumerable).Assembly,
+          typeof(CSharpCompilation).Assembly,
+          typeof(Compilation).Assembly,
+          typeof(Attribute).Assembly,
+          typeof(Task<>).Assembly,
+          typeof(BusinessBase<>).Assembly
+        }));
 
-        var documentId = DocumentId.CreateNewId(projectId);
-        solution = solution.AddDocument(documentId, "Test.cs", SourceText.From(code));
+      var documentId = DocumentId.CreateNewId(projectId);
+      solution = solution.AddDocument(documentId, "Test.cs", SourceText.From(code));
 
-        return solution.GetProject(projectId).Documents.First();
-      }
+      return solution.GetProject(projectId).Documents.First();
     }
   }
 }

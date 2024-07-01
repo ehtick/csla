@@ -8,8 +8,6 @@
 
 // Code from Stephen Toub @ Microsoft
 // https://blogs.msdn.microsoft.com/pfxteam/2012/02/11/building-async-coordination-primitives-part-1-asyncmanualresetevent/
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Csla.Threading
 {
@@ -24,6 +22,15 @@ namespace Csla.Threading
     /// Get awaitable task for the event
     /// </summary>
     public Task WaitAsync() { return _tcs.Task; }
+
+    /// <summary>
+    /// Sets the cancellation token for the event.
+    /// </summary>
+    /// <param name="ct">The cancellation token to set.</param>
+    public void SetCancellationToken(CancellationToken ct)
+    {
+      ct.Register(() => _tcs.TrySetCanceled(), useSynchronizationContext: false);
+    }
 
     /// <summary>
     /// Set the event, unblocking any code awaiting the event

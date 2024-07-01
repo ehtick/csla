@@ -5,10 +5,6 @@
 // </copyright>
 // <summary>IsInRole authorization rule.</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Csla.Rules.CommonRules
 {
@@ -47,7 +43,7 @@ namespace Csla.Rules.CommonRules
     /// <param name="action">Action this rule will enforce.</param>
     /// <param name="element">Member to be authorized.</param>
     /// <param name="roles">List of allowed roles.</param>
-    public IsInRole(AuthorizationActions action, Csla.Core.IMemberInfo element, List<string> roles)
+    public IsInRole(AuthorizationActions action, Core.IMemberInfo element, List<string> roles)
       : base(action, element)
     {
       _roles = roles;
@@ -59,7 +55,7 @@ namespace Csla.Rules.CommonRules
     /// <param name="action">Action this rule will enforce.</param>
     /// <param name="element">Member to be authorized.</param>
     /// <param name="roles">List of allowed roles.</param>
-    public IsInRole(AuthorizationActions action, Csla.Core.IMemberInfo element, params string[] roles)
+    public IsInRole(AuthorizationActions action, Core.IMemberInfo element, params string[] roles)
       : base(action, element)
     {
       _roles = [..roles];
@@ -125,7 +121,7 @@ namespace Csla.Rules.CommonRules
     /// <param name="action">Action this rule will enforce.</param>
     /// <param name="element">Member to be authorized.</param>
     /// <param name="roles">List of disallowed roles.</param>
-    public IsNotInRole(AuthorizationActions action, Csla.Core.IMemberInfo element, List<string> roles)
+    public IsNotInRole(AuthorizationActions action, Core.IMemberInfo element, List<string> roles)
       : base(action, element)
     {
       _roles = roles;
@@ -137,7 +133,7 @@ namespace Csla.Rules.CommonRules
     /// <param name="action">Action this rule will enforce.</param>
     /// <param name="element">Member to be authorized.</param>
     /// <param name="roles">List of disallowed roles.</param>
-    public IsNotInRole(AuthorizationActions action, Csla.Core.IMemberInfo element, params string[] roles)
+    public IsNotInRole(AuthorizationActions action, Core.IMemberInfo element, params string[] roles)
       : base(action, element)
     {
       _roles = [..roles];

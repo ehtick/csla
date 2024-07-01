@@ -5,25 +5,14 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Csla.TestHelpers;
 
-#if !NUNIT
+using Csla.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-#else
-using NUnit.Framework;
-using TestClass = NUnit.Framework.TestFixtureAttribute;
-using TestInitialize = NUnit.Framework.SetUpAttribute;
-using TestCleanup = NUnit.Framework.TearDownAttribute;
-using TestMethod = NUnit.Framework.TestAttribute;
-#endif
 
 namespace Csla.Test.Nullable
 {
-  [TestClass()]
+  [TestClass]
   public class NullableTests
   {
     private static TestDIContext _testDIContext;
@@ -40,7 +29,7 @@ namespace Csla.Test.Nullable
       TestResults.Reinitialise();
     }
 
-    [TestMethod()]
+    [TestMethod]
     [TestCategory("SkipWhenLiveUnitTesting")]
     public void TestNullableProperty()
     {
@@ -53,7 +42,7 @@ namespace Csla.Test.Nullable
       Assert.AreEqual(null, nullRoot.NullableInteger);
     }
 
-    [TestMethod()]
+    [TestMethod]
     [TestCategory("SkipWhenLiveUnitTesting")]
     public void TestNullableField()
     {
@@ -64,7 +53,7 @@ namespace Csla.Test.Nullable
       Assert.AreEqual(null, nullRoot._nullableIntMember);
     }
 
-    [TestMethod()]
+    [TestMethod]
     [TestCategory("SkipWhenLiveUnitTesting")]
     public void TestNullableAfterClone()
     {
@@ -78,7 +67,7 @@ namespace Csla.Test.Nullable
       Assert.AreEqual(null, nullRoot2.NullableInteger);
     }
 
-    [TestMethod()]
+    [TestMethod]
     [TestCategory("SkipWhenLiveUnitTesting")]
     public void TestNullableAfterEditCycle()
     {

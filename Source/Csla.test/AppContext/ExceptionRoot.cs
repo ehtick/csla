@@ -4,28 +4,27 @@
 //     Website: https://cslanet.com
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
 
 namespace Csla.Test.AppContext
 {
-  [Serializable()]
+  [Serializable]
   class ExceptionRoot : BusinessBase<ExceptionRoot>
   {
     private string _Data = string.Empty;
     public string Data
     {
       [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
-      get { return this._Data; }
+      get { return _Data; }
       [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
-      set { this._Data = value; }
+      set { _Data = value; }
     }
 
     protected override object GetIdValue()
     {
-      return this._Data;
+      return _Data;
     }
 
-    [Serializable()]
+    [Serializable]
     internal class Criteria
     {
       public const string DefaultData = "<new>";
@@ -38,7 +37,7 @@ namespace Csla.Test.AppContext
 
       public Criteria()
       {
-        this.Data = Criteria.DefaultData;
+        Data = DefaultData;
       }
 
       public Criteria(string Data)
@@ -50,8 +49,8 @@ namespace Csla.Test.AppContext
     [Fetch]
     protected void DataPortal_Fetch(Criteria crit)
     {
-      this._Data = crit.Data;
-      this.MarkOld();
+      _Data = crit.Data;
+      MarkOld();
 
       TestResults.Add("Root", "Fetched");
       TestResults.Add("create", "create");
@@ -61,7 +60,7 @@ namespace Csla.Test.AppContext
     [Create]
     private void DataPortal_Create(Criteria crit)
     {
-      this._Data = crit.Data;
+      _Data = crit.Data;
 
       TestResults.Add("Root", "Created");
       TestResults.Add("create", "create");

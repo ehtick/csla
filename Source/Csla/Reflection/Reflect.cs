@@ -5,7 +5,7 @@
 // </copyright>
 // <summary>Provides strong-typed reflection of the <typeparamref name="TTarget"/> </summary>
 //-----------------------------------------------------------------------
-using System;
+
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -60,11 +60,12 @@ namespace Csla.Reflection
 
     private static System.Reflection.MethodInfo GetMethodInfo(Expression method)
     {
-      if (method == null) throw new ArgumentNullException("method");
+      if (method == null) throw new ArgumentNullException(nameof(method));
 
-      var lambda = method as LambdaExpression;
-      if (lambda == null) throw new ArgumentException("Not a lambda expression", "method");
-      if (lambda.Body.NodeType != ExpressionType.Call) throw new ArgumentException("Not a method call", "method");
+      if (method is not LambdaExpression lambda)
+        throw new ArgumentException("Not a lambda expression", nameof(method));
+      if (lambda.Body.NodeType != ExpressionType.Call)
+        throw new ArgumentException("Not a method call", nameof(method));
 
       return ((MethodCallExpression)lambda.Body).Method;
     }
@@ -87,7 +88,6 @@ namespace Csla.Reflection
     /// </summary>
     /// <typeparam name="P">Type assigned to the property</typeparam>
     /// <param name="property">Property Expression</param>
-    /// <returns></returns>
     /// <exception cref="ArgumentNullException">The <paramref name="property"/> is null.</exception>
     /// <exception cref="ArgumentException">The <paramref name="property"/> is not a lambda expression or it does not represent a property access.</exception>
     public static PropertyInfo GetProperty<P>(Expression<Func<TTarget, P>> property)
@@ -113,10 +113,10 @@ namespace Csla.Reflection
 
     private static MemberInfo GetMemberInfo(Expression member)
     {
-      if (member == null) throw new ArgumentNullException("member");
+      if (member == null) throw new ArgumentNullException(nameof(member));
 
-      var lambda = member as LambdaExpression;
-      if (lambda == null) throw new ArgumentException("Not a lambda expression", "member");
+      if (member is not LambdaExpression lambda)
+        throw new ArgumentException("Not a lambda expression", nameof(member));
 
       MemberExpression memberExpr = null;
 
@@ -133,7 +133,7 @@ namespace Csla.Reflection
         memberExpr = lambda.Body as MemberExpression;
       }
 
-      if (memberExpr == null) throw new ArgumentException("Not a member access", "member");
+      if (memberExpr == null) throw new ArgumentException("Not a member access", nameof(member));
 
       return memberExpr.Member;
     }

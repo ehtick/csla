@@ -5,11 +5,6 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
-using Csla;
 
 namespace Csla.Test.AppContext
 {
@@ -39,7 +34,7 @@ namespace Csla.Test.AppContext
 
     public AppContextThread(string Name)
     {
-      this._Name = Name;
+      _Name = Name;
     }
 
     public void Stop()
@@ -51,7 +46,7 @@ namespace Csla.Test.AppContext
     {
       lock (this)
       {
-        TestResults.Add(this._Name, this._Name);
+        TestResults.Add(_Name, _Name);
         //Csla.ApplicationContext.ClientContext.Add(this._Name, this._Name);
       }
       while (_run)

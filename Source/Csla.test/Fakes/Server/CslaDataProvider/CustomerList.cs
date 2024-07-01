@@ -5,14 +5,8 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+
 using Csla;
-using Csla.Security;
-using Csla.Core;
-using Csla.Serialization;
 using Csla.Test;
 
 namespace cslalighttest.CslaDataProvider
@@ -40,7 +34,7 @@ namespace cslalighttest.CslaDataProvider
     [Update]
     protected void DataPortal_Update()
     {
-      if (this.Items[0].ThrowException)
+      if (Items[0].ThrowException)
         throw new Exception();
       TestResults.Add("CustomerUpdate", "Updating Customer List");
     }

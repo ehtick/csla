@@ -6,9 +6,9 @@
 // </copyright>
 // <summary>Displays an error dialog for any exceptions</summary>
 //-----------------------------------------------------------------------
-using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 
 namespace Csla.Xaml
 {
@@ -23,8 +23,8 @@ namespace Csla.Xaml
     /// </summary>
     public ErrorDialog()
     {
-      this.DialogIcon = MessageBoxImage.Exclamation;
-      this.DataContextChanged += ErrorDialog_DataContextChanged;
+      DialogIcon = MessageBoxImage.Exclamation;
+      DataContextChanged += ErrorDialog_DataContextChanged;
     }
 
     void ErrorDialog_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -125,40 +125,37 @@ namespace Csla.Xaml
 
     private void AttachSource(object source)
     {
-      var dp = source as System.Windows.Data.DataSourceProvider;
-      if (dp != null)
+      if (source is DataSourceProvider dp)
         dp.DataChanged += source_DataChanged;
     }
 
     private void DetachSource(object source)
     {
-      var dp = source as System.Windows.Data.DataSourceProvider;
-      if (dp != null)
+      if (source is DataSourceProvider dp)
         dp.DataChanged -= source_DataChanged;
     }
 
     private void source_DataChanged(object sender, EventArgs e)
     {
-      var dp = sender as System.Windows.Data.DataSourceProvider;
-      if (dp != null && dp.Error != null)
+      if (sender is DataSourceProvider dp && dp.Error != null)
       {
         string error;
-        if (this.ShowExceptionDetail)
+        if (ShowExceptionDetail)
           error = dp.Error.ToString();
         else
           error = dp.Error.Message;
 
         string output;
-        if (string.IsNullOrEmpty(this.DialogFirstLine))
+        if (string.IsNullOrEmpty(DialogFirstLine))
           output = error;
         else
-          output = string.Format("{0}{1}{2}", this.DialogFirstLine, Environment.NewLine, error);
+          output = $"{DialogFirstLine}{Environment.NewLine}{error}";
 
         MessageBox.Show(
           output,
-          this.DialogTitle,
+          DialogTitle,
           MessageBoxButton.OK, 
-          this.DialogIcon);
+          DialogIcon);
       }
     }
 

@@ -5,11 +5,9 @@
 // </copyright>
 // <summary>Provides consistent context information between the client</summary>
 //-----------------------------------------------------------------------
-using System;
+
 using System.Security.Principal;
-using System.Threading;
 using Csla.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Csla.Xaml
 {
@@ -27,7 +25,7 @@ namespace Csla.Xaml
     /// Method called when the ApplicationContext
     /// property has been set to a new value.
     /// </summary>
-    protected override void OnApplicationContextSet() => applicationContext = base.ApplicationContext;
+    protected override void OnApplicationContextSet() => applicationContext = ApplicationContext;
 
     /// <summary>
     /// Gets the current ApplicationContext.
@@ -42,12 +40,11 @@ namespace Csla.Xaml
     /// <summary>
     /// Gets the current principal.
     /// </summary>
-    /// <returns></returns>
     public override IPrincipal GetUser()
     {
       if (_principal == null)
       {
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
         if (OperatingSystem.IsWindows() && !SecurityOptions.FlowSecurityPrincipalFromClient)
           SetUser(new WindowsPrincipal(WindowsIdentity.GetCurrent()));
         else

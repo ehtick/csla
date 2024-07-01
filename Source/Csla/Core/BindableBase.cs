@@ -5,7 +5,7 @@
 // </copyright>
 // <summary>This class implements INotifyPropertyChanged</summary>
 //-----------------------------------------------------------------------
-using System;
+
 using System.ComponentModel;
 
 namespace Csla.Core
@@ -15,7 +15,7 @@ namespace Csla.Core
   /// and INotifyPropertyChanging in a 
   /// serialization-safe manner.
   /// </summary>
-  [Serializable()]
+  [Serializable]
   public abstract class BindableBase : 
     MobileObject, 
     INotifyPropertyChanged, 
@@ -27,7 +27,7 @@ namespace Csla.Core
     protected BindableBase()
     { }
 
-    [NonSerialized()]
+    [NonSerialized]
     private PropertyChangedEventHandler _nonSerializableChangedHandlers;
     private PropertyChangedEventHandler _serializableChangedHandlers;
 
@@ -42,19 +42,19 @@ namespace Csla.Core
       {
         if (ShouldHandlerSerialize(value))
           _serializableChangedHandlers = (PropertyChangedEventHandler)
-            System.Delegate.Combine(_serializableChangedHandlers, value);
+            Delegate.Combine(_serializableChangedHandlers, value);
         else
           _nonSerializableChangedHandlers = (PropertyChangedEventHandler)
-            System.Delegate.Combine(_nonSerializableChangedHandlers, value);
+            Delegate.Combine(_nonSerializableChangedHandlers, value);
       }
       remove
       {
           if (ShouldHandlerSerialize(value))
           _serializableChangedHandlers = (PropertyChangedEventHandler)
-            System.Delegate.Remove(_serializableChangedHandlers, value);
+            Delegate.Remove(_serializableChangedHandlers, value);
         else
           _nonSerializableChangedHandlers = (PropertyChangedEventHandler)
-            System.Delegate.Remove(_nonSerializableChangedHandlers, value);
+            Delegate.Remove(_nonSerializableChangedHandlers, value);
       }
     }
 
@@ -63,7 +63,6 @@ namespace Csla.Core
     /// if the event handler should be serialized
     /// </summary>
     /// <param name="value">the event handler to review</param>
-    /// <returns></returns>
     protected virtual bool ShouldHandlerSerialize(PropertyChangedEventHandler value)
     {
       return value.Method.IsPublic &&
@@ -83,12 +82,10 @@ namespace Csla.Core
     [EditorBrowsable(EditorBrowsableState.Advanced)]
     protected virtual void OnPropertyChanged(string propertyName)
     {
-      if (_nonSerializableChangedHandlers != null)
-        _nonSerializableChangedHandlers.Invoke(this,
-          new PropertyChangedEventArgs(propertyName));
-      if (_serializableChangedHandlers != null)
-        _serializableChangedHandlers.Invoke(this,
-          new PropertyChangedEventArgs(propertyName));
+      _nonSerializableChangedHandlers?.Invoke(this,
+        new PropertyChangedEventArgs(propertyName));
+      _serializableChangedHandlers?.Invoke(this,
+        new PropertyChangedEventArgs(propertyName));
     }
 
         /// <summary>
@@ -104,12 +101,10 @@ namespace Csla.Core
     [EditorBrowsable(EditorBrowsableState.Advanced)]
     protected virtual void OnMetaPropertyChanged(string propertyName)
     {
-      if (_nonSerializableChangedHandlers != null)
-        _nonSerializableChangedHandlers.Invoke(this,
-          new MetaPropertyChangedEventArgs(propertyName));
-      if (_serializableChangedHandlers != null)
-        _serializableChangedHandlers.Invoke(this,
-          new MetaPropertyChangedEventArgs(propertyName));
+      _nonSerializableChangedHandlers?.Invoke(this,
+        new MetaPropertyChangedEventArgs(propertyName));
+      _serializableChangedHandlers?.Invoke(this,
+        new MetaPropertyChangedEventArgs(propertyName));
     }
 
     /// <summary>
@@ -157,7 +152,7 @@ namespace Csla.Core
       OnPropertyChanged(string.Empty);
     }
 
-    [NonSerialized()]
+    [NonSerialized]
     private PropertyChangingEventHandler _nonSerializableChangingHandlers;
     private PropertyChangingEventHandler _serializableChangingHandlers;
 
@@ -172,19 +167,19 @@ namespace Csla.Core
       {
           if (ShouldHandlerSerialize(value))
           _serializableChangingHandlers = (PropertyChangingEventHandler)
-            System.Delegate.Combine(_serializableChangingHandlers, value);
+            Delegate.Combine(_serializableChangingHandlers, value);
         else
           _nonSerializableChangingHandlers = (PropertyChangingEventHandler)
-            System.Delegate.Combine(_nonSerializableChangingHandlers, value);
+            Delegate.Combine(_nonSerializableChangingHandlers, value);
       }
       remove
       {
           if (ShouldHandlerSerialize(value))
           _serializableChangingHandlers = (PropertyChangingEventHandler)
-            System.Delegate.Remove(_serializableChangingHandlers, value);
+            Delegate.Remove(_serializableChangingHandlers, value);
         else
           _nonSerializableChangingHandlers = (PropertyChangingEventHandler)
-            System.Delegate.Remove(_nonSerializableChangingHandlers, value);
+            Delegate.Remove(_nonSerializableChangingHandlers, value);
       }
     }
 
@@ -230,12 +225,10 @@ namespace Csla.Core
     [EditorBrowsable(EditorBrowsableState.Advanced)]
     protected virtual void OnPropertyChanging(string propertyName)
     {
-      if (_nonSerializableChangingHandlers != null)
-        _nonSerializableChangingHandlers.Invoke(this,
-          new PropertyChangingEventArgs(propertyName));
-      if (_serializableChangingHandlers != null)
-        _serializableChangingHandlers.Invoke(this,
-          new PropertyChangingEventArgs(propertyName));
+      _nonSerializableChangingHandlers?.Invoke(this,
+        new PropertyChangingEventArgs(propertyName));
+      _serializableChangingHandlers?.Invoke(this,
+        new PropertyChangingEventArgs(propertyName));
     }
 
     /// <summary>
@@ -259,7 +252,6 @@ namespace Csla.Core
     /// if the event handler should be serialized
     /// </summary>
     /// <param name="value">the event handler to review</param>
-    /// <returns></returns>
     protected virtual bool ShouldHandlerSerialize(PropertyChangingEventHandler value)
     {
       return value.Method.IsPublic &&

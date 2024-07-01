@@ -5,20 +5,13 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Csla.Serialization;
-using System.Diagnostics;
-using Csla.Rules;
 
 namespace Csla.Test.Authorization
 {
 #if TESTING
   [DebuggerNonUserCode]
 #endif
-  [Serializable()]
+  [Serializable]
   public class ReadOnlyPerson : ReadOnlyBase<ReadOnlyPerson>
   {
     private bool _authorizationCheckDisabled;
@@ -77,8 +70,8 @@ namespace Csla.Test.Authorization
 
     protected override void AddBusinessRules()
     {
-      BusinessRules.AddRule(new Csla.Rules.CommonRules.IsInRole(Rules.AuthorizationActions.ReadProperty, FirstNameProperty, new List<string> { "Admin" }));
-      BusinessRules.AddRule(new Csla.Rules.CommonRules.IsNotInRole(Rules.AuthorizationActions.ReadProperty, MiddleNameProperty, new List<string> { "Admin" }));
+      BusinessRules.AddRule(new Rules.CommonRules.IsInRole(Rules.AuthorizationActions.ReadProperty, FirstNameProperty, new List<string> { "Admin" }));
+      BusinessRules.AddRule(new Rules.CommonRules.IsNotInRole(Rules.AuthorizationActions.ReadProperty, MiddleNameProperty, new List<string> { "Admin" }));
     }
 
     internal void SetDisableCanReadAuthorizationChecks(bool isCanReadAuthorizationChecksDisabled) => _authorizationCheckDisabled = isCanReadAuthorizationChecksDisabled;

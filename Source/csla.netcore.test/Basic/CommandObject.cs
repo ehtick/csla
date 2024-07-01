@@ -5,15 +5,11 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Csla.Serialization;
 
 namespace Csla.Test.Basic
 {
   [Serializable]
-  public class CommandObject : Csla.CommandBase<CommandObject>
+  public class CommandObject : CommandBase<CommandObject>
   {
 
     private static object locker = new object();

@@ -5,24 +5,22 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Text;
+
 using System.Data;
 
 namespace Csla.Test.DataBinding
 {
-  [Serializable()]
+  [Serializable]
   public class ChildEntityList : BusinessBindingListBase<ChildEntityList, ChildEntity>
   {
     public ChildEntityList()
     {
-      this.MarkAsChild();
+      MarkAsChild();
     }
 
     #region "Criteria"
 
-    [Serializable()]
+    [Serializable]
     private class Criteria
     {
       //no criteria for this list

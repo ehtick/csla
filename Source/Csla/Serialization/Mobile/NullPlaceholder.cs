@@ -5,14 +5,13 @@
 // </copyright>
 // <summary>Placeholder for null child objects.</summary>
 //-----------------------------------------------------------------------
-using System;
 
 namespace Csla.Serialization.Mobile
 {
   /// <summary>
   /// Placeholder for null child objects.
   /// </summary>
-  [Serializable()]
+  [Serializable]
   public sealed class NullPlaceholder : IMobileObject
   {
     /// <summary>

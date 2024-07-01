@@ -6,12 +6,8 @@
 // </copyright>
 // <summary>Invokes a method on a target object when a </summary>
 //-----------------------------------------------------------------------
-using System;
 using System.Windows;
-using System.Windows.Controls;
 using System.ComponentModel;
-using System.Collections.Generic;
-using Csla.Properties;
 
 namespace Csla.Xaml
 {
@@ -53,12 +49,11 @@ namespace Csla.Xaml
       result = ctrl.GetValue(TargetProperty);
       if (result == null)
       {
-        var fe = ctrl as FrameworkElement;
-        if (fe != null)
+        if (ctrl is FrameworkElement fe)
           result = fe.DataContext;
       }
-      var icv = result as ICollectionView;
-      if (icv != null)
+
+      if (result is ICollectionView icv)
         result = icv.CurrentItem;
       return result;
     }
@@ -101,8 +96,7 @@ namespace Csla.Xaml
       typeof(InvokeMethod),
       new PropertyMetadata((o, _) =>
       {
-        var ctrl = o as UIElement;
-        if (ctrl != null)
+        if (o is UIElement ctrl)
           new InvokeMethod(ctrl);
       }));
 
@@ -204,16 +198,16 @@ namespace Csla.Xaml
             {
               var del = Delegate.CreateDelegate(eventRef.EventHandlerType,
                 this,
-                this.GetType().GetMethod("CallMethod", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic));
+                GetType().GetMethod("CallMethod", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic));
               eventRef.AddEventHandler(ctrl, del);
             }
             else
             {
-              throw new NotSupportedException(Csla.Properties.Resources.ExecuteBadTriggerEvent);
+              throw new NotSupportedException(Properties.Resources.ExecuteBadTriggerEvent);
             }
           }
           else
-            throw new NotSupportedException(Csla.Properties.Resources.ExecuteBadTriggerEvent);
+            throw new NotSupportedException(Properties.Resources.ExecuteBadTriggerEvent);
         }
       }
     }
@@ -244,7 +238,7 @@ namespace Csla.Xaml
               }
             ]);
         else
-          throw new NotSupportedException(Csla.Properties.Resources.ExecuteBadParams);
+          throw new NotSupportedException(Properties.Resources.ExecuteBadParams);
       }
       catch (System.Reflection.TargetInvocationException ex)
       {

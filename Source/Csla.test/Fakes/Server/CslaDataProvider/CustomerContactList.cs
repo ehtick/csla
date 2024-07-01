@@ -5,14 +5,8 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+
 using Csla;
-using Csla.Security;
-using Csla.Core;
-using Csla.Serialization;
 
 namespace cslalighttest.CslaDataProvider
 {
@@ -22,19 +16,19 @@ namespace cslalighttest.CslaDataProvider
 
     public Customer MyParent
     {
-      get { return (Customer)this.Parent; }
+      get { return (Customer)Parent; }
     }
 
     private CustomerContactList() { }
 
     private void Child_Fetch(int customerID, [Inject] IChildDataPortal<CustomerContact> childDataPortal)
     {
-      this.RaiseListChangedEvents = false;
+      RaiseListChangedEvents = false;
       for (int i = 1; i <= customerID; i++)
       {
-        Add(childDataPortal.FetchChild(customerID, i, "First Name # " + i.ToString(), "Last Name # " + i.ToString(), new DateTime(1980 + i, 1, 1)));
+        Add(childDataPortal.FetchChild(customerID, i, $"First Name # {i}", $"Last Name # {i}", new DateTime(1980 + i, 1, 1)));
       }
-      this.RaiseListChangedEvents = true;
+      RaiseListChangedEvents = true;
     }
   }
 }

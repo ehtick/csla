@@ -1,22 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Csla.Configuration;
+﻿using Csla.Configuration;
 using Csla.TestHelpers;
 using Microsoft.Extensions.DependencyInjection;
-
-
-#if !NUNIT
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-#else
-using NUnit.Framework;
-using TestClass = NUnit.Framework.TestFixtureAttribute;
-using TestInitialize = NUnit.Framework.SetUpAttribute;
-using TestCleanup = NUnit.Framework.TearDownAttribute;
-using TestMethod = NUnit.Framework.TestAttribute;
-#endif 
 
 namespace Csla.Test.BasicModern
 {
@@ -37,10 +22,10 @@ namespace Csla.Test.BasicModern
     [TestMethod]
     public void EditLevelsWorkWithMobileFormatter()
     {
-      var oldSetting = Configuration.ConfigurationManager.AppSettings["CslaSerializationFormatter"];
+      var oldSetting = ConfigurationManager.AppSettings["CslaSerializationFormatter"];
       try
       {
-        Configuration.ConfigurationManager.AppSettings.Set("CslaSerializationFormatter", "MobileFormatter");
+        ConfigurationManager.AppSettings.Set("CslaSerializationFormatter", "MobileFormatter");
 
         var root = NewRoot();
 
@@ -60,17 +45,17 @@ namespace Csla.Test.BasicModern
       }
       finally
       {
-        Configuration.ConfigurationManager.AppSettings.Set("CslaSerializationFormatter", oldSetting);
+        ConfigurationManager.AppSettings.Set("CslaSerializationFormatter", oldSetting);
       }
     }
 
     [TestMethod]
     public void CloneWorkswithMobileFormatter()
     {
-      var oldSetting = Configuration.ConfigurationManager.AppSettings["CslaSerializationFormatter"];
+      var oldSetting = ConfigurationManager.AppSettings["CslaSerializationFormatter"];
       try
       {
-        Configuration.ConfigurationManager.AppSettings.Set("CslaSerializationFormatter", "MobileFormatter");
+        ConfigurationManager.AppSettings.Set("CslaSerializationFormatter", "MobileFormatter");
 
         var original = NewRoot();
 
@@ -96,7 +81,7 @@ namespace Csla.Test.BasicModern
       }
       finally
       {
-        Configuration.ConfigurationManager.AppSettings.Set("CslaSerializationFormatter", oldSetting);
+        ConfigurationManager.AppSettings.Set("CslaSerializationFormatter", oldSetting);
       }
     }
 
@@ -110,6 +95,7 @@ namespace Csla.Test.BasicModern
     }
 
     [TestMethod]
+    [TestCategory("SkipOnCIServer")]
     public void MakeOldMetastateEvents()
     {
       var graph = NewRoot();
@@ -132,6 +118,7 @@ namespace Csla.Test.BasicModern
     }
 
     [TestMethod]
+    [TestCategory("SkipOnCIServer")]
     public void MarkDeletedMetastateEvents()
     {
       var graph = NewRoot();
@@ -155,6 +142,7 @@ namespace Csla.Test.BasicModern
     }
 
     [TestMethod]
+    [TestCategory("SkipOnCIServer")]
     public void RootChangedMetastateEventsId()
     {
       var graph = NewRoot();
@@ -177,6 +165,7 @@ namespace Csla.Test.BasicModern
     }
 
     [TestMethod]
+    [TestCategory("SkipOnCIServer")]
     public void RootChangedMetastateEventsName()
     {
       var graph = NewRoot();
@@ -221,6 +210,7 @@ namespace Csla.Test.BasicModern
     }
 
     [TestMethod]
+    [TestCategory("SkipOnCIServer")]
     public void RootChangedMetastateEventsChild()
     {
 

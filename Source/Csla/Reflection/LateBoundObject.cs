@@ -5,8 +5,7 @@
 // </copyright>
 // <summary>Enables simple invocation of methods</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Threading.Tasks;
+
 using Csla.Properties;
 
 namespace Csla.Reflection
@@ -18,8 +17,8 @@ namespace Csla.Reflection
   /// </summary>
   public class LateBoundObject : Core.IUseApplicationContext
   {
-    private ApplicationContext ApplicationContext { get; set; }
-    ApplicationContext Core.IUseApplicationContext.ApplicationContext { get => ApplicationContext; set => ApplicationContext = value; }
+    private ApplicationContext _applicationContext;
+    ApplicationContext Core.IUseApplicationContext.ApplicationContext { get => _applicationContext; set => _applicationContext = value; }
 
     /// <summary>
     /// Object instance managed by LateBoundObject.
@@ -40,7 +39,7 @@ namespace Csla.Reflection
     /// </remarks>
     public LateBoundObject(Type objectType)
     {
-      Instance = ApplicationContext.CreateInstanceDI(objectType);
+      Instance = _applicationContext.CreateInstanceDI(objectType);
     }
 
     /// <summary>
@@ -64,7 +63,7 @@ namespace Csla.Reflection
     /// </param>
     public object CallMethodIfImplemented(string method)
     {
-      return MethodCaller.CallMethodIfImplemented(this.Instance, method);
+      return MethodCaller.CallMethodIfImplemented(Instance, method);
     }
 
     /// <summary>
@@ -79,7 +78,7 @@ namespace Csla.Reflection
     /// </param>
     public object CallMethodIfImplemented(string method, params object[] parameters)
     {
-      return MethodCaller.CallMethodIfImplemented(this.Instance, method, parameters);
+      return MethodCaller.CallMethodIfImplemented(Instance, method, parameters);
     }
 
     /// <summary>
@@ -92,7 +91,7 @@ namespace Csla.Reflection
     /// </param>
     public object CallMethod(string method)
     {
-      return MethodCaller.CallMethod(this.Instance, method);
+      return MethodCaller.CallMethod(Instance, method);
     }
 
     /// <summary>
@@ -108,7 +107,7 @@ namespace Csla.Reflection
     /// </param>
     public object CallMethod(string method, params object[] parameters)
     {
-      return MethodCaller.CallMethod(this.Instance, method, parameters);
+      return MethodCaller.CallMethod(Instance, method, parameters);
     }
 
     /// <summary>
@@ -117,12 +116,11 @@ namespace Csla.Reflection
     /// otherwise synchronously invokes the method.
     /// </summary>
     /// <param name="methodName">Name of the method.</param>
-    /// <returns></returns>
     public async Task CallMethodTryAsync(string methodName)
     {
       try
       {
-        await MethodCaller.CallMethodTryAsync(this.Instance, methodName);
+        await MethodCaller.CallMethodTryAsync(Instance, methodName);
       }
       catch (CallMethodException)
       {
@@ -147,7 +145,7 @@ namespace Csla.Reflection
     {
       try
       {
-        await MethodCaller.CallMethodTryAsync(this.Instance, methodName, parameters);
+        await MethodCaller.CallMethodTryAsync(Instance, methodName, parameters);
       }
       catch (CallMethodException)
       {
@@ -159,13 +157,13 @@ namespace Csla.Reflection
       }
     }
 
-    private Reflection.ServiceProviderMethodCaller serviceProviderMethodCaller;
-    private Reflection.ServiceProviderMethodCaller ServiceProviderMethodCaller
+    private ServiceProviderMethodCaller serviceProviderMethodCaller;
+    private ServiceProviderMethodCaller ServiceProviderMethodCaller
     {
       get
       {
         if (serviceProviderMethodCaller == null)
-          serviceProviderMethodCaller = (Reflection.ServiceProviderMethodCaller)ApplicationContext.CreateInstanceDI(typeof(Reflection.ServiceProviderMethodCaller));
+          serviceProviderMethodCaller = (ServiceProviderMethodCaller)_applicationContext.CreateInstanceDI(typeof(ServiceProviderMethodCaller));
         return serviceProviderMethodCaller;
       }
     }
@@ -186,7 +184,7 @@ namespace Csla.Reflection
         Instance, parameters);
       try
       {
-        Utilities.ThrowIfAsyncMethodOnSyncClient(ApplicationContext, isSync, method.MethodInfo);
+        Utilities.ThrowIfAsyncMethodOnSyncClient(_applicationContext, isSync, method.MethodInfo);
         await ServiceProviderMethodCaller.CallMethodTryAsync(Instance, method, parameters).ConfigureAwait(false);
       }
       catch (CallMethodException)

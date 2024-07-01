@@ -5,14 +5,10 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Csla;
 
 namespace Csla.Test.ObjectFactory
 {
-  [Csla.Server.ObjectFactory("Csla.Test.ObjectFactory.CommandObjectFactory, Csla.Test", null, null, null, null, "ExecuteMissingMethod")]
+  [Server.ObjectFactory("Csla.Test.ObjectFactory.CommandObjectFactory, Csla.Test", null, null, null, null, "ExecuteMissingMethod")]
   [Serializable]
   public class CommandObjectMissingFactoryMethod : CommandBase<CommandObjectMissingFactoryMethod>
   {

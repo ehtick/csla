@@ -5,13 +5,7 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System.Collections.Generic;
-using System.Text;
-using Csla;
-using System;
-using System.Threading.Tasks;
 
-using Csla.Core;
 using Csla.Server;
 
 namespace Csla.Test.DataPortalTest
@@ -139,7 +133,7 @@ namespace Csla.Test.DataPortalTest
 
     public async Task<object> Create(int id)
     {
-      Console.WriteLine($"Create {id},{System.Threading.Thread.GetCurrentProcessorId()}, {System.Threading.Thread.CurrentThread.ManagedThreadId}");
+      Console.WriteLine($"Create {id},{Thread.GetCurrentProcessorId()}, {Thread.CurrentThread.ManagedThreadId}");
       await Task.Delay(1);
       return await Task.Run(() => new SingleWithFactory());
     }
@@ -234,6 +228,12 @@ namespace Csla.Test.DataPortalTest
       if (Value == 555)
         throw new Exception("bad value");
       Value += 1;
+    }
+
+    [Execute]
+    protected void DataPortal_ExecuteWithInt(int value)
+    {
+      Value += value;
     }
   }
 }

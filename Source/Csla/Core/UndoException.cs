@@ -5,7 +5,6 @@
 // </copyright>
 // <summary>Exception indicating a problem with the</summary>
 //-----------------------------------------------------------------------
-using System;
 
 namespace Csla.Core
 {
@@ -15,7 +14,7 @@ namespace Csla.Core
   /// CSLA .NET.
   /// </summary>
   /// <remarks></remarks>
-  [Serializable()]
+  [Serializable]
   public class UndoException : Exception
   {
     /// <summary>

@@ -1,14 +1,10 @@
-﻿#if !NETFX_CORE
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="TypeSystem.cs" company="Marimer LLC">
 //     Copyright (c) Marimer LLC. All rights reserved.
 //     Website: https://cslanet.com
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-
 namespace Csla.Core
 {
   internal static class TypeSystem
@@ -59,4 +55,3 @@ namespace Csla.Core
     }
   }
 }
-#endif

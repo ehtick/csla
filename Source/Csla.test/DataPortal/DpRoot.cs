@@ -5,15 +5,10 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Csla.DataPortalClient;
-using Csla.Serialization;
 
 namespace Csla.Test.DataPortal
 {
-  [Serializable()]
+  [Serializable]
   public class DpRoot : BusinessBase<DpRoot>
   {
     private string _auth = "No value";
@@ -44,7 +39,7 @@ namespace Csla.Test.DataPortal
 
     #region "Criteria class"
 
-    [Serializable()]
+    [Serializable]
     internal class Criteria : CriteriaBase<Criteria>
     {
       public static PropertyInfo<string> DataProperty = RegisterProperty<string>(c => c.Data);
@@ -69,7 +64,7 @@ namespace Csla.Test.DataPortal
 
     public DpRoot CloneThis()
     {
-      return this.Clone();
+      return Clone();
     }
 
 
@@ -132,14 +127,14 @@ namespace Csla.Test.DataPortal
     {
       string role = "Admin";
 
-      BusinessRules.AddRule(new Csla.Rules.CommonRules.IsNotInRole(Rules.AuthorizationActions.ReadProperty, DenyReadOnPropertyProperty, new List<string> { role }));
-      BusinessRules.AddRule(new Csla.Rules.CommonRules.IsNotInRole(Rules.AuthorizationActions.WriteProperty, DenyWriteOnPropertyProperty, new List<string> { role }));
+      BusinessRules.AddRule(new Rules.CommonRules.IsNotInRole(Rules.AuthorizationActions.ReadProperty, DenyReadOnPropertyProperty, new List<string> { role }));
+      BusinessRules.AddRule(new Rules.CommonRules.IsNotInRole(Rules.AuthorizationActions.WriteProperty, DenyWriteOnPropertyProperty, new List<string> { role }));
 
-      BusinessRules.AddRule(new Csla.Rules.CommonRules.IsNotInRole(Rules.AuthorizationActions.ReadProperty, DenyReadWriteOnPropertyProperty, new List<string> { role }));
-      BusinessRules.AddRule(new Csla.Rules.CommonRules.IsNotInRole(Rules.AuthorizationActions.WriteProperty, DenyReadWriteOnPropertyProperty, new List<string> { role }));
+      BusinessRules.AddRule(new Rules.CommonRules.IsNotInRole(Rules.AuthorizationActions.ReadProperty, DenyReadWriteOnPropertyProperty, new List<string> { role }));
+      BusinessRules.AddRule(new Rules.CommonRules.IsNotInRole(Rules.AuthorizationActions.WriteProperty, DenyReadWriteOnPropertyProperty, new List<string> { role }));
 
-      BusinessRules.AddRule(new Csla.Rules.CommonRules.IsInRole(Rules.AuthorizationActions.ReadProperty, AllowReadWriteOnPropertyProperty, new List<string> { role }));
-      BusinessRules.AddRule(new Csla.Rules.CommonRules.IsInRole(Rules.AuthorizationActions.WriteProperty, AllowReadWriteOnPropertyProperty, new List<string> { role }));
+      BusinessRules.AddRule(new Rules.CommonRules.IsInRole(Rules.AuthorizationActions.ReadProperty, AllowReadWriteOnPropertyProperty, new List<string> { role }));
+      BusinessRules.AddRule(new Rules.CommonRules.IsInRole(Rules.AuthorizationActions.WriteProperty, AllowReadWriteOnPropertyProperty, new List<string> { role }));
     }
 
     public static PropertyInfo<string> DenyReadOnPropertyProperty = RegisterProperty<string>(c => c.DenyReadOnProperty);

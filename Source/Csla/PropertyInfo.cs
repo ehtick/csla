@@ -5,8 +5,7 @@
 // </copyright>
 // <summary>Maintains metadata about a property.</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Linq;
+
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
@@ -102,7 +101,7 @@ namespace Csla
     /// </param>
     /// <param name="relationship">Relationship with referenced object.</param>
     public PropertyInfo(string name, string friendlyName, Type containingType, RelationshipTypes relationship) 
-      : this(name, friendlyName, null, DataBindingFriendlyDefault(), relationship)
+      : this(name, friendlyName, containingType, DataBindingFriendlyDefault(), relationship)
     { }
 
     /// <summary>
@@ -245,7 +244,6 @@ namespace Csla
     /// Gets the System.Reflection.PropertyInfo object
     /// representing the property.
     /// </summary>
-    /// <returns></returns>
     public System.Reflection.PropertyInfo GetPropertyInfo() => _propertyInfo;
 
     #region IComparable Members

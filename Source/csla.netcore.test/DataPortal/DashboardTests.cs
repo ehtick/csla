@@ -5,25 +5,12 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 using Csla;
 using Csla.Configuration;
 using Csla.Server.Dashboard;
-using Csla.TestHelpers;
 using Microsoft.Extensions.DependencyInjection;
-#if !NUNIT
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-#else
-using NUnit.Framework;
-using TestClass = NUnit.Framework.TestFixtureAttribute;
-using TestInitialize = NUnit.Framework.SetUpAttribute;
-using TestCleanup = NUnit.Framework.TearDownAttribute;
-using TestMethod = NUnit.Framework.TestAttribute;
-#endif 
 
 namespace csla.netcore.test.DataPortal
 {
@@ -47,7 +34,7 @@ namespace csla.netcore.test.DataPortal
       serviceProvider = services.BuildServiceProvider();
 
       IDashboard dashboard = serviceProvider.GetRequiredService<IDashboard>();
-      Assert.IsInstanceOfType(dashboard, typeof(Csla.Server.Dashboard.NullDashboard));
+      Assert.IsInstanceOfType(dashboard, typeof(NullDashboard));
     }
 
     // This would really be testing the behaviour of the service provider not the dashboard
@@ -183,7 +170,7 @@ namespace csla.netcore.test.DataPortal
     private void DataPortal_Fetch(int id)
     {
       // load values into object
-      System.Threading.Thread.Sleep(10);
+      Thread.Sleep(10);
     }
 
     [Insert]

@@ -5,7 +5,7 @@
 // </copyright>
 // <summary>Implementation of the authorizer that</summary>
 //-----------------------------------------------------------------------
-using System;
+
 using Csla.Properties;
 using Csla.Rules;
 using Csla.Security;
@@ -25,10 +25,10 @@ namespace Csla.Server
     /// <param name="applicationContext"></param>
     public ActiveAuthorizer(ApplicationContext applicationContext)
     {
-      ApplicationContext = applicationContext;
+      _applicationContext = applicationContext;
     }
 
-    private ApplicationContext ApplicationContext { get; set; }
+    private ApplicationContext _applicationContext;
 
     /// <summary>
     /// Checks authorization rules for the request.
@@ -36,16 +36,19 @@ namespace Csla.Server
     /// <param name="clientRequest">
     /// Client request information.
     /// </param>
-    public void Authorize(AuthorizeRequest clientRequest)
+    /// <param name="ct">
+    /// The cancellation token.
+    /// </param>
+    public async Task AuthorizeAsync(AuthorizeRequest clientRequest, CancellationToken ct)
     {
-      if (ApplicationContext.LogicalExecutionLocation == ApplicationContext.LogicalExecutionLocations.Server &&
-          ApplicationContext.ExecutionLocation == ApplicationContext.ExecutionLocations.Server)
+      if (_applicationContext.LogicalExecutionLocation == ApplicationContext.LogicalExecutionLocations.Server &&
+          _applicationContext.ExecutionLocation == ApplicationContext.ExecutionLocations.Server)
       {
         if (clientRequest.Operation == DataPortalOperations.Update ||
             clientRequest.Operation == DataPortalOperations.Execute)
         {
           // Per-Instance checks
-          if (!BusinessRules.HasPermission(ApplicationContext, clientRequest.Operation.ToAuthAction(), clientRequest.RequestObject))
+          if (!await BusinessRules.HasPermissionAsync(_applicationContext, clientRequest.Operation.ToAuthAction(), clientRequest.RequestObject, ct))
           {
             throw new SecurityException(
                string.Format(Resources.UserNotAuthorizedException,
@@ -56,7 +59,7 @@ namespace Csla.Server
         }
 
         // Per-Type checks
-        if (!BusinessRules.HasPermission(ApplicationContext, clientRequest.Operation.ToAuthAction(), clientRequest.ObjectType))
+        if (!await BusinessRules.HasPermissionAsync(_applicationContext, clientRequest.Operation.ToAuthAction(), clientRequest.ObjectType, ct))
         {
           throw new SecurityException(
              string.Format(Resources.UserNotAuthorizedException,

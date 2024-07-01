@@ -5,25 +5,11 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Csla.Test.Security;
-using UnitDriven;
-using System.Diagnostics;
+
 using System.Security.Claims;
 using Csla.Core;
 using Csla.TestHelpers;
-
-#if NUNIT
-using NUnit.Framework;
-using TestClass = NUnit.Framework.TestFixtureAttribute;
-using TestInitialize = NUnit.Framework.SetUpAttribute;
-using TestCleanup = NUnit.Framework.TearDownAttribute;
-using TestMethod = NUnit.Framework.TestAttribute;
-#elif MSTEST
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-#endif
 
 namespace Csla.Test.Authorization
 {
@@ -31,7 +17,7 @@ namespace Csla.Test.Authorization
   [DebuggerNonUserCode]
   [DebuggerStepThrough]
 #endif
-  [TestClass()]
+  [TestClass]
   public class ReadonlyAuthorizationTests
   {
     private static TestDIContext _testDIContext;

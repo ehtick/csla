@@ -8,19 +8,11 @@
 
 using Csla.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-#if !NUNIT
 
-#else
-using NUnit.Framework;
-using TestClass = NUnit.Framework.TestFixtureAttribute;
-using TestInitialize = NUnit.Framework.SetUpAttribute;
-using TestCleanup = NUnit.Framework.TearDownAttribute;
-using TestMethod = NUnit.Framework.TestAttribute;
-#endif
 
 namespace Csla.Test.FieldManager
 {
-  [TestClass()]
+  [TestClass]
   public class ChildUpdateTests
   {
     private static TestDIContext _testDIContext;

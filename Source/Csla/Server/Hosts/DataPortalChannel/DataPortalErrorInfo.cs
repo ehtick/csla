@@ -6,8 +6,6 @@
 // <summary>Message containing details about any</summary>
 //-----------------------------------------------------------------------
 
-using System;
-
 namespace Csla.Server.Hosts.DataPortalChannel
 {
   /// <summary>
@@ -115,12 +113,12 @@ namespace Csla.Server.Hosts.DataPortalChannel
     public DataPortalErrorInfo(ApplicationContext applicationContext, Exception ex)
     {
       ApplicationContext = applicationContext;
-      this.ExceptionTypeName = ex.GetType().FullName;
-      this.Message = ex.Message;
-      this.StackTrace = ex.StackTrace;
-      this.Source = ex.Source;
+      ExceptionTypeName = ex.GetType().FullName;
+      Message = ex.Message;
+      StackTrace = ex.StackTrace;
+      Source = ex.Source;
       if (ex.InnerException != null)
-        this.InnerError = ApplicationContext.CreateInstance<DataPortalErrorInfo>(ApplicationContext, ex.InnerException);
+        InnerError = ApplicationContext.CreateInstance<DataPortalErrorInfo>(ApplicationContext, ex.InnerException);
     }
 
     /// <summary>

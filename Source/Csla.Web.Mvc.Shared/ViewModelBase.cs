@@ -1,4 +1,4 @@
-﻿#if !NETSTANDARD2_0 && !NETCOREAPP3_1 && !NET5_0_OR_GREATER
+﻿#if !NETSTANDARD2_0 && !NET8_0_OR_GREATER
 //-----------------------------------------------------------------------
 // <copyright file="ViewModelBase.cs" company="Marimer LLC">
 //     Copyright (c) Marimer LLC. All rights reserved.
@@ -6,11 +6,8 @@
 // </copyright>
 // <summary>Base class used to create ViewModel objects that contain the Model object and related elements.</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Web.Mvc;
+using Csla.Core;
 
 namespace Csla.Web.Mvc
 {
@@ -21,16 +18,16 @@ namespace Csla.Web.Mvc
   /// <typeparam name="T">Type of the Model object.</typeparam>
   public abstract class ViewModelBase<T> : IViewModel where T : class
   {
-    object IViewModel.ModelObject
+    object? IViewModel.ModelObject
     {
       get { return ModelObject; }
-      set { ModelObject = (T)value; }
+      set { ModelObject = (T?)value; }
     }
 
     /// <summary>
     /// Gets or sets the Model object.
     /// </summary>
-    public T ModelObject { get; set; }
+    public T? ModelObject { get; set; }
 
     /// <summary>
     /// Saves the current Model object if the object
@@ -45,14 +42,13 @@ namespace Csla.Web.Mvc
     {
       try
       {
-        var savable = ModelObject as Csla.Core.ISavable;
-        if (savable == null)
+        if (ModelObject is not ISavable savable)
           throw new InvalidOperationException("Save");
 
         ModelObject = (T)savable.Save(forceUpdate);
         return true;
       }
-      catch (Csla.DataPortalException ex)
+      catch (DataPortalException ex)
       {
         if (ex.BusinessException != null)
           modelState.AddModelError("", ex.BusinessException.Message);

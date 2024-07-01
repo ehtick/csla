@@ -5,20 +5,10 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Csla.TestHelpers;
 
-#if !NUNIT
+using Csla.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-#else
-using NUnit.Framework;
-using TestClass = NUnit.Framework.TestFixtureAttribute;
-using TestInitialize = NUnit.Framework.SetUpAttribute;
-using TestCleanup = NUnit.Framework.TearDownAttribute;
-using TestMethod = NUnit.Framework.TestAttribute;
-#endif 
+
 
 namespace Csla.Test.EditableRootList
 {
@@ -95,12 +85,12 @@ namespace Csla.Test.EditableRootList
     private bool _itemIsNew;
     private bool _isListSaved;
 
-    void item_Saved(object sender, Csla.Core.SavedEventArgs e)
+    void item_Saved(object sender, Core.SavedEventArgs e)
     {
       _itemIsNew = ((ERitem)e.NewObject).IsNew;
     }
 
-    void List_Saved(object sender, Csla.Core.SavedEventArgs e)
+    void List_Saved(object sender, Core.SavedEventArgs e)
     {
       _isListSaved = (e.Error==null && e.NewObject != null);
     }

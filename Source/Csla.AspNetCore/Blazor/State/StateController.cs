@@ -5,11 +5,12 @@
 // </copyright>
 // <summary>Gets and puts the current user session data</summary>
 //-----------------------------------------------------------------------
-using System.IO;
+
 using Microsoft.AspNetCore.Mvc;
 using Csla.State;
 using Csla.Security;
 using Csla.Blazor.State.Messages;
+using Csla.Serialization;
 
 namespace Csla.AspNetCore.Blazor.State
 {
@@ -19,8 +20,6 @@ namespace Csla.AspNetCore.Blazor.State
   /// </summary>
   /// <param name="applicationContext"></param>
   /// <param name="sessionManager"></param>
-  [ApiController]
-  [Route("[controller]")]
   public class StateController(ApplicationContext applicationContext, ISessionManager sessionManager) : ControllerBase
   {
     /// <summary>
@@ -35,7 +34,6 @@ namespace Csla.AspNetCore.Blazor.State
     /// format.
     /// </summary>
     /// <param name="lastTouched">Last touched value from session</param>
-    /// <returns></returns>
     [HttpGet]
     public virtual StateResult Get(long lastTouched)
     {
@@ -51,10 +49,9 @@ namespace Csla.AspNetCore.Blazor.State
         message.Session = session;
         if (FlowUserIdentityToWebAssembly)
         {
-          var principal = new CslaClaimsPrincipal(applicationContext.Principal);
-          message.Principal = principal;
+          message.Principal = applicationContext.Principal;
         }
-        var formatter = Csla.Serialization.SerializationFormatterFactory.GetFormatter(applicationContext);
+        var formatter = applicationContext.GetRequiredService<ISerializationFormatter>();
         var buffer = new MemoryStream();
         formatter.Serialize(buffer, message);
         result.ResultStatus = ResultStatuses.Success;
@@ -68,11 +65,10 @@ namespace Csla.AspNetCore.Blazor.State
     /// serialized format.
     /// </summary>
     /// <param name="updatedSessionData"></param>
-    /// <returns></returns>
     [HttpPut]
     public virtual void Put(byte[] updatedSessionData)
     {
-      var formatter = Csla.Serialization.SerializationFormatterFactory.GetFormatter(applicationContext);
+      var formatter = applicationContext.GetRequiredService<ISerializationFormatter>();
       var buffer = new MemoryStream(updatedSessionData)
       {
         Position = 0

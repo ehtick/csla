@@ -1,8 +1,4 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
-using Csla.Core;
+﻿using Csla.Core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Csla.TestHelpers;
 
@@ -14,7 +10,7 @@ namespace Csla.Test.CommandBase
   [TestClass]
   public class CommandBaseTest : Csla.Server.ObjectFactory
   {
-    public CommandBaseTest(ApplicationContext applicationContext) : base(applicationContext)
+    public CommandBaseTest() : base(null)
     {
     }
 
@@ -26,10 +22,10 @@ namespace Csla.Test.CommandBase
     ///</summary>
     public TestContext TestContext { get; set; }
 
-    [ClassInitialize()]
+    [ClassInitialize]
     public static void ClassInitialize(TestContext testContext) 
-    { 
-
+    {
+      _ = testContext;
     }
 
     #region Additional test attributes

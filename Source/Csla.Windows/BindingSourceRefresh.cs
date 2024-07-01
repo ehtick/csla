@@ -5,11 +5,8 @@
 // </copyright>
 // <summary>BindingSourceRefresh contains functionality for refreshing the data bound to controls on Host as well as a mechinism for catching data</summary>
 //-----------------------------------------------------------------------
-using System;
+
 using System.ComponentModel;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Windows.Forms;
 
 // code from Bill McCarthy
 // http://msmvps.com/bill/archive/2005/10/05/69012.aspx
@@ -29,7 +26,7 @@ namespace Csla.Windows
   public class BindingSourceRefresh : Component, IExtenderProvider, ISupportInitialize
   {
     #region Fields
-    private readonly Dictionary<BindingSource, bool> _sources = new Dictionary<BindingSource, bool>();
+    private readonly Dictionary<BindingSource, bool> _sources = [];
     #endregion
     #region Events
     /// <summary>
@@ -60,7 +57,7 @@ namespace Csla.Windows
     /// <summary>
     /// Required designer variable.
     /// </summary>
-    private System.ComponentModel.IContainer components = null;
+    private IContainer components = null;
     /// <summary>
     /// Clean up any resources being used.
     /// </summary>
@@ -135,7 +132,7 @@ namespace Csla.Windows
     /// </summary>
     [Browsable(false)]
     [DefaultValue(null)]
-#if NETSTANDARD2_0 || NET6_0_OR_GREATER
+#if NETSTANDARD2_0 || NET8_0_OR_GREATER
     [System.ComponentModel.DataAnnotations.ScaffoldColumn(false)]
 #endif
     public ContainerControl Host { get; set; }
@@ -277,10 +274,8 @@ namespace Csla.Windows
           {
             e.Binding.ReadValue();
           }
-          if (BindingError != null)
-          {
-            BindingError(this, new BindingErrorEventArgs(e.Binding, e.Exception));
-          }
+
+          BindingError?.Invoke(this, new BindingErrorEventArgs(e.Binding, e.Exception));
           break;
         default:
           if ((e.BindingCompleteContext == BindingCompleteContext.DataSourceUpdate)

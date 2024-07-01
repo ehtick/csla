@@ -5,8 +5,7 @@
 // </copyright>
 // <summary>Parses a rule:// URI to provide</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
+
 using System.Text;
 
 namespace Csla.Rules
@@ -44,7 +43,7 @@ namespace Csla.Rules
     /// </summary>
     /// <param name="rule">Rule object.</param>
     /// <param name="property">Property to which rule applies.</param>
-    public RuleUri(IBusinessRuleBase rule, Csla.Core.IPropertyInfo property)
+    public RuleUri(IBusinessRuleBase rule, Core.IPropertyInfo property)
       : this(GetTypeName(rule), ((property == null) ? "(object)" : property.Name))
       //: this(rule.GetType().FullName, ((property == null) ? "null" : property.Name))
     { }
@@ -61,7 +60,7 @@ namespace Csla.Rules
       {
         var tmp = hostName;
         hostName = null;
-        for (int i = 0; i < tmp.Length - 1; i = i + 63)
+        for (int i = 0; i < tmp.Length - 1; i += 63)
           hostName = hostName + tmp.Substring(i, ((i + 63 <= tmp.Length) ? 63 : tmp.Length - i)) + "/";
         hostName = hostName.Substring(0, hostName.Length - 1);
       }
@@ -99,7 +98,6 @@ namespace Csla.Rules
     /// <summary>
     /// Gets a string representation of the rule URI.
     /// </summary>
-    /// <returns></returns>
     public override string ToString()
     {
       return _uri.ToString();
@@ -131,7 +129,7 @@ namespace Csla.Rules
         string name = _uri.Host;
         if (_uri.Parts().Length > 1)
           for (int i = 0; i < _uri.Parts().Length - 1; i++)
-            name = name + _uri.Parts()[i];
+            name += _uri.Parts()[i];
         return name.Replace("/", "");
       }
     }
@@ -167,8 +165,8 @@ namespace Csla.Rules
           {
             string[] argParams = arg.Split('=');
             result.Add(
-              System.Uri.UnescapeDataString(argParams[0]),
-              System.Uri.UnescapeDataString(argParams[1]));
+              Uri.UnescapeDataString(argParams[0]),
+              Uri.UnescapeDataString(argParams[1]));
           }
         }
         return result;
@@ -186,7 +184,6 @@ namespace Csla.Rules
     /// Recursive processing of generic constraints and parameters.
     /// </summary>
     /// <param name="type">The type.</param>
-    /// <returns></returns>
     private static string GetTypeName(Type type)
     {
       if (!type.IsGenericType)
@@ -226,7 +223,7 @@ namespace Csla.Rules
     /// <returns>
     /// Returns the Segments property. 
     /// </returns>
-    public static string[] Parts(this System.Uri uri)
+    public static string[] Parts(this Uri uri)
     {
       return uri.Segments;
     }

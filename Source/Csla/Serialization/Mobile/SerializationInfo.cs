@@ -5,11 +5,7 @@
 // </copyright>
 // <summary>Object containing the serialization</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Xml.Linq;
+
 using System.Runtime.Serialization;
 
 namespace Csla.Serialization.Mobile
@@ -190,22 +186,22 @@ namespace Csla.Serialization.Mobile
       #endregion
     }
 
-    private Dictionary<string, ChildData> _children = new Dictionary<string, ChildData>();
+    private Dictionary<string, ChildData> _children = [];
     /// <summary>
     /// Dictionary containing child reference data.
     /// </summary>
-    [DataMember()]
+    [DataMember]
     public Dictionary<string, ChildData> Children
     {
       get { return _children; }
       set { _children = value; }
     }
 
-    private Dictionary<string, FieldData> _values = new Dictionary<string, FieldData>();
+    private Dictionary<string, FieldData> _values = [];
     /// <summary>
     /// Dictionary containg field data.
     /// </summary>
-    [DataMember()]
+    [DataMember]
     public Dictionary<string, FieldData> Values
     {
       get { return _values; }
@@ -214,7 +210,7 @@ namespace Csla.Serialization.Mobile
 
     internal SerializationInfo(int referenceId)
     {
-      this.ReferenceId = referenceId;
+      ReferenceId = referenceId;
     }
 
     /// <summary>
@@ -289,7 +285,6 @@ namespace Csla.Serialization.Mobile
     /// <param name="name">
     /// Name of the field.
     /// </param>
-    /// <returns></returns>
     public T GetValue<T>(string name)
     {
       try
@@ -299,7 +294,7 @@ namespace Csla.Serialization.Mobile
       }
       catch (Exception ex)
       {
-        throw new InvalidOperationException(string.Format("SerializationInfo.GetValue: {0}", name), ex);
+        throw new InvalidOperationException($"SerializationInfo.GetValue: {name}", ex);
       }
     }
 
@@ -425,5 +420,24 @@ namespace Csla.Serialization.Mobile
     }
 
     #endregion
+
+    /// <summary>
+    /// Returns true if the type is considered a simple
+    /// (non-complex) serializable type by MobileFormatter.
+    /// </summary>
+    /// <param name="type">Type to evaluate</param>
+    /// <returns></returns>
+    public static bool IsNativeType(Type type)
+    {
+      bool result;
+      if (type is IMobileObject)
+        result = false;
+      else if (type.IsPrimitive || type.IsEnum)
+        result = true;
+      else
+        result = Enum.TryParse<CslaKnownTypes>(type.Name.Replace("[]", "Array"), out _);
+
+      return result;
+    }
   }
 }

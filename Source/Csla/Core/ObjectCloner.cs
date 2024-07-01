@@ -6,8 +6,6 @@
 // <summary>This class provides an implementation of a deep</summary>
 //-----------------------------------------------------------------------
 using Csla.Serialization;
-using System;
-using System.IO;
 
 namespace Csla.Core
 {
@@ -18,7 +16,7 @@ namespace Csla.Core
   /// </summary>
   public class ObjectCloner
   {
-    private ApplicationContext ApplicationContext { get; set; }
+    private ApplicationContext _applicationContext;
 
     /// <summary>
     /// Creates an instance of the type.
@@ -26,14 +24,13 @@ namespace Csla.Core
     /// <param name="applicationContext"></param>
     public ObjectCloner(ApplicationContext applicationContext)
     {
-      ApplicationContext = applicationContext;
+      _applicationContext = applicationContext;
     }
 
     /// <summary>
     /// Gets an instance of ObjectCloner.
     /// </summary>
     /// <param name="applicationContext"></param>
-    /// <returns></returns>
     public static ObjectCloner GetInstance(ApplicationContext applicationContext)
     {
       return new ObjectCloner(applicationContext);
@@ -53,7 +50,7 @@ namespace Csla.Core
     {
       using var buffer = new MemoryStream();
       ISerializationFormatter formatter =
-        SerializationFormatterFactory.GetFormatter(ApplicationContext);
+        _applicationContext.GetRequiredService<ISerializationFormatter>();
       formatter.Serialize(buffer, obj);
       buffer.Position = 0;
       return formatter.Deserialize(buffer);

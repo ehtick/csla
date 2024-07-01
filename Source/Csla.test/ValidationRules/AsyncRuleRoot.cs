@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Threading;
-using System.Threading.Tasks;
-using Csla.Core;
+﻿using Csla.Core;
 using Csla.Rules;
-using Csla.Serialization;
 
 namespace Csla.Test.ValidationRules
 {
@@ -48,8 +42,8 @@ namespace Csla.Test.ValidationRules
 
     protected override void AddBusinessRules()
     {
-      BusinessRules.AddRule(new Csla.Rules.CommonRules.Required(CustomerNumberProperty));
-      BusinessRules.AddRule(new Csla.Rules.CommonRules.Required(CustomerNameProperty));
+      BusinessRules.AddRule(new Rules.CommonRules.Required(CustomerNumberProperty));
+      BusinessRules.AddRule(new Rules.CommonRules.Required(CustomerNameProperty));
 
       // async rule will only run when CustomerNumber has value
       BusinessRules.AddRule(new LookupCustomerRule(CustomerNumberProperty, CustomerNameProperty) { Priority = 10 });
@@ -57,7 +51,7 @@ namespace Csla.Test.ValidationRules
       BusinessRules.AddRule(new AsyncAwaitRule(AsyncAwaitProperty));
     }
 
-    private class LookupCustomerRule : Csla.Rules.BusinessRule
+    private class LookupCustomerRule : BusinessRule
     {
       private IPropertyInfo _nameProperty;
 
@@ -67,7 +61,7 @@ namespace Csla.Test.ValidationRules
       {
         _nameProperty = nameProperty;
         AffectedProperties.Add(nameProperty);
-        InputProperties = [primaryProperty];
+        InputProperties.Add(primaryProperty);
 
         IsAsync = true;
       }
@@ -80,7 +74,7 @@ namespace Csla.Test.ValidationRules
 
         bw.RunWorkerCompleted += (_, _) =>
         {
-          context.AddOutValue(_nameProperty, string.Format("customer name {0}", cn));
+          context.AddOutValue(_nameProperty, $"customer name {cn}");
 
           context.Complete();
         };

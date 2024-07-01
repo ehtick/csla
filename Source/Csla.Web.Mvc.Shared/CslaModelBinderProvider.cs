@@ -5,7 +5,7 @@
 // </copyright>
 // <summary>Model binder provider.</summary>
 //-----------------------------------------------------------------------
-#if NETSTANDARD2_0 || NET5_0_OR_GREATER || NETCOREAPP3_1
+#if NETSTANDARD2_0 || NET8_0_OR_GREATER 
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Csla.Web.Mvc
@@ -27,7 +27,7 @@ namespace Csla.Web.Mvc
     /// Gets the CslaModelBinder provider.
     /// </summary>
     /// <param name="context">Model binder provider context.</param>
-    public IModelBinder GetBinder(ModelBinderProviderContext context)
+    public IModelBinder? GetBinder(ModelBinderProviderContext context)
     {
       if (typeof(Core.IEditableCollection).IsAssignableFrom(context.Metadata.ModelType) ||
           typeof(IBusinessBase).IsAssignableFrom(context.Metadata.ModelType))

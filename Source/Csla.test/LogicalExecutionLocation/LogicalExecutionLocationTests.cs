@@ -5,20 +5,10 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Csla.TestHelpers;
 
-#if !NUNIT
+using Csla.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-#else
-using NUnit.Framework;
-using TestClass = NUnit.Framework.TestFixtureAttribute;
-using TestInitialize = NUnit.Framework.SetUpAttribute;
-using TestCleanup = NUnit.Framework.TearDownAttribute;
-using TestMethod = NUnit.Framework.TestAttribute;
-#endif 
+
 
 namespace Csla.Test.LogicalExecutionLocation
 {
@@ -53,10 +43,10 @@ namespace Csla.Test.LogicalExecutionLocation
       LocationBusinessBase item = LocationBusinessBase.GetLocationBusinessBase(dataPortal);
 #pragma warning restore CS0436 // Type conflicts with imported type
 
-      Assert.AreEqual(Csla.ApplicationContext.LogicalExecutionLocations.Server.ToString(), item.Data, "Should be server");
-      Assert.AreEqual(Csla.ApplicationContext.LogicalExecutionLocations.Server.ToString(), item.NestedData, "Nested should be server");
+      Assert.AreEqual(ApplicationContext.LogicalExecutionLocations.Server.ToString(), item.Data, "Should be server");
+      Assert.AreEqual(ApplicationContext.LogicalExecutionLocations.Server.ToString(), item.NestedData, "Nested should be server");
 
-      Assert.AreEqual(Csla.ApplicationContext.LogicalExecutionLocations.Client, applicationContext.LogicalExecutionLocation, "Should be client");
+      Assert.AreEqual(ApplicationContext.LogicalExecutionLocations.Client, applicationContext.LogicalExecutionLocation, "Should be client");
 
     }
 
@@ -71,10 +61,10 @@ namespace Csla.Test.LogicalExecutionLocation
       LocationBusinessBase item = LocationBusinessBase.GetLocationBusinessBase(dataPortal);
 #pragma warning restore CS0436 // Type conflicts with imported type
 
-      Assert.AreEqual(Csla.ApplicationContext.LogicalExecutionLocations.Server.ToString(), item.Rule, "Should be server");
+      Assert.AreEqual(ApplicationContext.LogicalExecutionLocations.Server.ToString(), item.Rule, "Should be server");
 
       item.Data = "random";
-      Assert.AreEqual(Csla.ApplicationContext.LogicalExecutionLocations.Client.ToString(), item.Rule, "Should be client");
+      Assert.AreEqual(ApplicationContext.LogicalExecutionLocations.Client.ToString(), item.Rule, "Should be client");
 
     }
   }

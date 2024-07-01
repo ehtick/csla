@@ -5,21 +5,10 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
-using Csla.TestHelpers;
 
-#if !NUNIT
+using Csla.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-#else
-using NUnit.Framework;
-using TestClass = NUnit.Framework.TestFixtureAttribute;
-using TestInitialize = NUnit.Framework.SetUpAttribute;
-using TestCleanup = NUnit.Framework.TearDownAttribute;
-using TestMethod = NUnit.Framework.TestAttribute;
-#endif 
+
 
 namespace Csla.Test.Basic
 {
@@ -39,7 +28,7 @@ namespace Csla.Test.Basic
     {
       TestResults.Reinitialise();
 
-      Csla.Test.DataBinding.ParentEntity p = CreateParentEntityInstance();
+      DataBinding.ParentEntity p = CreateParentEntityInstance();
 
       p.NotUndoable = "something";
       p.Data = "data";
@@ -484,9 +473,9 @@ namespace Csla.Test.Basic
       return dataPortal.Create(new GenRootBase.Criteria());
     }
 
-    private Csla.Test.DataBinding.ParentEntity CreateParentEntityInstance()
+    private DataBinding.ParentEntity CreateParentEntityInstance()
     {
-      IDataPortal<Csla.Test.DataBinding.ParentEntity> dataPortal = _testDIContext.CreateDataPortal<Csla.Test.DataBinding.ParentEntity>();
+      IDataPortal<DataBinding.ParentEntity> dataPortal = _testDIContext.CreateDataPortal<DataBinding.ParentEntity>();
       return dataPortal.Create();
     }
 
@@ -504,23 +493,23 @@ namespace Csla.Test.Basic
 
     public FormSimulator(Core.BusinessBase obj)
     {
-      this._obj.PropertyChanged += Obj_IsDirtyChanged;
-      this._obj = obj;
+      _obj.PropertyChanged += Obj_IsDirtyChanged;
+      _obj = obj;
     }
 
     private void Obj_IsDirtyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
     { }
   }
 
-  [Serializable()]
+  [Serializable]
   public class SerializableListener
   {
     private readonly Core.BusinessBase _obj;
 
     public SerializableListener(Core.BusinessBase obj)
     {
-      this._obj.PropertyChanged += Obj_IsDirtyChanged;
-      this._obj = obj;
+      _obj.PropertyChanged += Obj_IsDirtyChanged;
+      _obj = obj;
     }
 
     public void Obj_IsDirtyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)

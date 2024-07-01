@@ -5,10 +5,6 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Csla;
 
 namespace Csla.Test.DataPortalChild
 {
@@ -22,7 +18,7 @@ namespace Csla.Test.DataPortalChild
 
     public object MyParent
     {
-      get { return this.Parent; }
+      get { return Parent; }
     }
 
     public string Status { get; private set; }

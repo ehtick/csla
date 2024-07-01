@@ -6,8 +6,6 @@
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
 
-using System;
-
 namespace Csla.Test.FieldManager
 {
   [Serializable]
@@ -25,7 +23,7 @@ namespace Csla.Test.FieldManager
 
     public object MyParent
     {
-      get { return this.Parent; }
+      get { return Parent; }
     }
 
     public string Status { get; private set; }

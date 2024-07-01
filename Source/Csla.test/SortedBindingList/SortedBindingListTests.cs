@@ -5,25 +5,15 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Text;
+
 using System.ComponentModel;
 using Csla.TestHelpers;
-
-#if !NUNIT
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-#else
-using NUnit.Framework;
-using TestClass = NUnit.Framework.TestFixtureAttribute;
-using TestInitialize = NUnit.Framework.SetUpAttribute;
-using TestCleanup = NUnit.Framework.TearDownAttribute;
-using TestMethod = NUnit.Framework.TestAttribute;
-#endif 
+
 
 namespace Csla.Test.SortedBindingList
 {
-  [TestClass()]
+  [TestClass]
   public class SortedBindingListTests
   {
     private static TestDIContext _testDIContext;
@@ -40,7 +30,7 @@ namespace Csla.Test.SortedBindingList
       TestResults.Reinitialise();
     }
 
-    [TestMethod()]
+    [TestMethod]
     public void AscendingSort()
     {
       int[] intArr = [45, 23, 57, 56, 11, 87, 94, 44];
@@ -78,7 +68,7 @@ namespace Csla.Test.SortedBindingList
       Console.WriteLine("list changed");
     }
 
-    [TestMethod()]
+    [TestMethod]
     public void DescendingSort()
     {
       string[] strArr = ["zandy", "alex", "Chris", "bert", "alfred", "Bert", "Jimmy", "chris", "chris", "mobbit", "myper", "Corey", "Monkey"];
@@ -134,7 +124,7 @@ namespace Csla.Test.SortedBindingList
     //    }
     //}
 
-    [TestMethod()]
+    [TestMethod]
     public void CopyTo()
     {
       int[] intArray = [5, 7, 1, 3, 5, 44, 32];
@@ -173,7 +163,7 @@ namespace Csla.Test.SortedBindingList
 
       Assert.AreEqual(1, sortedList.IndexOf(barney), "Unsorted index should be 1");
 
-      sortedList.ApplySort(string.Empty, System.ComponentModel.ListSortDirection.Ascending);
+      sortedList.ApplySort(string.Empty, ListSortDirection.Ascending);
 
       Assert.AreEqual(1, sortedList.IndexOf(charlie), "Sorted index should be 1");
     }

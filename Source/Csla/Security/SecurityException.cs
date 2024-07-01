@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-#if !(ANDROID || IOS) && !NETFX_CORE
-using System.Security.Permissions;
-#endif
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Csla.Security
+﻿namespace Csla.Security
 {
   /// <summary>
   /// Security exception.

@@ -5,23 +5,9 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Csla;
-using Csla.Configuration;
+
 using Csla.TestHelpers;
-#if !NUNIT
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-#else
-using NUnit.Framework;
-using TestClass = NUnit.Framework.TestFixtureAttribute;
-using TestInitialize = NUnit.Framework.SetUpAttribute;
-using TestCleanup = NUnit.Framework.TearDownAttribute;
-using TestMethod = NUnit.Framework.TestAttribute;
-#endif 
 
 namespace Csla.Test.DataPortal
 {
@@ -53,7 +39,7 @@ namespace Csla.Test.DataPortal
     private PersonList FetchPersonList()
     {
       IDataPortal<PersonList> dataPortal = _testDIContext.CreateDataPortal<PersonList>();
-      return dataPortal.Fetch(new PersonList.Criteria());
+      return dataPortal.Fetch(new PersonListBase.Criteria());
     }
 
     private PersonEdit CreatePersonEdit()
@@ -67,14 +53,14 @@ namespace Csla.Test.DataPortal
   public class PersonList : PersonListBase;
 
   [Serializable]
-  public class PersonListBase : Csla.BusinessBindingListBase<PersonList, PersonEdit>
+  public class PersonListBase : BusinessBindingListBase<PersonList, PersonEdit>
   {
     private void DataPortal_Fetch(Criteria criteria)
     {
     }
 
-    [Serializable()]
-    public class Criteria : Csla.CriteriaBase<Criteria>;
+    [Serializable]
+    public class Criteria : CriteriaBase<Criteria>;
   }
 
   [Serializable]

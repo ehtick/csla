@@ -5,24 +5,10 @@
 // </copyright>
 // <summary>Always make sure to cleanup after each test </summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Configuration;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+
 using Csla.Configuration;
 using Csla.TestHelpers;
-using Microsoft.Extensions.DependencyInjection;
-
-#if !NUNIT
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-#else
-using NUnit.Framework;
-using TestClass = NUnit.Framework.TestFixtureAttribute;
-using TestInitialize = NUnit.Framework.SetUpAttribute;
-using TestCleanup = NUnit.Framework.TearDownAttribute;
-using TestMethod = NUnit.Framework.TestAttribute;
-#endif 
 
 namespace Csla.Test.ObjectFactory
 {
@@ -74,7 +60,7 @@ namespace Csla.Test.ObjectFactory
 
       var root = dataPortal.Create();
       Assert.AreEqual("Create", root.Data, "Data should match");
-      Assert.AreEqual(Csla.ApplicationContext.ExecutionLocations.Server, root.Location, "Location should match");
+      Assert.AreEqual(ApplicationContext.ExecutionLocations.Server, root.Location, "Location should match");
       Assert.IsTrue(root.IsNew, "Should be new");
       Assert.IsTrue(root.IsDirty, "Should be dirty");
     }
@@ -94,7 +80,7 @@ namespace Csla.Test.ObjectFactory
 
       var root = dataPortal.Create("abc");
       Assert.AreEqual("Create abc", root.Data, "Data should match");
-      Assert.AreEqual(Csla.ApplicationContext.ExecutionLocations.Client, root.Location, "Location should match");
+      Assert.AreEqual(ApplicationContext.ExecutionLocations.Client, root.Location, "Location should match");
       Assert.IsTrue(root.IsNew, "Should be new");
       Assert.IsTrue(root.IsDirty, "Should be dirty");
     }
@@ -112,7 +98,7 @@ namespace Csla.Test.ObjectFactory
 
       var root = dataPortal.Create("abc");
       Assert.AreEqual("Create abc", root.Data, "Data should match");
-      Assert.AreEqual(Csla.ApplicationContext.ExecutionLocations.Client, root.Location, "Location should match");
+      Assert.AreEqual(ApplicationContext.ExecutionLocations.Client, root.Location, "Location should match");
       Assert.IsTrue(root.IsNew, "Should be new");
       Assert.IsTrue(root.IsDirty, "Should be dirty");
     }
@@ -319,7 +305,7 @@ namespace Csla.Test.ObjectFactory
       catch (DataPortalException ex)
       {
         // inner exception should be System.NotImplementedException and mesaage should contain methodname 
-        Assert.AreEqual(typeof(System.NotImplementedException), ex.InnerException.GetType());
+        Assert.AreEqual(typeof(NotImplementedException), ex.InnerException.GetType());
         Assert.IsTrue(ex.InnerException.Message.Contains("ExecuteMissingMethod"));
         // rethrow exception 
         throw;

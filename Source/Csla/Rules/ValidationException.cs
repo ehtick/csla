@@ -5,7 +5,6 @@
 // </copyright>
 // <summary>Exception class indicating that there was a validation</summary>
 //-----------------------------------------------------------------------
-using System;
 
 namespace Csla.Rules
 {
@@ -14,7 +13,7 @@ namespace Csla.Rules
   /// Exception class indicating that there was a validation
   /// problem with a business object.
   /// </summary>
-  [Serializable()]
+  [Serializable]
   public class ValidationException : Exception
   {
 

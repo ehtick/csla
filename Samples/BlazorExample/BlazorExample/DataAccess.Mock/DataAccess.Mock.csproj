@@ -4,9 +4,9 @@
     <TargetFramework>net8.0</TargetFramework>
     <AssemblyName>DataAccess.Mock</AssemblyName>
   </PropertyGroup>
-
+  
   <ItemGroup>
-    <PackageReference Include="Csla" Version="8.0.0-R24021201" />
+    <PackageReference Include="Csla" />
   </ItemGroup>
 
   <ItemGroup>

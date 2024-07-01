@@ -7,25 +7,12 @@
 //-----------------------------------------------------------------------
 using Csla;
 using Csla.Configuration;
-using Csla.DataPortalClient;
-using System;
-using UnitDriven;
-using Csla.Testing.Business.BusyStatus;
-using System.Threading.Tasks;
-using Csla.TestHelpers;
 using Csla.Test;
+using Csla.TestHelpers;
+using Csla.Testing.Business.BusyStatus;
 using FluentAssertions;
-
-#if NUNIT
-using NUnit.Framework;
-using TestClass = NUnit.Framework.TestFixtureAttribute;
-using TestInitialize = NUnit.Framework.SetUpAttribute;
-using TestCleanup = NUnit.Framework.TearDownAttribute;
-using TestMethod = NUnit.Framework.TestAttribute;
-using TestSetup = NUnit.Framework.SetUpAttribute;
-#elif MSTEST
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-#endif
+using UnitDriven;
 
 namespace cslalighttest.BusyStatus
 {
@@ -41,7 +28,7 @@ namespace cslalighttest.BusyStatus
     {
       _testDIContext = TestDIContextFactory.CreateDefaultContext();
       _noCloneOnUpdateDIContext = TestDIContextFactory.CreateContext(opt => opt.
-        DataPortal(dpo => dpo.ClientSideDataPortal(o => o.
+        DataPortal(dpo => dpo.AddClientSideDataPortal(o => o.
           AutoCloneOnUpdate = false)));
     }
 
@@ -231,8 +218,6 @@ namespace cslalighttest.BusyStatus
       context.Assert.Success();
 
       context.Complete();
-
-
     }
 
     [TestMethod]
@@ -264,7 +249,7 @@ namespace cslalighttest.BusyStatus
       UnitTestContext context = GetContext();
       ItemWithAsynchRuleList items = ItemWithAsynchRuleList.GetListWithItems(dataPortal);
 
-     
+
 
       items[0].ValidationComplete += (_, _) =>
       {
@@ -317,21 +302,21 @@ namespace cslalighttest.BusyStatus
     }
 
     [TestMethod]
-    public async Task WaitForIdle_WhenBusyWillWaitUntilNotBusyAnymore() 
+    public async Task WaitForIdle_WhenBusyWillWaitUntilNotBusyAnymore()
     {
       IDataPortal<ItemWithAsynchRule> dataPortal = _noCloneOnUpdateDIContext.CreateDataPortal<ItemWithAsynchRule>();
 
       UnitTestContext context = GetContext();
       var item = await dataPortal.FetchAsync("an id");
       item.RuleField = "some value";
-      
+
       await item.WaitForIdle(TimeSpan.FromSeconds(5)); // Timeout should _never_ happen
 
       item.IsBusy.Should().BeFalse(because: $"{nameof(ItemWithAsynchRule.IsBusy)} is still true even though we waited with {nameof(ItemWithAsynchRule.WaitForIdle)}.");
     }
 
     [TestMethod]
-    public async Task WaitForIdle_WhenReachingTheTimeoutATimeoutExceptionIsThrown() 
+    public async Task WaitForIdle_WhenReachingTheTimeoutATimeoutExceptionIsThrown()
     {
 
       IDataPortal<ItemWithAsynchRule> dataPortal = _noCloneOnUpdateDIContext.CreateDataPortal<ItemWithAsynchRule>();

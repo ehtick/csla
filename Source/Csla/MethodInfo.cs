@@ -5,17 +5,13 @@
 // </copyright>
 // <summary>Maintains metadata about a method.</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Csla
 {
   /// <summary>
   /// Maintains metadata about a method.
   /// </summary>
-  public class MethodInfo : Csla.Core.IMemberInfo
+  public class MethodInfo : Core.IMemberInfo
   {
     /// <summary>
     /// Creates an instance of the type.
@@ -37,8 +33,7 @@ namespace Csla
     /// <param name="obj">Object to compare.</param>
     public override bool Equals(object obj)
     {
-      var other = obj as MethodInfo;
-      if (other != null)
+      if (obj is MethodInfo other)
         return Name == other.Name;
       else
         return false;

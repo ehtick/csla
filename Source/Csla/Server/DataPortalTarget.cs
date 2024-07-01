@@ -5,12 +5,11 @@
 // </copyright>
 // <summary>Encapsulates server-side data portal invocations</summary>
 //-----------------------------------------------------------------------
-using System;
+
 using System.Collections.Concurrent;
-using System.Threading.Tasks;
 using Csla.Core;
 
-#if NET5_0_OR_GREATER
+#if NET8_0_OR_GREATER
 using System.Runtime.Loader;
 
 using Csla.Runtime;
@@ -21,7 +20,7 @@ namespace Csla.Server
 {
   internal class DataPortalTarget : LateBoundObject
   {
-#if NET5_0_OR_GREATER
+#if NET8_0_OR_GREATER
     private static readonly ConcurrentDictionary<Type, Tuple<string, DataPortalMethodNames>> _methodNameList =
       new ConcurrentDictionary<Type, Tuple<string, DataPortalMethodNames>>();
 #else
@@ -32,18 +31,18 @@ namespace Csla.Server
     private readonly TimeSpan _waitForIdleTimeout;
     private readonly DataPortalMethodNames _methodNames;
 
-    public DataPortalTarget(object obj, Csla.Configuration.CslaOptions cslaOptions)
+    public DataPortalTarget(object obj, Configuration.CslaOptions cslaOptions)
       : base(obj)
     {
       _target = obj as IDataPortalTarget;
       _waitForIdleTimeout = TimeSpan.FromSeconds(cslaOptions.DefaultWaitForIdleTimeoutInSeconds);
 
-#if NET5_0_OR_GREATER
+#if NET8_0_OR_GREATER
       var objectType = obj.GetType();
 
       var methodNameListInfo = _methodNameList.GetOrAdd(
         objectType,
-        (_) => AssemblyLoadContextManager.CreateCacheInstance(
+        _ => AssemblyLoadContextManager.CreateCacheInstance(
           objectType,
           DataPortalMethodNames.Default,
           OnAssemblyLoadContextUnload
@@ -53,7 +52,7 @@ namespace Csla.Server
       _methodNames = methodNameListInfo.Item2;
 #else
       _methodNames = _methodNameList.GetOrAdd(obj.GetType(),
-        (_) => DataPortalMethodNames.Default);
+        _ => DataPortalMethodNames.Default);
 #endif
     }
 
@@ -109,8 +108,8 @@ namespace Csla.Server
 
     public void ThrowIfBusy()
     {
-      if (Instance is Csla.Core.ITrackStatus busy && busy.IsBusy)
-        throw new InvalidOperationException(string.Format("{0}.IsBusy == true", Instance.GetType().Name));
+      if (Instance is ITrackStatus busy && busy.IsBusy)
+        throw new InvalidOperationException($"{Instance.GetType().Name}.IsBusy == true");
     }
 
     public async Task WaitForIdle()
@@ -160,34 +159,34 @@ namespace Csla.Server
       await CallMethodTryAsyncDI<T>(isSync, parameters).ConfigureAwait(false);
     }
 
-    public async Task CreateAsync(object criteria, bool isSync)
+    public Task CreateAsync(object criteria, bool isSync)
     {
-      await InvokeOperationAsync<CreateAttribute>(criteria, isSync).ConfigureAwait(false);
+      return InvokeOperationAsync<CreateAttribute>(criteria, isSync);
     }
 
-    public async Task CreateChildAsync(params object[] parameters)
+    public Task CreateChildAsync(params object[] parameters)
     {
-      await CallMethodTryAsyncDI<CreateChildAttribute>(false, parameters).ConfigureAwait(false);
+      return CallMethodTryAsyncDI<CreateChildAttribute>(false, parameters);
     }
 
-    public async Task FetchAsync(object criteria, bool isSync)
+    public Task FetchAsync(object criteria, bool isSync)
     {
-      await InvokeOperationAsync<FetchAttribute>(criteria, isSync).ConfigureAwait(false);
+      return InvokeOperationAsync<FetchAttribute>(criteria, isSync);
     }
 
-    public async Task FetchChildAsync(params object[] parameters)
+    public Task FetchChildAsync(params object[] parameters)
     {
-      await CallMethodTryAsyncDI<FetchChildAttribute>(false, parameters).ConfigureAwait(false);
+      return CallMethodTryAsyncDI<FetchChildAttribute>(false, parameters);
     }
 
-    public async Task ExecuteAsync(object criteria, bool isSync)
+    public Task ExecuteAsync(object criteria, bool isSync)
     {
-      await InvokeOperationAsync<ExecuteAttribute>(criteria, isSync).ConfigureAwait(false);
+      return InvokeOperationAsync<ExecuteAttribute>(criteria, isSync);
     }
 
     public async Task UpdateAsync(bool isSync)
     {
-      if (Instance is Core.BusinessBase busObj)
+      if (Instance is BusinessBase busObj)
       {
         if (busObj.IsDeleted)
         {
@@ -226,7 +225,7 @@ namespace Csla.Server
     public async Task UpdateChildAsync(params object[] parameters)
     {
       // tell the business object to update itself
-      if (Instance is Core.BusinessBase busObj)
+      if (Instance is BusinessBase busObj)
       {
         if (busObj.IsDeleted)
         {
@@ -253,7 +252,7 @@ namespace Csla.Server
         }
 
       }
-      else if (Instance is Core.ICommandObject)
+      else if (Instance is ICommandObject)
       {
         // tell the object to update itself
         await CallMethodTryAsyncDI<ExecuteChildAttribute>(false, parameters).ConfigureAwait(false);
@@ -268,16 +267,16 @@ namespace Csla.Server
       }
     }
 
-    public async Task ExecuteAsync(bool isSync)
+    public Task ExecuteAsync(bool isSync)
     {
-      await InvokeOperationAsync<ExecuteAttribute>(EmptyCriteria.Instance, isSync).ConfigureAwait(false);
+      return InvokeOperationAsync<ExecuteAttribute>(EmptyCriteria.Instance, isSync);
     }
 
-    public async Task DeleteAsync(object criteria, bool isSync)
+    public Task DeleteAsync(object criteria, bool isSync)
     {
-      await InvokeOperationAsync<DeleteAttribute>(criteria, isSync).ConfigureAwait(false);
+      return InvokeOperationAsync<DeleteAttribute>(criteria, isSync);
     }
-#if NET5_0_OR_GREATER
+#if NET8_0_OR_GREATER
 
     private static void OnAssemblyLoadContextUnload(AssemblyLoadContext context)
     {

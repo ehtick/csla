@@ -5,10 +5,6 @@
 // </copyright>
 // <summary>Interface to be implemented by a custom</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Csla.Server
 {
@@ -25,6 +21,9 @@ namespace Csla.Server
     /// <param name="clientRequest">
     /// Object containing information about the client request.
     /// </param>
-    void Authorize(AuthorizeRequest clientRequest);
+    /// <param name="ct">
+    /// The cancellation token.
+    /// </param>
+    Task AuthorizeAsync(AuthorizeRequest clientRequest, CancellationToken ct);
   }
 }

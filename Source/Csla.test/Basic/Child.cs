@@ -5,14 +5,12 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Text;
+
 using System.Data;
 
 namespace Csla.Test.Basic
 {
-  [Serializable()]
+  [Serializable]
   public class Child : BusinessBase<Child>
   {
     public static PropertyInfo<string> DataProperty = RegisterProperty<string>(nameof(Data));

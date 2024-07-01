@@ -5,7 +5,7 @@
 // </copyright>
 // <summary>Authorization handler for CSLA permissions</summary>
 //-----------------------------------------------------------------------
-using System.Threading.Tasks;
+
 using Microsoft.AspNetCore.Authorization;
 
 namespace Csla.Blazor
@@ -15,7 +15,7 @@ namespace Csla.Blazor
   /// </summary>
   public class CslaPermissionsHandler : AuthorizationHandler<CslaPermissionRequirement>
   {
-    private ApplicationContext ApplicationContext { get; set; }
+    private ApplicationContext _applicationContext;
 
     /// <summary>
     /// Creates an instance of the type.
@@ -23,7 +23,7 @@ namespace Csla.Blazor
     /// <param name="applicationContext"></param>
     public CslaPermissionsHandler(ApplicationContext applicationContext)
     {
-      ApplicationContext = applicationContext;
+      _applicationContext = applicationContext;
     }
 
     /// <summary>
@@ -31,14 +31,12 @@ namespace Csla.Blazor
     /// </summary>
     /// <param name="context"></param>
     /// <param name="requirement"></param>
-    /// <returns></returns>
-    protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, CslaPermissionRequirement requirement)
+    protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, CslaPermissionRequirement requirement)
     {
-      if (Rules.BusinessRules.HasPermission(ApplicationContext, requirement.Action, requirement.ObjectType))
+      if (await Rules.BusinessRules.HasPermissionAsync(_applicationContext, requirement.Action, requirement.ObjectType, CancellationToken.None))
         context.Succeed(requirement);
       else
         context.Fail();
-      return Task.CompletedTask;
     }
   }
 }

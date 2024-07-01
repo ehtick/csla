@@ -5,13 +5,10 @@
 // </copyright>
 // <summary>Dynamically find/invoke methods with DI provided params</summary>
 //-----------------------------------------------------------------------
-using System;
+
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
-#if NET5_0_OR_GREATER
+#if NET8_0_OR_GREATER
 using System.Runtime.Loader;
 
 using Csla.Runtime;
@@ -27,19 +24,17 @@ namespace Csla.Reflection
   /// </summary>
   public class ServiceProviderMethodCaller : Core.IUseApplicationContext
   {
-    private static readonly BindingFlags _bindingAttr = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.DeclaredOnly | BindingFlags.DeclaredOnly;
+    private static readonly BindingFlags _bindingAttr = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
     private static readonly BindingFlags _factoryBindingAttr = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
 
-#if NET5_0_OR_GREATER
-    private static readonly ConcurrentDictionary<string, Tuple<string, ServiceProviderMethodInfo>> _methodCache =
-      new ConcurrentDictionary<string, Tuple<string, ServiceProviderMethodInfo>>();
+#if NET8_0_OR_GREATER
+    private static readonly ConcurrentDictionary<string, Tuple<string, ServiceProviderMethodInfo>> _methodCache = [];
 #else
-    private static readonly ConcurrentDictionary<string, ServiceProviderMethodInfo> _methodCache =
-      new ConcurrentDictionary<string, ServiceProviderMethodInfo>();
+    private static readonly ConcurrentDictionary<string, ServiceProviderMethodInfo> _methodCache = [];
 #endif
 
-    ApplicationContext Core.IUseApplicationContext.ApplicationContext { get => ApplicationContext; set => ApplicationContext = value; }
-    private ApplicationContext ApplicationContext { get; set; }
+    ApplicationContext Core.IUseApplicationContext.ApplicationContext { get => _applicationContext; set => _applicationContext = value; }
+    private ApplicationContext _applicationContext;
 
     /// <summary>
     /// Find a method based on data portal criteria
@@ -72,14 +67,14 @@ namespace Csla.Reflection
       if (targetType == null)
         throw new ArgumentNullException(nameof(targetType));
 
-      var activator = ApplicationContext.GetRequiredService<IDataPortalActivator>();
+      var activator = _applicationContext.GetRequiredService<IDataPortalActivator>();
       targetType = activator.ResolveType(targetType);
 
       var typeOfOperation = typeof(T);
 
       var cacheKey = GetCacheKeyName(targetType, typeOfOperation, criteria);
 
-#if NET5_0_OR_GREATER
+#if NET8_0_OR_GREATER
       if (_methodCache.TryGetValue(cacheKey, out var unloadableCachedMethodInfo))
       {
         var cachedMethod = unloadableCachedMethodInfo?.Item2;
@@ -93,10 +88,10 @@ namespace Csla.Reflection
       }
 
       var candidates = new List<ScoredMethodInfo>();
-      var factoryInfo = Csla.Server.ObjectFactoryAttribute.GetObjectFactoryAttribute(targetType);
+      var factoryInfo = ObjectFactoryAttribute.GetObjectFactoryAttribute(targetType);
       if (factoryInfo != null)
       {
-        var factoryLoader = ApplicationContext.CurrentServiceProvider.GetService(typeof(Server.IObjectFactoryLoader)) as Server.IObjectFactoryLoader;
+        var factoryLoader = _applicationContext.CurrentServiceProvider.GetService(typeof(IObjectFactoryLoader)) as IObjectFactoryLoader;
         var factoryType = factoryLoader?.GetFactoryType(factoryInfo.FactoryTypeName);
         var ftList = new List<System.Reflection.MethodInfo>();
         var level = 0;
@@ -318,7 +313,7 @@ namespace Csla.Reflection
 
       if (resultingMethod != null)
       {
-#if NET5_0_OR_GREATER
+#if NET8_0_OR_GREATER
         var cacheInstance = AssemblyLoadContextManager.CreateCacheInstance(targetType, resultingMethod, OnAssemblyLoadContextUnload);
         _ = _methodCache.TryAdd(cacheKey, cacheInstance);
 #else
@@ -455,7 +450,6 @@ namespace Csla.Reflection
     /// <param name="obj">Target object</param>
     /// <param name="method">Method to invoke</param>
     /// <param name="parameters">Criteria params array</param>
-    /// <returns></returns>
     public async Task<object> CallMethodTryAsync(object obj, ServiceProviderMethodInfo method, object[] parameters)
     {
       if (method == null)
@@ -475,7 +469,7 @@ namespace Csla.Reflection
         plist = new object[method.Parameters.Length];
         int index = 0;
         int criteriaIndex = 0;
-        var service = ApplicationContext.CurrentServiceProvider;
+        var service = _applicationContext.CurrentServiceProvider;
         foreach (var item in method.Parameters)
         {
           if (method.IsInjected[index])
@@ -531,7 +525,7 @@ namespace Csla.Reflection
         throw new CallMethodException(obj.GetType().Name + "." + info.Name + " " + Resources.MethodCallFailed, inner);
       }
     }
-#if NET5_0_OR_GREATER
+#if NET8_0_OR_GREATER
 
     private static void OnAssemblyLoadContextUnload(AssemblyLoadContext context)
     {

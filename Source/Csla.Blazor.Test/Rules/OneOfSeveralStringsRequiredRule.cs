@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Csla.Core;
-using Csla.Rules;
+﻿using Csla.Rules;
 
 namespace Csla.Blazor.Test.Rules
 {
@@ -55,7 +51,7 @@ namespace Csla.Blazor.Test.Rules
     /// <value></value>
     protected override string GetMessage()
     {
-      return HasMessageDelegate ? base.MessageText : "One of the properties must be provided";
+      return HasMessageDelegate ? MessageText : "One of the properties must be provided";
     }
 
     /// <summary>
@@ -83,7 +79,7 @@ namespace Csla.Blazor.Test.Rules
         foreach (Csla.Core.IPropertyInfo propertyInfo in InputProperties)
         { 
           var message = string.Format(GetMessage(), propertyInfo.FriendlyName);
-          context.Results.Add(new RuleResult(RuleName, propertyInfo, message) { Severity = Severity });
+          context.Results.Add(new RuleResult(RuleName, propertyInfo, message, 1) { Severity = Severity });
         }
       }
     }

@@ -5,10 +5,6 @@
 // </copyright>
 // <summary>Interface defining an authorization context</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Security.Claims;
-using System.Security.Principal;
-using Csla.Core;
 
 namespace Csla.Rules 
 {
@@ -21,7 +17,7 @@ namespace Csla.Rules
     /// <summary>
     /// Gets the rule object.
     /// </summary>
-    IAuthorizationRule Rule { get; }
+    IAuthorizationRuleBase Rule { get; }
 
     /// <summary>
     /// Gets a reference to the target business object.

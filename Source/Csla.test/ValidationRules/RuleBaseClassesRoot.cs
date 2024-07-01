@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Csla.Core;
+﻿using Csla.Core;
 using Csla.Rules;
 using Csla.Rules.CommonRules;
-using Csla.TestHelpers;
-using Csla.Threading;
 
 namespace Csla.Test.ValidationRules
 {
@@ -138,7 +131,7 @@ namespace Csla.Test.ValidationRules
   /// <summary>
   /// CalcSum rule will set primary property to the sum of all.
   /// </summary>
-  public class CalcSum : Csla.Rules.PropertyRule
+  public class CalcSum : PropertyRule
   {
     /// <summary>
     /// Initializes a new instance of the <see cref="CalcSum"/> class.
@@ -148,10 +141,6 @@ namespace Csla.Test.ValidationRules
     public CalcSum(IPropertyInfo primaryProperty, params IPropertyInfo[] inputProperties)
       : base(primaryProperty)
     {
-      if (InputProperties == null)
-      {
-        InputProperties = [];
-      }
       InputProperties.AddRange(inputProperties);
 
       CanRunOnServer = false;
@@ -168,7 +157,7 @@ namespace Csla.Test.ValidationRules
     }
   }
 
-  public class ValidateRootObject : Csla.Rules.ObjectRule
+  public class ValidateRootObject : ObjectRule
   {
     public ValidateRootObject()
       : base()
@@ -220,7 +209,8 @@ namespace Csla.Test.ValidationRules
       : base(primaryProperty)
     {
       CompareTo = compareToProperty;
-      InputProperties = [primaryProperty, compareToProperty];
+      InputProperties.Add(primaryProperty);
+      InputProperties.Add(compareToProperty);
       AffectedProperties.Add(compareToProperty);
     }
 
@@ -235,8 +225,8 @@ namespace Csla.Test.ValidationRules
 
       if (value1.CompareTo(value2) >= 0)
       {
-        context.AddErrorResult(string.Format("{0} must be less than {1}", PrimaryProperty.FriendlyName, CompareTo.FriendlyName));
-        context.AddErrorResult(CompareTo, string.Format("{0} must be larger than {1}", CompareTo.FriendlyName, PrimaryProperty.FriendlyName));
+        context.AddErrorResult($"{PrimaryProperty.FriendlyName} must be less than {CompareTo.FriendlyName}");
+        context.AddErrorResult(CompareTo, $"{CompareTo.FriendlyName} must be larger than {PrimaryProperty.FriendlyName}");
       }
     }
   }
@@ -248,7 +238,7 @@ namespace Csla.Test.ValidationRules
       : base(primaryProperty)
     {
       NameProperty = nameProperty;
-      InputProperties = [primaryProperty];
+      InputProperties.Add(primaryProperty);
       AffectedProperties.Add(NameProperty);
 
       CanRunOnServer = false;
@@ -269,7 +259,7 @@ namespace Csla.Test.ValidationRules
           name = "Rocky Lhotka";
           break;
         default:
-          name = string.Format("Customer_{0}", customerId);
+          name = $"Customer_{customerId}";
           break;
       }
       context.AddOutValue(NameProperty, name);

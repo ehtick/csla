@@ -1,4 +1,4 @@
-﻿#if NETSTANDARD2_0 || NETCOREAPP3_1 || NET5_0_OR_GREATER
+﻿#if NETSTANDARD2_0  || NET8_0_OR_GREATER
 //-----------------------------------------------------------------------
 // <copyright file="WebConfiguration.cs" company="Marimer LLC">
 //     Copyright (c) Marimer LLC. All rights reserved.
@@ -6,7 +6,6 @@
 // </copyright>
 // <summary>Implement extension methods for .NET Core configuration</summary>
 //-----------------------------------------------------------------------
-using System;
 using Microsoft.AspNetCore.Builder;
 
 namespace Csla.Configuration
@@ -25,7 +24,7 @@ namespace Csla.Configuration
       return app;
     }
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
     /// <summary>
     /// Configures the application to use CSLA .NET
     /// </summary>

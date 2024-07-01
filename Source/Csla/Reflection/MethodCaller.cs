@@ -5,15 +5,12 @@
 // </copyright>
 // <summary>Provides methods to dynamically find and call methods.</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
+
 using System.ComponentModel;
 using System.Reflection;
 using System.Globalization;
-using System.Threading.Tasks;
-
 using Csla.Properties;
-#if NET5_0_OR_GREATER
+#if NET8_0_OR_GREATER
 using System.Runtime.Loader;
 using Csla.Runtime;
 #endif
@@ -58,11 +55,10 @@ namespace Csla.Reflection
 
     #region Dynamic Method Cache
 
-#if NET5_0_OR_GREATER
-    private static readonly Dictionary<MethodCacheKey, Tuple<string, DynamicMethodHandle>> _methodCache =
-      new Dictionary<MethodCacheKey, Tuple<string, DynamicMethodHandle>>();
+#if NET8_0_OR_GREATER
+    private static readonly Dictionary<MethodCacheKey, Tuple<string, DynamicMethodHandle>> _methodCache = [];
 #else
-    private readonly static Dictionary<MethodCacheKey, DynamicMethodHandle> _methodCache = new Dictionary<MethodCacheKey, DynamicMethodHandle>();
+    private readonly static Dictionary<MethodCacheKey, DynamicMethodHandle> _methodCache = [];
 #endif
 
     private static DynamicMethodHandle GetCachedMethod(object obj, System.Reflection.MethodInfo info, params object[] parameters)
@@ -73,7 +69,7 @@ namespace Csla.Reflection
 
       DynamicMethodHandle mh = null;
 
-#if NET5_0_OR_GREATER
+#if NET8_0_OR_GREATER
       var key = new MethodCacheKey(objectType.FullName, info.Name, GetParameterTypes(parameters));
 
       try
@@ -137,7 +133,7 @@ namespace Csla.Reflection
 
     private static DynamicMethodHandle GetCachedMethod(object obj, string method, bool hasParameters, params object[] parameters)
     {
-#if NET5_0_OR_GREATER
+#if NET8_0_OR_GREATER
       var objectType = obj.GetType();
 
       var key = new MethodCacheKey(objectType.FullName, method, GetParameterTypes(hasParameters, parameters));
@@ -247,7 +243,7 @@ namespace Csla.Reflection
       }
       catch
       {
-#if NET5_0_OR_GREATER
+#if NET8_0_OR_GREATER
         string[] splitName = typeName.Split(',');
 
         if (splitName.Length > 2)
@@ -293,18 +289,17 @@ namespace Csla.Reflection
     private const BindingFlags propertyFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy;
     private const BindingFlags fieldFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
 
-#if NET5_0_OR_GREATER
-    private static readonly Dictionary<MethodCacheKey, Tuple<string, DynamicMemberHandle>> _memberCache =
-      new Dictionary<MethodCacheKey, Tuple<string, DynamicMemberHandle>>();
+#if NET8_0_OR_GREATER
+    private static readonly Dictionary<MethodCacheKey, Tuple<string, DynamicMemberHandle>> _memberCache = [];
 #else
-    private static readonly Dictionary<MethodCacheKey, DynamicMemberHandle> _memberCache = new Dictionary<MethodCacheKey, DynamicMemberHandle>();
+    private static readonly Dictionary<MethodCacheKey, DynamicMemberHandle> _memberCache = [];
 #endif
 
     internal static DynamicMemberHandle GetCachedProperty(Type objectType, string propertyName)
     {
       var key = new MethodCacheKey(objectType.FullName, propertyName, GetParameterTypes(null));
 
-#if NET5_0_OR_GREATER
+#if NET8_0_OR_GREATER
       var found = _memberCache.TryGetValue(key, out var memberHandleInfo);
 
       var mh = memberHandleInfo?.Item2;
@@ -359,7 +354,7 @@ namespace Csla.Reflection
     {
       var key = new MethodCacheKey(objectType.FullName, fieldName, GetParameterTypes(null));
 
-#if NET5_0_OR_GREATER
+#if NET8_0_OR_GREATER
       var found = _memberCache.TryGetValue(key, out var memberHandleInfo);
 
       var mh = memberHandleInfo?.Item2;
@@ -416,7 +411,6 @@ namespace Csla.Reflection
     /// </summary>
     /// <param name="obj">Target object.</param>
     /// <param name="property">Property to invoke.</param>
-    /// <returns></returns>
     public static object CallPropertyGetter(object obj, string property)
     {
       if (ApplicationContext.UseReflectionFallback)
@@ -427,9 +421,9 @@ namespace Csla.Reflection
       else
       {
         if (obj == null)
-          throw new ArgumentNullException("obj");
+          throw new ArgumentNullException(nameof(obj));
         if (string.IsNullOrEmpty(property))
-          throw new ArgumentException("Argument is null or empty.", "property");
+          throw new ArgumentException("Argument is null or empty.", nameof(property));
 
         var mh = GetCachedProperty(obj.GetType(), property);
         if (mh.DynamicMemberGet == null)
@@ -455,9 +449,9 @@ namespace Csla.Reflection
     public static void CallPropertySetter(object obj, string property, object value)
     {
       if (obj == null)
-        throw new ArgumentNullException("obj");
+        throw new ArgumentNullException(nameof(obj));
       if (string.IsNullOrEmpty(property))
-        throw new ArgumentException("Argument is null or empty.", "property");
+        throw new ArgumentException("Argument is null or empty.", nameof(property));
 
       if (ApplicationContext.UseReflectionFallback)
       {
@@ -733,7 +727,7 @@ namespace Csla.Reflection
 
     private static object[] GetExtrasArray(int count, Type arrayType)
     {
-      return (object[])(System.Array.CreateInstance(arrayType.GetElementType(), count));
+      return (object[])(Array.CreateInstance(arrayType.GetElementType(), count));
     }
 #endregion
 
@@ -1232,7 +1226,6 @@ namespace Csla.Reflection
     /// <param name="typeParams">Type parameters for method</param>
     /// <param name="hasParameters">Flag indicating whether method accepts parameters</param>
     /// <param name="parameters">Parameters for method</param>
-    /// <returns></returns>
     public static Task<object> CallGenericStaticMethodAsync(Type objectType, string method, Type[] typeParams, bool hasParameters, params object[] parameters)
     {
       var tcs = new TaskCompletionSource<object>();
@@ -1252,7 +1245,7 @@ namespace Csla.Reflection
         }
         else
         {
-          var methodReference = objectType.GetMethod(method, BindingFlags.Static | BindingFlags.Public, null, CallingConventions.Any, System.Type.EmptyTypes, null);
+          var methodReference = objectType.GetMethod(method, BindingFlags.Static | BindingFlags.Public, null, CallingConventions.Any, Type.EmptyTypes, null);
           var gr = methodReference.MakeGenericMethod(typeParams);
           task = (Task)gr.Invoke(null, null);
         }
@@ -1260,7 +1253,7 @@ namespace Csla.Reflection
         if (task.Exception != null)
           tcs.SetException(task.Exception);
         else
-          tcs.SetResult(Csla.Reflection.MethodCaller.CallPropertyGetter(task, "Result"));
+          tcs.SetResult(CallPropertyGetter(task, "Result"));
       }
       catch (Exception ex)
       {
@@ -1277,7 +1270,6 @@ namespace Csla.Reflection
     /// <param name="typeParams">Type parameters for method</param>
     /// <param name="hasParameters">Flag indicating whether method accepts parameters</param>
     /// <param name="parameters">Parameters for method</param>
-    /// <returns></returns>
     public static object CallGenericMethod(object target, string method, Type[] typeParams, bool hasParameters, params object[] parameters)
     {
       var objectType = target.GetType();
@@ -1295,7 +1287,7 @@ namespace Csla.Reflection
       }
       else
       {
-        var methodReference = objectType.GetMethod(method, BindingFlags.Static | BindingFlags.Public, null, CallingConventions.Any, System.Type.EmptyTypes, null);
+        var methodReference = objectType.GetMethod(method, BindingFlags.Static | BindingFlags.Public, null, CallingConventions.Any, Type.EmptyTypes, null);
         if (methodReference == null)
           throw new InvalidOperationException(objectType.Name + "." + method);
         var gr = methodReference.MakeGenericMethod(typeParams);
@@ -1316,7 +1308,7 @@ namespace Csla.Reflection
       object returnValue;
       System.Reflection.MethodInfo factory = objectType.GetMethod(
            method, factoryFlags, null,
-           MethodCaller.GetParameterTypes(parameters), null);
+           GetParameterTypes(parameters), null);
 
       if (factory == null)
       {
@@ -1388,7 +1380,7 @@ namespace Csla.Reflection
 
       return info;
     }
-#if NET5_0_OR_GREATER
+#if NET8_0_OR_GREATER
 
     private static void OnMethodAssemblyLoadContextUnload(AssemblyLoadContext context)
     {

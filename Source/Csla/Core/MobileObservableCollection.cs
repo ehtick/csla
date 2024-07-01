@@ -5,9 +5,8 @@
 // </copyright>
 // <summary>Inherit from this base class to easily</summary>
 //-----------------------------------------------------------------------
-using System;
+
 using System.ComponentModel;
-using System.Collections.Generic;
 using Csla.Serialization.Mobile;
 using Csla.Properties;
 using System.Diagnostics;
@@ -134,7 +133,7 @@ namespace Csla.Core
         throw new InvalidOperationException(Resources.CannotSerializeCollectionsNotOfIMobileObject);
 
       List<int> references = new List<int>();
-      for (int x = 0; x < this.Count; x++)
+      for (int x = 0; x < Count; x++)
       {
         T child = this[x];
         if (child != null)
@@ -187,12 +186,12 @@ namespace Csla.Core
           if (child is IBusinessBase bb)
           {
             var editLevelAdded = bb.EditLevelAdded;
-            this.Add(child);
+            Add(child);
             bb.EditLevelAdded = editLevelAdded;
           }
           else
           {
-            this.Add(child);
+            Add(child);
           }
         }
       }

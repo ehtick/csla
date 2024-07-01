@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Text;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Csla.Blazor.Test.Fakes
 {
   [Serializable]
   public class FakePersonEmailAddress : BusinessBase<FakePersonEmailAddress>
   {
-    public static Csla.PropertyInfo<string> EmailAddressProperty = RegisterProperty<string>(nameof(EmailAddress));
+    public static PropertyInfo<string> EmailAddressProperty = RegisterProperty<string>(nameof(EmailAddress));
 
     #region Properties
 

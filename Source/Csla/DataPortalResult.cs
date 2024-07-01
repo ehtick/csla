@@ -5,7 +5,6 @@
 // </copyright>
 // <summary>DataPortalResult defines the results of DataPortal operation.</summary>
 //-----------------------------------------------------------------------
-using System;
 
 namespace Csla
 {
@@ -50,24 +49,24 @@ namespace Csla
     /// </param>
     public DataPortalResult(T obj, Exception ex, object userState)
     {
-      this.Object = obj;
-      this.Error = ex;
-      this.UserState = userState;
+      Object = obj;
+      Error = ex;
+      UserState = userState;
     }
 
     object IDataPortalResult.Object
     {
-      get { return this.Object; }
+      get { return Object; }
     }
 
     Exception IDataPortalResult.Error
     {
-      get { return this.Error; }
+      get { return Error; }
     }
 
     object IDataPortalResult.UserState
     {
-      get { return this.UserState; }
+      get { return UserState; }
     }
   }
 }

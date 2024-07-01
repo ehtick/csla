@@ -5,12 +5,6 @@
 // </copyright>
 // <summary>Base class used to create business and validation</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Csla.Properties;
 
 namespace Csla.Rules
 {
@@ -43,7 +37,7 @@ namespace Csla.Rules
     /// to a specfic property.
     /// </summary>
     /// <param name="primaryProperty">Primary property for this rule.</param>
-    protected BusinessRuleAsync(Csla.Core.IPropertyInfo primaryProperty)
+    protected BusinessRuleAsync(Core.IPropertyInfo primaryProperty)
       : base(primaryProperty)
     { }
 

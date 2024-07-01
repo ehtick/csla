@@ -4,7 +4,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System.Collections.Immutable;
-using System.Linq;
 
 namespace Csla.Analyzers
 {
@@ -46,7 +45,7 @@ namespace Csla.Analyzers
               !argumentType.IsSerializableByMobileFormatter(context.Compilation) &&
               !argument.GetAttributes().Any(_ => _.AttributeClass.IsInjectable()) && 
               argumentType is not { ContainingNamespace.Name: "System", Name: "Nullable" } &&
-              argumentType is INamedTypeSymbol namedArgument && !namedArgument.IsSerializable)
+              argumentType is INamedTypeSymbol namedArgument)
           {
             context.ReportDiagnostic(Diagnostic.Create(
               shouldUseSerializableTypesRule, argument.Locations[0]));

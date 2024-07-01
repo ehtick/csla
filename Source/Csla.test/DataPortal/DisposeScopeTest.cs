@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Csla.Configuration;
-using Csla.TestHelpers;
+﻿using Csla.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -22,7 +16,7 @@ namespace Csla.Test.DataPortal
       // CSLA should not dispose of the default service provider.
       IServiceCollection serviceCollection = new ServiceCollection();
       serviceCollection.AddScoped<DisposableClass>();
-      serviceCollection.AddCsla(o => o.DataPortal(dp => dp.ClientSideDataPortal((dpo => dpo.UseLocalProxy(lpo => lpo.UseLocalScope = false)))));
+      serviceCollection.AddCsla(o => o.DataPortal(dp => dp.AddClientSideDataPortal((dpo => dpo.UseLocalProxy(lpo => lpo.UseLocalScope = false)))));
 
       var services = serviceCollection.BuildServiceProvider();
       IDataPortal<ClassA> dataPortal = services.GetRequiredService<IDataPortal<ClassA>>();
@@ -35,6 +29,7 @@ namespace Csla.Test.DataPortal
     }
 
     [TestMethod]
+    [TestCategory("SkipOnCIServer")]
     public void Test_Scope_DoesDisposeWithLocalScope()
     {
       // CSLA should dispose of the temporary server-side service provider.

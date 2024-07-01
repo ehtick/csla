@@ -5,8 +5,7 @@
 // </copyright>
 // <summary>Restricts callers to an action method.</summary>
 //-----------------------------------------------------------------------
-#if !NETSTANDARD2_0 && !NETCOREAPP3_1 && !NET5_0_OR_GREATER
-using System;
+#if !NETSTANDARD2_0 && !NET8_0_OR_GREATER
 using System.Web;
 using System.Web.Mvc;
 using Csla.Rules;
@@ -23,7 +22,7 @@ namespace Csla.Web.Mvc
     private AuthorizationActions _action;
     private Type _objectType;
     private string _errorMsg = ERROR_MSG;
-    private ApplicationContext ApplicationContext { get; set; }
+    private ApplicationContext _applicationContext;
 
     /// <summary>
     /// Creates an instance of the type.
@@ -34,7 +33,7 @@ namespace Csla.Web.Mvc
     {
       _action = action;
       _objectType = objectType;
-      ApplicationContext = ApplicationContextManager.GetApplicationContext();
+      _applicationContext = ApplicationContextManager.GetApplicationContext();
     }
 
     /// <summary>
@@ -56,9 +55,9 @@ namespace Csla.Web.Mvc
     /// <returns>True if access is authorized; otherwise, false.</returns>
     protected override bool AuthorizeCore(HttpContextBase httpContext)
     {
-      if (!ApplicationContext.User.Identity.IsAuthenticated) return false;
+      if (!_applicationContext.User.Identity.IsAuthenticated) return false;
 
-      return BusinessRules.HasPermission(ApplicationContext, _action, _objectType);
+      return BusinessRules.HasPermission(_applicationContext, _action, _objectType);
     }
 
     /// <summary>
@@ -72,12 +71,12 @@ namespace Csla.Web.Mvc
       if (filterContext.HttpContext.Request.IsAjaxRequest())
       {
         filterContext.HttpContext.Response.StatusCode = (int)System.Net.HttpStatusCode.InternalServerError;
-        filterContext.Result = new JsonResult()
+        filterContext.Result = new JsonResult
         {
           JsonRequestBehavior = JsonRequestBehavior.AllowGet,
           Data = new
           {
-            ErrorType = this.GetType().Name,
+            ErrorType = GetType().Name,
             Action = filterContext.ActionDescriptor.ActionName,
             Message = _errorMsg
           }

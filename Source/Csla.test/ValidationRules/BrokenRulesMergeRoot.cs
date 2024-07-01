@@ -5,11 +5,8 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Text;
+
 using Csla.Rules;
-using Csla.Serialization;
 
 namespace Csla.Test.ValidationRules
 {
@@ -43,7 +40,7 @@ namespace Csla.Test.ValidationRules
 
     public class RuleBroken : BusinessRule
     {
-      public RuleBroken(Csla.Core.IPropertyInfo primaryProperty)
+      public RuleBroken(Core.IPropertyInfo primaryProperty)
         : base(primaryProperty)
       { }
 

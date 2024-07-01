@@ -1,20 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Csla.Configuration;
+﻿using Csla.Configuration;
 using Csla.Core;
 using Csla.TestHelpers;
-#if !NUNIT && !ANDROID
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-#elif !ANDROID
-using NUnit.Framework;
-using TestClass = NUnit.Framework.TestFixtureAttribute;
-using TestInitialize = NUnit.Framework.SetUpAttribute;
-using TestCleanup = NUnit.Framework.TearDownAttribute;
-using TestMethod = NUnit.Framework.TestAttribute;
-#endif 
 
 namespace Csla.Test.DataPortal
 {
@@ -43,6 +30,7 @@ namespace Csla.Test.DataPortal
     }
 
     [TestMethod]
+    [TestCategory("SkipOnCIServer")]
     public void CreateWithIntercept()
     {
       var obj = CreateInitializeRoot("abc");
@@ -54,6 +42,7 @@ namespace Csla.Test.DataPortal
     }
 
     [TestMethod]
+    [TestCategory("SkipOnCIServer")]
     public void FetchWithIntercept()
     {
       var obj = GetInitializeRoot("abc");
@@ -132,6 +121,7 @@ namespace Csla.Test.DataPortal
     }
 
     [TestMethod]
+    [TestCategory("SkipOnCIServer")]
     public void ExecuteCommandWithIntercept()
     {
       IDataPortal<InterceptorCommand> dataPortal = _testDIContext.CreateDataPortal<InterceptorCommand>();
@@ -251,7 +241,7 @@ namespace Csla.Test.DataPortal
     }
   }
 
-  public class TestInterceptor : Csla.Server.IInterceptDataPortal
+  public class TestInterceptor : Server.IInterceptDataPortal
   {
     public Task InitializeAsync(Server.InterceptArgs e)
     {
@@ -269,7 +259,7 @@ namespace Csla.Test.DataPortal
     }
   }
 
-  public class TestActivator(IServiceProvider serviceProvider) : Csla.Server.DefaultDataPortalActivator(serviceProvider)
+  public class TestActivator(IServiceProvider serviceProvider) : Server.DefaultDataPortalActivator(serviceProvider)
   {
     public override object CreateInstance(Type requestedType, params object[] parameters)
     {

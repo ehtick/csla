@@ -5,8 +5,6 @@
 // </copyright>
 // <summary>This exception is returned from the </summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Security.Permissions;
 
 namespace Csla.Reflection
 {
@@ -18,7 +16,7 @@ namespace Csla.Reflection
   /// being invoked.
   /// </summary>
   [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1032:ImplementStandardExceptionConstructors")]
-  [Serializable()]
+  [Serializable]
   public class CallMethodException : Exception
   {
     private string _innerStackTrace;
@@ -28,7 +26,6 @@ namespace Csla.Reflection
     /// exception.
     /// </summary>
     /// <value></value>
-    /// <returns></returns>
     /// <remarks></remarks>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.String.Format(System.String,System.Object,System.Object,System.Object)")]
     public override string StackTrace

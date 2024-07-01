@@ -7,8 +7,6 @@
 //-----------------------------------------------------------------------
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace Csla.Generators.CSharp.AutoSerialization.Discovery
@@ -62,7 +60,7 @@ namespace Csla.Generators.CSharp.AutoSerialization.Discovery
       containerDefinitionBuilder.Append(" ");
       containerDefinitionBuilder.Append(typeDeclarationSyntax.Identifier.ToString());
 
-      containerDefinition = new ExtractedContainerDefinition()
+      containerDefinition = new ExtractedContainerDefinition
       {
         Name = typeDeclarationSyntax.Identifier.ToString(),
         FullDefinition = containerDefinitionBuilder.ToString()
@@ -86,7 +84,7 @@ namespace Csla.Generators.CSharp.AutoSerialization.Discovery
       containerDefinitionBuilder.Append("namespace ");
       containerDefinitionBuilder.Append(namespaceDeclarationSyntax.Name.ToString());
 
-      containerDefinition = new ExtractedContainerDefinition()
+      containerDefinition = new ExtractedContainerDefinition
       {
         Name = namespaceDeclarationSyntax.Name.ToString(),
         FullDefinition = containerDefinitionBuilder.ToString()

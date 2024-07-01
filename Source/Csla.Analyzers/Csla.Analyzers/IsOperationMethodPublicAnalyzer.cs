@@ -2,7 +2,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using static Csla.Analyzers.Extensions.IMethodSymbolExtensions;
 using static Csla.Analyzers.Extensions.ITypeSymbolExtensions;
@@ -55,7 +54,7 @@ namespace Csla.Analyzers
         }
         else
         {
-          var properties = new Dictionary<string, string>()
+          var properties = new Dictionary<string, string>
           {
             [IsOperationMethodPublicAnalyzerConstants.IsSealed] = typeSymbol.IsSealed.ToString()
           }.ToImmutableDictionary();

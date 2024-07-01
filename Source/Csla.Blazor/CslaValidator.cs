@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 
 namespace Csla.Blazor
@@ -30,7 +27,7 @@ namespace Csla.Blazor
       {
         // No cascading parameter is available; we are probably not inside an EditForm component
         throw new InvalidOperationException(
-          string.Format(Csla.Properties.Resources.CascadingEditContextRequiredException,
+          string.Format(Properties.Resources.CascadingEditContextRequiredException,
           nameof(CslaValidator), nameof(EditContext)));
       }
 

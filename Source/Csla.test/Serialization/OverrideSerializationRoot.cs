@@ -1,9 +1,8 @@
-using System;
 using System.ComponentModel;
 
 namespace Csla.Test.Serialization
 {
-  [Serializable()]
+  [Serializable]
   public class OverrideSerializationRoot : SerializationRoot
   {
     protected override bool ShouldHandlerSerialize(PropertyChangedEventHandler value)

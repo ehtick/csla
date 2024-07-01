@@ -5,37 +5,15 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Linq;
-using System.ComponentModel;
-using System.Diagnostics;
-using Csla.Serialization;
-using Csla.Test.ValidationRules;
-using UnitDriven;
-using Csla.TestHelpers;
+
 using Csla.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Security.Claims;
-
-
-
-#if NUNIT
-using NUnit.Framework;
-using TestClass = NUnit.Framework.TestFixtureAttribute;
-using TestInitialize = NUnit.Framework.SetUpAttribute;
-using TestCleanup = NUnit.Framework.TearDownAttribute;
-using TestMethod = NUnit.Framework.TestAttribute;
-#else
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Csla.Serialization.Mobile;
-using System.IO;
-#endif 
 
 namespace Csla.Test.Serialization
 {
-  [TestClass()]
+  [TestClass]
   public class CslaClaimsPrincipalSerializationTests
   {
     [TestMethod]
@@ -45,11 +23,13 @@ namespace Csla.Test.Serialization
       services.AddCsla();
       var provider = services.BuildServiceProvider();
       var applicationContext = provider.GetRequiredService<ApplicationContext>();
+
       var generic = new System.Security.Principal.GenericIdentity("rocky", "custom");
       var identity = new ClaimsIdentity(generic);
-      var principal = new Csla.Security.CslaClaimsPrincipal(identity);
+      var principal = new ClaimsPrincipal(identity);
       var cloner = new Core.ObjectCloner(applicationContext);
-      var clone = (Csla.Security.CslaClaimsPrincipal)cloner.Clone(principal);
+      var clone = (ClaimsPrincipal)cloner.Clone(principal);
+      
       Assert.AreEqual(principal.Identity.Name, clone.Identity.Name);
       Assert.AreEqual(principal.Identity.IsAuthenticated, clone.Identity.IsAuthenticated);
     }
@@ -61,10 +41,12 @@ namespace Csla.Test.Serialization
       services.AddCsla();
       var provider = services.BuildServiceProvider();
       var applicationContext = provider.GetRequiredService<ApplicationContext>();
+
       var identity = new ClaimsIdentity("custom", "rocky", null);
       var principal = new ClaimsPrincipal(identity);
       var cloner = new Core.ObjectCloner(applicationContext);
-      var clone = (Csla.Security.CslaClaimsPrincipal)cloner.Clone(principal);
+      var clone = (ClaimsPrincipal)cloner.Clone(principal);
+      
       Assert.AreEqual(principal.Identity.Name, clone.Identity.Name);
       Assert.AreEqual(principal.Identity.AuthenticationType, clone.Identity.AuthenticationType);
       Assert.AreEqual(principal.Identity.IsAuthenticated, clone.Identity.IsAuthenticated);

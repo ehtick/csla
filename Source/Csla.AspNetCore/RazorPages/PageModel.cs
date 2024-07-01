@@ -5,14 +5,12 @@
 // </copyright>
 // <summary>Custom PageModel for CSLA .NET</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Csla.Rules;
-using System.Linq;
 using Csla.Core;
-using System.Threading.Tasks;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Csla.AspNetCore.RazorPages
 {
@@ -22,21 +20,21 @@ namespace Csla.AspNetCore.RazorPages
   public class PageModel<T> : PageModel
     where T : ISavable
   {
-    private ApplicationContext ApplicationContext { get; set; }
+    private ApplicationContext _applicationContext;
 
     /// <summary>
     /// Creates an instance of the type.
     /// </summary>
     public PageModel(ApplicationContext applicationContext)
     {
-      ApplicationContext = applicationContext;
+      _applicationContext = applicationContext;
     }
 
     /// <summary>
     /// Gets or sets the business domain model object.
     /// </summary>
     [BindProperty]
-    public T Item { get; set; }
+    public T? Item { get; set; }
 
     /// <summary>
     /// Save the Item
@@ -48,9 +46,10 @@ namespace Csla.AspNetCore.RazorPages
       try
       {
         if (Item is BusinessBase bb && !bb.IsValid)
-          AddBrokenRuleInfo(Item, null);
+          AddBrokenRuleInfo(Item, string.Empty);
         if (ModelState.IsValid)
         {
+          ThrowIfItemIsNull();
           Item = (T) await Item.SaveAsync(forceUpdate);
           return true;
         }
@@ -73,7 +72,7 @@ namespace Csla.AspNetCore.RazorPages
       return false;
     }
 
-    private void AddBrokenRuleInfo(T item, string defaultText)
+    private void AddBrokenRuleInfo(T? item, string defaultText)
     {
       if (item is BusinessBase bb)
       {
@@ -99,7 +98,7 @@ namespace Csla.AspNetCore.RazorPages
       }
     }
 
-    private readonly Dictionary<string, PropertyInfo> _info = new Dictionary<string, PropertyInfo>();
+    private readonly Dictionary<string, PropertyInfo> _info = [];
 
     /// <summary>
     /// Get a PropertyInfo object for a property
@@ -107,10 +106,9 @@ namespace Csla.AspNetCore.RazorPages
     /// to the metastate of the property.
     /// </summary>
     /// <param name="propertyName">Property name</param>
-    /// <returns></returns>
     public PropertyInfo GetPropertyInfo(string propertyName)
     {
-      if (!_info.TryGetValue(propertyName, out PropertyInfo info))
+      if (!_info.TryGetValue(propertyName, out PropertyInfo? info))
       {
         info = new PropertyInfo(Item, propertyName);
         _info.Add(propertyName, info);
@@ -123,10 +121,9 @@ namespace Csla.AspNetCore.RazorPages
     /// is authorized to create an instance of the
     /// business domain type
     /// </summary>
-    /// <returns></returns>
     public bool CanCreateItem()
     {
-      return BusinessRules.HasPermission(ApplicationContext, AuthorizationActions.CreateObject, typeof(T));
+      return BusinessRules.HasPermission(_applicationContext, AuthorizationActions.CreateObject, typeof(T));
     }
 
     /// <summary>
@@ -134,10 +131,9 @@ namespace Csla.AspNetCore.RazorPages
     /// is authorized to retrieve an instance of the
     /// business domain type
     /// </summary>
-    /// <returns></returns>
     public bool CanGetItem()
     {
-      return BusinessRules.HasPermission(ApplicationContext, AuthorizationActions.GetObject, typeof(T));
+      return BusinessRules.HasPermission(_applicationContext, AuthorizationActions.GetObject, typeof(T));
     }
 
     /// <summary>
@@ -145,10 +141,9 @@ namespace Csla.AspNetCore.RazorPages
     /// is authorized to edit/save an instance of the
     /// business domain type
     /// </summary>
-    /// <returns></returns>
     public bool CanEditItem()
     {
-      return BusinessRules.HasPermission(ApplicationContext, AuthorizationActions.EditObject, typeof(T));
+      return BusinessRules.HasPermission(_applicationContext, AuthorizationActions.EditObject, typeof(T));
     }
 
     /// <summary>
@@ -156,10 +151,16 @@ namespace Csla.AspNetCore.RazorPages
     /// is authorized to delete an instance of the
     /// business domain type
     /// </summary>
-    /// <returns></returns>
     public bool CanDeleteItem()
     {
-      return BusinessRules.HasPermission(ApplicationContext, AuthorizationActions.DeleteObject, typeof(T));
+      return BusinessRules.HasPermission(_applicationContext, AuthorizationActions.DeleteObject, typeof(T));
+    }
+
+    [MemberNotNull(nameof(Item))]
+    private void ThrowIfItemIsNull()
+    {
+      if (Item is null)
+        throw new InvalidOperationException($"{nameof(Item)} == null");
     }
   }
 }

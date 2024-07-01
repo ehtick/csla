@@ -1,4 +1,4 @@
-﻿#if NET5_0_OR_GREATER
+﻿#if NET8_0_OR_GREATER
 //-----------------------------------------------------------------------
 // <copyright file="ApplicationContextManagerInMemory.cs" company="Marimer LLC">
 //     Copyright (c) Marimer LLC. All rights reserved.
@@ -8,10 +8,9 @@
 //-----------------------------------------------------------------------
 using Csla.Core;
 using Microsoft.AspNetCore.Components.Authorization;
-using System;
+using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
 using System.Security.Principal;
-using System.Threading.Tasks;
 
 namespace Csla.AspNetCore.Blazor
 {
@@ -21,8 +20,8 @@ namespace Csla.AspNetCore.Blazor
   /// </summary>
   public class ApplicationContextManagerInMemory : IContextManager, IDisposable
   {
-    private ContextDictionary LocalContext { get; set; }
-    private ContextDictionary ClientContext { get; set; }
+    private IContextDictionary? LocalContext { get; set; }
+    private IContextDictionary? ClientContext { get; set; }
     private IPrincipal CurrentPrincipal { get; set; }
     private readonly ClaimsPrincipal UnauthenticatedPrincipal = new();
     private bool disposedValue;
@@ -35,50 +34,57 @@ namespace Csla.AspNetCore.Blazor
     /// <summary>
     /// Gets or sets a reference to the current ApplicationContext.
     /// </summary>
-    public ApplicationContext ApplicationContext { get; set; }
+    public ApplicationContext? ApplicationContext { get; set; }
 
     /// <summary>
     /// Gets the active circuit state.
     /// </summary>
     protected ActiveCircuitState ActiveCircuitState { get; }
 
+    private readonly HttpContext? HttpContext;
+
     /// <summary>
     /// Creates an instance of the object, initializing it
     /// with the required IServiceProvider.
     /// </summary>
+    /// <param name="httpContextAccessor"></param>
     /// <param name="authenticationStateProvider">AuthenticationStateProvider service</param>
     /// <param name="activeCircuitState"></param>
-    public ApplicationContextManagerInMemory(AuthenticationStateProvider authenticationStateProvider, ActiveCircuitState activeCircuitState)
+    /// <exception cref="ArgumentNullException"><paramref name="httpContextAccessor"/>, <paramref name="authenticationStateProvider"/> or <paramref name="activeCircuitState"/> is <see langword="null"/>.</exception>
+    public ApplicationContextManagerInMemory(IHttpContextAccessor httpContextAccessor, AuthenticationStateProvider authenticationStateProvider, ActiveCircuitState activeCircuitState)
     {
-      AuthenticationStateProvider = authenticationStateProvider;
-      ActiveCircuitState = activeCircuitState;
+      ArgumentNullException.ThrowIfNull(httpContextAccessor);
+      HttpContext = httpContextAccessor.HttpContext;
+      AuthenticationStateProvider = authenticationStateProvider ?? throw new ArgumentNullException(nameof(authenticationStateProvider));
+      ActiveCircuitState = activeCircuitState ?? throw new ArgumentNullException(nameof(activeCircuitState));
       CurrentPrincipal = UnauthenticatedPrincipal;
       AuthenticationStateProvider.AuthenticationStateChanged += AuthenticationStateProvider_AuthenticationStateChanged;
-      InitializeUser();
+      _ = InitializeUser();
     }
 
-    private void InitializeUser()
+    private async Task InitializeUser()
     {
-      Task<AuthenticationState> task = default;
-      try
+      var httpContext = HttpContext;
+      if (httpContext != null)
       {
-        task = AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = httpContext.User;
+        if (user != null)
+          CurrentPrincipal = user;
       }
-      catch (InvalidOperationException ex)
+      else
       {
-        task = Task.FromResult(new AuthenticationState(UnauthenticatedPrincipal));
-        string message = ex.Message;
-        if (message.Contains(nameof(AuthenticationStateProvider.GetAuthenticationStateAsync))
-            && message.Contains(nameof(IHostEnvironmentAuthenticationStateProvider.SetAuthenticationState)))
+        Task<AuthenticationState> task;
+        try
         {
-          SetHostPrincipal(task);
+          task = AuthenticationStateProvider.GetAuthenticationStateAsync();
+          await task;
         }
-        else
+        catch (InvalidOperationException)
         {
-          throw;
+          task = Task.FromResult(new AuthenticationState(UnauthenticatedPrincipal));
         }
+        AuthenticationStateProvider_AuthenticationStateChanged(task);
       }
-      AuthenticationStateProvider_AuthenticationStateChanged(task);
     }
 
     private void AuthenticationStateProvider_AuthenticationStateChanged(Task<AuthenticationState> task)
@@ -132,15 +138,26 @@ namespace Csla.AspNetCore.Blazor
     {
       if (!ReferenceEquals(CurrentPrincipal, principal))
       {
-        if (principal is ClaimsPrincipal claimsPrincipal)
+        if (ActiveCircuitState.CircuitExists)
         {
-          CurrentPrincipal = principal;
-          SetHostPrincipal(Task.FromResult(new AuthenticationState(claimsPrincipal)));
+          if (principal is ClaimsPrincipal claimsPrincipal)
+          {
+            SetHostPrincipal(Task.FromResult(new AuthenticationState(claimsPrincipal)));
+          }
+          else
+          {
+            throw new ArgumentException("typeof(principal) != ClaimsPrincipal");
+          }
+        }
+        else if (HttpContext is not null)
+        {
+          HttpContext.User = (ClaimsPrincipal)principal;
         }
         else
         {
-          throw new ArgumentException("typeof(principal) != ClaimsPrincipal");
+          throw new InvalidOperationException("HttpContext==null, !CircuitExists");
         }
+        CurrentPrincipal = principal;
       }
     }
 
@@ -153,10 +170,9 @@ namespace Csla.AspNetCore.Blazor
     /// <summary>
     /// Gets the local context.
     /// </summary>
-    public ContextDictionary GetLocalContext()
+    public IContextDictionary? GetLocalContext()
     {
-      if (LocalContext == null)
-        LocalContext = new ContextDictionary();
+      LocalContext ??= new ContextDictionary();
       return LocalContext;
     }
 
@@ -164,7 +180,7 @@ namespace Csla.AspNetCore.Blazor
     /// Sets the local context.
     /// </summary>
     /// <param name="localContext">Local context.</param>
-    public void SetLocalContext(ContextDictionary localContext)
+    public void SetLocalContext(IContextDictionary? localContext)
     {
       LocalContext = localContext;
     }
@@ -173,10 +189,9 @@ namespace Csla.AspNetCore.Blazor
     /// Gets the client context.
     /// </summary>
     /// <param name="executionLocation"></param>
-    public ContextDictionary GetClientContext(ApplicationContext.ExecutionLocations executionLocation)
+    public IContextDictionary? GetClientContext(ApplicationContext.ExecutionLocations executionLocation)
     {
-      if (ClientContext == null)
-        ClientContext = new ContextDictionary();
+      ClientContext ??= new ContextDictionary();
       return ClientContext;
     }
 
@@ -185,7 +200,7 @@ namespace Csla.AspNetCore.Blazor
     /// </summary>
     /// <param name="clientContext">Client context.</param>
     /// <param name="executionLocation"></param>
-    public void SetClientContext(ContextDictionary clientContext, ApplicationContext.ExecutionLocations executionLocation)
+    public void SetClientContext(IContextDictionary? clientContext, ApplicationContext.ExecutionLocations executionLocation)
     {
       ClientContext = clientContext;
     }

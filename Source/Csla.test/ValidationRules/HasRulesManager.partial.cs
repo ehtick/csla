@@ -5,10 +5,6 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Csla.Test.ValidationRules
 {
@@ -45,7 +41,7 @@ namespace Csla.Test.ValidationRules
       }
       else
       {
-        if (this.IsNew)
+        if (IsNew)
         {
           //we would insert here
           TestResults.Add("HasRulesManager", "Inserted");

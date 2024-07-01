@@ -5,14 +5,11 @@
 // </copyright>
 // <summary>Object providing schema information for a</summary>
 //-----------------------------------------------------------------------
-using System;
+
 using System.Collections;
-using System.Collections.Generic;
 using System.Web.UI.Design;
 using System.ComponentModel;
 using System.ComponentModel.Design;
-using Csla;
-using Csla.Web.Design;
 
 namespace Csla.Web.Design
 {
@@ -21,7 +18,7 @@ namespace Csla.Web.Design
   /// Object providing schema information for a
   /// business object.
   /// </summary>
-  [Serializable()]
+  [Serializable]
   public class ObjectViewSchema : IDataSourceViewSchema
   {
     private string _typeName = "";
@@ -46,7 +43,7 @@ namespace Csla.Web.Design
     /// <remarks>This schema object only returns
     /// schema for the object itself, so GetChildren will
     /// always return Nothing (null in C#).</remarks>
-    public System.Web.UI.Design.IDataSourceViewSchema[] GetChildren()
+    public IDataSourceViewSchema[] GetChildren()
     {
       return null;
     }
@@ -61,7 +58,7 @@ namespace Csla.Web.Design
     /// <see cref="BrowsableAttribute">Browsable</see> attribute
     /// is False.
     /// </remarks>
-    public System.Web.UI.Design.IDataSourceFieldSchema[] GetFields()
+    public IDataSourceFieldSchema[] GetFields()
     {
       ITypeResolutionService typeService = null;
       List<ObjectFieldInfo> result = new List<ObjectFieldInfo>();

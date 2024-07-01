@@ -5,15 +5,10 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Csla;
 
 namespace Csla.Test.ObjectFactory
 {
-  [Csla.Server.ObjectFactory("Csla.Test.ObjectFactory.RootFactory, Csla.Tests")]
+  [Server.ObjectFactory("Csla.Test.ObjectFactory.RootFactory, Csla.Tests")]
   [Serializable]
   public class Root : BusinessBase<Root>
   {
@@ -24,8 +19,8 @@ namespace Csla.Test.ObjectFactory
       set { SetProperty(DataProperty, value); }
     }
 
-    private static PropertyInfo<Csla.ApplicationContext.ExecutionLocations> LocationProperty = RegisterProperty<Csla.ApplicationContext.ExecutionLocations>(nameof(Location));
-    public Csla.ApplicationContext.ExecutionLocations Location
+    private static PropertyInfo<ApplicationContext.ExecutionLocations> LocationProperty = RegisterProperty<ApplicationContext.ExecutionLocations>(nameof(Location));
+    public ApplicationContext.ExecutionLocations Location
     {
       get { return GetProperty(LocationProperty); }
       set { SetProperty(LocationProperty, value); }

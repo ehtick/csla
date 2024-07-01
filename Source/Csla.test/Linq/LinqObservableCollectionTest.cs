@@ -5,26 +5,10 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using Csla;
-using System;
-using System.Collections.ObjectModel;
-using System.Collections.Generic;
-using System.Collections;
-using System.Linq;
-using Csla.Serialization;
-using UnitDriven;
-using Csla.TestHelpers;
 
-#if NUNIT
-using NUnit.Framework;
-using TestClass = NUnit.Framework.TestFixtureAttribute;
-using TestInitialize = NUnit.Framework.SetUpAttribute;
-using TestCleanup = NUnit.Framework.TearDownAttribute;
-using TestMethod = NUnit.Framework.TestAttribute;
-using TestSetup = NUnit.Framework.SetUpAttribute;
-#elif MSTEST
+using System.Collections.ObjectModel;
+using Csla.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-#endif
 
 namespace Csla.Test.Linq
 {
@@ -155,7 +139,7 @@ namespace Csla.Test.Linq
       Assert.AreEqual(3, count, "Calculated count wrong (br)");
       Assert.AreEqual(3, synced.Count, "Synced count wrong (br)");
       Assert.AreEqual(4, source.Count, "source count wrong (br)");
-      Assert.AreEqual(0, synced.Where(_ => _.Id == 12).Count(), "synced contains 12");
+      Assert.AreEqual(0, synced.Count(_ => _.Id == 12), "synced contains 12");
 
       source.RemoveAt(3);
 
@@ -166,13 +150,13 @@ namespace Csla.Test.Linq
       Assert.AreEqual(3, count, "Calculated count wrong");
       Assert.AreEqual(3, synced.Count, "Synced count wrong");
       Assert.AreEqual(3, source.Count, "source count wrong");
-      Assert.AreEqual(0, synced.Where(_ => _.Id == 12).Count(), "synced contains 12");
+      Assert.AreEqual(0, synced.Count(_ => _.Id == 12), "synced contains 12");
     }
 
     [TestMethod]
     public void Create()
     {
-      var source = new ObservableCollection<string>() { "a", "b", "c" };
+      var source = new ObservableCollection<string> { "a", "b", "c" };
       var query = from r in source
                   where r == "b"
                   select r;
@@ -185,7 +169,7 @@ namespace Csla.Test.Linq
     [TestMethod]
     public void AddItem()
     {
-      var source = new ObservableCollection<string>() { "a", "b", "c" };
+      var source = new ObservableCollection<string> { "a", "b", "c" };
       var query = from r in source
                   where r == "b"
                   select r;
@@ -223,7 +207,7 @@ namespace Csla.Test.Linq
     [TestMethod]
     public void InsertItem()
     {
-      var source = new ObservableCollection<string>() { "a", "b", "c" };
+      var source = new ObservableCollection<string> { "a", "b", "c" };
       var query = from r in source
                   where r == "b"
                   select r;
@@ -261,7 +245,7 @@ namespace Csla.Test.Linq
     [TestMethod]
     public void RemoveAt()
     {
-      var source = new ObservableCollection<string>() { "a", "b", "c", "bb" };
+      var source = new ObservableCollection<string> { "a", "b", "c", "bb" };
       var query = from r in source
                   where r[0] == 'b'
                   select r;
@@ -299,7 +283,7 @@ namespace Csla.Test.Linq
     [TestMethod]
     public void RemoveItem()
     {
-      var source = new ObservableCollection<string>() { "a", "b", "c", "bb" };
+      var source = new ObservableCollection<string> { "a", "b", "c", "bb" };
       var query = from r in source
                   where r[0] == 'b'
                   select r;
@@ -337,7 +321,7 @@ namespace Csla.Test.Linq
     [TestMethod]
     public void ReplaceItem()
     {
-      var source = new ObservableCollection<string>() { "a", "b", "c" };
+      var source = new ObservableCollection<string> { "a", "b", "c" };
       var query = from r in source
                   where r == "b"
                   select r;
@@ -380,7 +364,7 @@ namespace Csla.Test.Linq
     [TestMethod]
     public void MoveItem()
     {
-      var source = new ObservableCollection<string>() { "a", "b", "c" };
+      var source = new ObservableCollection<string> { "a", "b", "c" };
       var query = from r in source
                   where r == "b"
                   select r;
@@ -409,7 +393,7 @@ namespace Csla.Test.Linq
     [TestMethod]
     public void ClearSource()
     {
-      var source = new ObservableCollection<string>() { "a", "b", "c" };
+      var source = new ObservableCollection<string> { "a", "b", "c" };
       var query = from r in source
                   where r == "b"
                   select r;
@@ -435,7 +419,7 @@ namespace Csla.Test.Linq
     [TestMethod]
     public void ClearView()
     {
-      var source = new ObservableCollection<string>() { "a", "b", "c" };
+      var source = new ObservableCollection<string> { "a", "b", "c" };
       var query = from r in source
                   where r == "b"
                   select r;

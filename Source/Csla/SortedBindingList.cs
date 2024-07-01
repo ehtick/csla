@@ -1,4 +1,3 @@
-#if !NETFX_CORE
 //-----------------------------------------------------------------------
 // <copyright file="SortedBindingList.cs" company="Marimer LLC">
 //     Copyright (c) Marimer LLC. All rights reserved.
@@ -6,9 +5,7 @@
 // </copyright>
 // <summary>Provides a sorted view into an existing IList(Of T).</summary>
 //-----------------------------------------------------------------------
-using System;
 using System.ComponentModel;
-using System.Collections.Generic;
 using System.Collections;
 using Csla.Properties;
 
@@ -23,7 +20,9 @@ namespace Csla
   /// the original list or collection.
   /// </typeparam>
   public class SortedBindingList<T> :
-    IList<T>, IBindingList, IEnumerable<T>, ICancelAddNew
+    IList<T>,
+    IBindingList,
+    ICancelAddNew
   {
 
     #region ListItem class
@@ -100,7 +99,7 @@ namespace Csla
         get { return _list[_sortIndex[_index].BaseIndex]; }
       }
 
-      Object System.Collections.IEnumerator.Current
+      Object IEnumerator.Current
       {
         get { return _list[_sortIndex[_index].BaseIndex]; }
       }
@@ -415,8 +414,7 @@ namespace Csla
     /// <param name="e">Event arguments.</param>
     protected void OnListChanged(ListChangedEventArgs e)
     {
-      if (ListChanged != null)
-        ListChanged(this, e);
+      ListChanged?.Invoke(this, e);
     }
 
     /// <summary>
@@ -494,7 +492,7 @@ namespace Csla
       }
     }
 
-    void System.Collections.ICollection.CopyTo(System.Array array, int index)
+    void ICollection.CopyTo(Array array, int index)
     {
       T[] tmp = new T[array.Length];
       CopyTo(tmp, index);
@@ -509,17 +507,17 @@ namespace Csla
       get { return SourceList.Count; }
     }
 
-    bool System.Collections.ICollection.IsSynchronized
+    bool ICollection.IsSynchronized
     {
       get { return false; }
     }
 
-    object System.Collections.ICollection.SyncRoot
+    object ICollection.SyncRoot
     {
       get { return SourceList; }
     }
 
-    IEnumerator System.Collections.IEnumerable.GetEnumerator()
+    IEnumerator IEnumerable.GetEnumerator()
     {
       return GetEnumerator();
     }
@@ -533,7 +531,7 @@ namespace Csla
       SourceList.Add(item);
     }
 
-    int System.Collections.IList.Add(object value)
+    int IList.Add(object value)
     {
       Add((T)value);
       return SortedIndex(SourceList.Count - 1);
@@ -556,7 +554,7 @@ namespace Csla
       return SourceList.Contains(item);
     }
 
-    bool System.Collections.IList.Contains(object value)
+    bool IList.Contains(object value)
     {
       return Contains((T)value);
     }
@@ -570,7 +568,7 @@ namespace Csla
       return SortedIndex(SourceList.IndexOf(item));
     }
 
-    int System.Collections.IList.IndexOf(object value)
+    int IList.IndexOf(object value)
     {
       return IndexOf((T)value);
     }
@@ -586,12 +584,12 @@ namespace Csla
       SourceList.Insert(index, item);
     }
 
-    void System.Collections.IList.Insert(int index, object value)
+    void IList.Insert(int index, object value)
     {
       Insert(index, (T)value);
     }
 
-    bool System.Collections.IList.IsFixedSize
+    bool IList.IsFixedSize
     {
       get { return false; }
     }
@@ -604,7 +602,7 @@ namespace Csla
       get { return SourceList.IsReadOnly; }
     }
 
-    object System.Collections.IList.this[int index]
+    object IList.this[int index]
     {
       get
       {
@@ -625,7 +623,7 @@ namespace Csla
       return SourceList.Remove(item);
     }
 
-    void System.Collections.IList.Remove(object value)
+    void IList.Remove(object value)
     {
       Remove((T)value);
     }
@@ -695,9 +693,7 @@ namespace Csla
     private IBindingList _bindingList;
     private bool _initiatedLocally;
 
-    private List<ListItem> _sortIndex =
-      new List<ListItem>();
-
+    private List<ListItem> _sortIndex = [];
 
     /// <summary>
     /// Creates a new view based on the provided IList object.
@@ -854,8 +850,7 @@ namespace Csla
     {
       if (itemIndex <= -1) return;
 
-      ICancelAddNew can = SourceList as ICancelAddNew;
-      if (can != null)
+      if (SourceList is ICancelAddNew can)
         can.CancelNew(OriginalIndex(itemIndex));
       else
         SourceList.RemoveAt(OriginalIndex(itemIndex));
@@ -863,8 +858,7 @@ namespace Csla
 
     void ICancelAddNew.EndNew(int itemIndex)
     {
-      ICancelAddNew can = SourceList as ICancelAddNew;
-      if (can != null)
+      if (SourceList is ICancelAddNew can)
         can.EndNew(OriginalIndex(itemIndex));
     }
 
@@ -887,4 +881,3 @@ namespace Csla
 
   }
 }
-#endif

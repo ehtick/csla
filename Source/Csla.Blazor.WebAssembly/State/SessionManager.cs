@@ -5,17 +5,14 @@
 // </copyright>
 // <summary>Manages all user session data</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.IO;
-using System.Net.Http;
+
 using System.Net.Http.Json;
-using System.Threading.Tasks;
 using Csla.Blazor.Authentication;
+using Csla.Blazor.State.Messages;
 using Csla.Blazor.WebAssembly.Configuration;
 using Csla.Serialization;
 using Csla.State;
 using Microsoft.AspNetCore.Components.Authorization;
-using Csla.Blazor.State.Messages;
 
 namespace Csla.Blazor.WebAssembly.State
 {
@@ -47,7 +44,29 @@ namespace Csla.Blazor.WebAssembly.State
     /// the web server to the wasm client
     /// if SyncContextWithServer is true.
     /// </summary>
-    public async Task<Session> RetrieveSession()
+    /// <param name="timeout">The timeout duration for the operation.</param>
+    /// <returns>The retrieved session.</returns>
+    /// <exception cref="TimeoutException">Thrown when the specified timeout is exceeded.</exception>
+    public async Task<Session> RetrieveSession(TimeSpan timeout)
+    {
+      try
+      {
+        return await RetrieveSession(GetCancellationToken(timeout));
+      }
+      catch (TaskCanceledException tcex)
+      {
+        throw new TimeoutException($"{this.GetType().FullName}.{nameof(RetrieveSession)}.", tcex);
+      }
+    }
+
+    /// <summary>
+    /// Retrieves the current user's session from
+    /// the web server to the wasm client
+    /// if SyncContextWithServer is true.
+    /// </summary>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>The retrieved session.</returns>
+    public async Task<Session> RetrieveSession(CancellationToken ct)
     {
       if (_options.SyncContextWithServer)
       {
@@ -55,11 +74,10 @@ namespace Csla.Blazor.WebAssembly.State
         if (_session != null)
           lastTouched = _session.LastTouched;
         var url = $"{_options.StateControllerName}?lastTouched={lastTouched}";
-
-        var stateResult = await client.GetFromJsonAsync<StateResult>(url);
+        var stateResult = await client.GetFromJsonAsync<StateResult>(url, ct).ConfigureAwait(false);
         if (stateResult.ResultStatus == ResultStatuses.Success)
         {
-          var formatter = SerializationFormatterFactory.GetFormatter(ApplicationContext);
+          var formatter = ApplicationContext.GetRequiredService<ISerializationFormatter>();
           var buffer = new MemoryStream(stateResult.SessionData)
           {
             Position = 0
@@ -89,17 +107,44 @@ namespace Csla.Blazor.WebAssembly.State
     /// the wasm client to the web server 
     /// if SyncContextWithServer is true.
     /// </summary>
-    /// <returns></returns>
-    public async Task SendSession()
+    /// <param name="timeout">The timeout duration for the operation.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    /// <exception cref="TimeoutException">Thrown when the specified timeout is exceeded.</exception>
+    public async Task SendSession(TimeSpan timeout)
+    {
+      try
+      {
+        await SendSession(GetCancellationToken(timeout));
+      }
+      catch (TaskCanceledException tcex)
+      {
+        throw new TimeoutException($"{this.GetType().FullName}.{nameof(SendSession)}.", tcex);
+      }
+    }
+
+    private static CancellationToken GetCancellationToken(TimeSpan timeout)
+    {
+      var cts = new CancellationTokenSource(timeout);
+      return cts.Token;
+    }
+
+    /// <summary>
+    /// Sends the current user's session from
+    /// the wasm client to the web server 
+    /// if SyncContextWithServer is true.
+    /// </summary>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    public async Task SendSession(CancellationToken ct)
     {
       _session.Touch();
       if (_options.SyncContextWithServer)
       {
-        var formatter = SerializationFormatterFactory.GetFormatter(ApplicationContext);
+        var formatter = ApplicationContext.GetRequiredService<ISerializationFormatter>();
         var buffer = new MemoryStream();
         formatter.Serialize(buffer, _session);
         buffer.Position = 0;
-        await client.PutAsJsonAsync<byte[]>(_options.StateControllerName, buffer.ToArray());
+        await client.PutAsJsonAsync<byte[]>(_options.StateControllerName, buffer.ToArray(), ct).ConfigureAwait(false);
       }
     }
 
@@ -107,6 +152,7 @@ namespace Csla.Blazor.WebAssembly.State
     /// <summary>
     /// Gets or creates the session data.
     /// </summary>
+    /// <returns>The session data.</returns>
     private Session GetSession()
     {
       Session result;

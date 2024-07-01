@@ -5,7 +5,7 @@
 // </copyright>
 // <summary>Use this type to configure the settings for CSLA .NET</summary>
 //-----------------------------------------------------------------------
-using System;
+
 using System.Transactions;
 
 namespace Csla.Configuration
@@ -68,20 +68,5 @@ namespace Csla.Configuration
     /// </summary>
     /// <returns>The default transaction scope async flow option.</returns>
     internal static TransactionScopeAsyncFlowOption GetDefaultTransactionScopeAsyncFlowOption() => defaultTransactionScopeAsyncFlowOption;
-
-#if !NETSTANDARD2_0 && !NET6_0_OR_GREATER
-    /// <summary>
-    /// Sets the invariant name of a provider for
-    /// use by DbProviderFactories.GetFactory().
-    /// </summary>
-    /// <param name="dbProvider"></param>
-    /// <returns></returns>
-    [Obsolete("Use dependency injection", true)]
-    public DataOptions DbProvider(string dbProvider)
-    {
-      Data.ConnectionManager.DbProvider = dbProvider;
-      return this;
-    }
-#endif
   }
 }

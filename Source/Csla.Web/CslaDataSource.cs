@@ -5,7 +5,7 @@
 // </copyright>
 // <summary>A Web Forms data binding control designed to support</summary>
 //-----------------------------------------------------------------------
-using System;
+
 using System.Web.UI;
 using System.ComponentModel;
 using System.Reflection;
@@ -18,7 +18,7 @@ namespace Csla.Web
   /// A Web Forms data binding control designed to support
   /// CSLA .NET business objects as data sources.
   /// </summary>
-  [Designer(typeof(Csla.Web.Design.CslaDataSourceDesigner))]
+  [Designer(typeof(Design.CslaDataSourceDesigner))]
   [DisplayName("CslaDataSource")]
   [Description("CSLA .NET Data Source Control")]
   [ToolboxData("<{0}:CslaDataSource runat=\"server\"></{0}:CslaDataSource>")]
@@ -64,7 +64,6 @@ namespace Csla.Web
     /// Returns the default view for this data control.
     /// </summary>
     /// <param name="viewName">Ignored.</param>
-    /// <returns></returns>
     /// <remarks>This control only contains a "Default" view.</remarks>
     protected override DataSourceView GetView(string viewName)
     {
@@ -79,8 +78,8 @@ namespace Csla.Web
     /// <value>Obsolete - do not use.</value>
     public string TypeAssemblyName
     {
-      get { return ((CslaDataSourceView)this.GetView("Default")).TypeAssemblyName; }
-      set { ((CslaDataSourceView)this.GetView("Default")).TypeAssemblyName = value; }
+      get { return ((CslaDataSourceView)GetView("Default")).TypeAssemblyName; }
+      set { ((CslaDataSourceView)GetView("Default")).TypeAssemblyName = value; }
     }
 
     /// <summary>
@@ -91,8 +90,8 @@ namespace Csla.Web
     /// including assembly name.</value>
     public string TypeName
     {
-      get { return ((CslaDataSourceView)this.GetView("Default")).TypeName; }
-      set { ((CslaDataSourceView)this.GetView("Default")).TypeName = value; }
+      get { return ((CslaDataSourceView)GetView("Default")).TypeName; }
+      set { ((CslaDataSourceView)GetView("Default")).TypeName = value; }
     }
 
     /// <summary>
@@ -106,8 +105,8 @@ namespace Csla.Web
     /// </remarks>
     public bool TypeSupportsPaging
     {
-      get { return ((CslaDataSourceView)this.GetView("Default")).TypeSupportsPaging; }
-      set { ((CslaDataSourceView)this.GetView("Default")).TypeSupportsPaging = value; }
+      get { return ((CslaDataSourceView)GetView("Default")).TypeSupportsPaging; }
+      set { ((CslaDataSourceView)GetView("Default")).TypeSupportsPaging = value; }
     }
 
     /// <summary>
@@ -116,12 +115,11 @@ namespace Csla.Web
     /// </summary>
     public bool TypeSupportsSorting
     {
-      get { return ((CslaDataSourceView)this.GetView("Default")).TypeSupportsSorting; }
-      set { ((CslaDataSourceView)this.GetView("Default")).TypeSupportsSorting = value; }
+      get { return ((CslaDataSourceView)GetView("Default")).TypeSupportsSorting; }
+      set { ((CslaDataSourceView)GetView("Default")).TypeSupportsSorting = value; }
     }
 
-    private static System.Collections.Generic.Dictionary<string,Type> _typeCache = 
-      new System.Collections.Generic.Dictionary<string,Type>();
+    private static Dictionary<string,Type> _typeCache = [];
 
     /// <summary>
     /// Returns a <see cref="Type">Type</see> object based on the
@@ -138,8 +136,7 @@ namespace Csla.Web
       if (!string.IsNullOrEmpty(typeAssemblyName))
       {
         // explicit assembly name provided
-        result = Type.GetType(string.Format(
-          "{0}, {1}", typeName, typeAssemblyName), true, true);
+        result = Type.GetType($"{typeName}, {typeAssemblyName}", true, true);
       }
       else if (typeName.IndexOf(",") > 0)
       {
@@ -182,8 +179,7 @@ namespace Csla.Web
     /// </summary>
     internal void OnSelectObject(SelectObjectArgs e)
     {
-      if (SelectObject != null)
-        SelectObject(this, e);
+      SelectObject?.Invoke(this, e);
     }
 
     /// <summary>
@@ -191,8 +187,7 @@ namespace Csla.Web
     /// </summary>
     internal void OnInsertObject(InsertObjectArgs e)
     {
-      if (InsertObject != null)
-        InsertObject(this, e);
+      InsertObject?.Invoke(this, e);
     }
 
     /// <summary>
@@ -200,8 +195,7 @@ namespace Csla.Web
     /// </summary>
     internal void OnUpdateObject(UpdateObjectArgs e)
     {
-      if (UpdateObject != null)
-        UpdateObject(this, e);
+      UpdateObject?.Invoke(this, e);
     }
 
     /// <summary>
@@ -209,8 +203,7 @@ namespace Csla.Web
     /// </summary>
     internal void OnDeleteObject(DeleteObjectArgs e)
     {
-      if (DeleteObject != null)
-        DeleteObject(this, e);
+      DeleteObject?.Invoke(this, e);
     }
   }
 }

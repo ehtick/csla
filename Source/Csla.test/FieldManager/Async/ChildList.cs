@@ -6,9 +6,6 @@
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Threading.Tasks;
-
 namespace Csla.Test.FieldManager.Async
 {
   [Serializable]
@@ -25,7 +22,7 @@ namespace Csla.Test.FieldManager.Async
 
     public object MyParent
     {
-      get { return this.Parent; }
+      get { return Parent; }
     }
 
     public string Status { get; private set; }

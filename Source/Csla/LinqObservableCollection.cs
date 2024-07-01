@@ -5,28 +5,28 @@
 // </copyright>
 // <summary>Synchronized view over a source list, </summary>
 //-----------------------------------------------------------------------
-using System;
+
 using System.Collections;
-using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Linq;
 using System.Linq.Expressions;
 
 namespace Csla
 {
   /// <summary>
-  /// Synchronized view over a source list, 
+  /// Synchronized view over a source list,
   /// filtered, sorted and ordered based
   /// on a query result.
   /// </summary>
   /// <typeparam name="T">Type of objects contained in the list/collection.</typeparam>
-  public class LinqObservableCollection<T> : IList<T>, ICollection<T>, IEnumerable<T>, 
-    IList, ICollection, INotifyCollectionChanged
+  public class LinqObservableCollection<T> :
+    IList<T>,
+    IList,
+    INotifyCollectionChanged
   {
     /// <summary>
     /// Event raised when the underlying source list is changed.
     /// </summary>
-    public event System.Collections.Specialized.NotifyCollectionChangedEventHandler CollectionChanged;
+    public event NotifyCollectionChangedEventHandler CollectionChanged;
 
     private System.Collections.ObjectModel.ObservableCollection<T> _baseCollection;
     private bool _suppressEvents = false;
@@ -239,8 +239,7 @@ namespace Csla
     {
       get 
       {
-        var obj = _baseCollection as ICollection<T>;
-        if (obj != null)
+        if (_baseCollection is ICollection<T> obj)
           return obj.IsReadOnly;
         else
           return false; 

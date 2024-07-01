@@ -5,7 +5,6 @@
 // </copyright>
 // <summary>Translates assembly names to and from short</summary>
 //-----------------------------------------------------------------------
-using System;
 
 namespace Csla.Serialization.Mobile
 {
@@ -35,7 +34,7 @@ namespace Csla.Serialization.Mobile
       {
         if (_cslaLibAssembly == null)
         {
-          _cslaLibAssembly = typeof(Csla.Serialization.Mobile.NullPlaceholder).AssemblyQualifiedName;
+          _cslaLibAssembly = typeof(NullPlaceholder).AssemblyQualifiedName;
           _cslaLibAssembly = _cslaLibAssembly.Substring(_cslaLibAssembly.IndexOf(", ") + 2);
         }
         return _cslaLibAssembly;
@@ -51,7 +50,6 @@ namespace Csla.Serialization.Mobile
     /// a short code.
     /// </summary>
     /// <param name="type">Original type.</param>
-    /// <returns></returns>
     public static string GetAssemblyQualifiedName(Type type)
     {
       var result = type.AssemblyQualifiedName;
@@ -66,7 +64,6 @@ namespace Csla.Serialization.Mobile
     /// specific assembly name.
     /// </summary>
     /// <param name="typeName"></param>
-    /// <returns></returns>
     public static string GetAssemblyQualifiedName(string typeName)
     {
       var result = typeName;

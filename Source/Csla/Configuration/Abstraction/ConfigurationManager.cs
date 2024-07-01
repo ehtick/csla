@@ -5,7 +5,7 @@
 // </copyright>
 // <summary>ConfigurationManager that abstracts underlying configuration</summary>
 //-----------------------------------------------------------------------
-using System;
+
 using System.Collections.Specialized;
 
 namespace Csla.Configuration
@@ -18,7 +18,7 @@ namespace Csla.Configuration
   {
     static ConfigurationManager()
     {
-#if !NETSTANDARD2_0 && !NET6_0_OR_GREATER
+#if !NETSTANDARD2_0 && !NET8_0_OR_GREATER
       try
       {
         AppSettings = System.Configuration.ConfigurationManager.AppSettings;

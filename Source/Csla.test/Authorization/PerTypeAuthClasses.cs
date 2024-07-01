@@ -5,10 +5,6 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Diagnostics;
 
 namespace Csla.Test.Authorization
 {
@@ -33,7 +29,7 @@ namespace Csla.Test.Authorization
 
     protected override void AddBusinessRules()
     {
-      BusinessRules.AddRule(new Csla.Rules.CommonRules.IsInRole(Rules.AuthorizationActions.WriteProperty, TestProperty, new List<string> { "Admin" }));
+      BusinessRules.AddRule(new Rules.CommonRules.IsInRole(Rules.AuthorizationActions.WriteProperty, TestProperty, new List<string> { "Admin" }));
     }
 
     [Create]

@@ -5,20 +5,9 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Csla.TestHelpers;
 
-#if !NUNIT
+using Csla.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-#else
-using NUnit.Framework;
-using TestClass = NUnit.Framework.TestFixtureAttribute;
-using TestInitialize = NUnit.Framework.SetUpAttribute;
-using TestCleanup = NUnit.Framework.TearDownAttribute;
-using TestMethod = NUnit.Framework.TestAttribute;
-#endif 
 
 namespace Csla.Test.Basic
 {
@@ -44,7 +33,7 @@ namespace Csla.Test.Basic
     {
       IDataPortal<DataBinding.ParentEntity> dataPortal = _testDIContext.CreateDataPortal<DataBinding.ParentEntity>();
 
-      Csla.Test.DataBinding.ParentEntity p = DataBinding.ParentEntity.NewParentEntity(dataPortal);
+      DataBinding.ParentEntity p = DataBinding.ParentEntity.NewParentEntity(dataPortal);
 
       p.NotUndoable = "something";
       p.Data = "data";
@@ -423,7 +412,7 @@ namespace Csla.Test.Basic
     private GenRoot NewGenRoot()
     {
       IDataPortal<GenRoot> dataPortal = _testDIContext.CreateDataPortal<GenRoot>();
-      return dataPortal.Create(new GenRoot.Criteria());
+      return dataPortal.Create(new GenRootBase.Criteria());
     }
   }
 
@@ -433,23 +422,23 @@ namespace Csla.Test.Basic
 
     public FormSimulator(Core.BusinessBase obj)
     {
-      this._obj.PropertyChanged += obj_IsDirtyChanged;
-      this._obj = obj;
+      _obj.PropertyChanged += obj_IsDirtyChanged;
+      _obj = obj;
     }
 
     private void obj_IsDirtyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
     { }
   }
 
-  [Serializable()]
+  [Serializable]
   public class SerializableListener
   {
     private Core.BusinessBase _obj;
 
     public SerializableListener(Core.BusinessBase obj)
     {
-      this._obj.PropertyChanged += obj_IsDirtyChanged;
-      this._obj = obj;
+      _obj.PropertyChanged += obj_IsDirtyChanged;
+      _obj = obj;
     }
 
     public void obj_IsDirtyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)

@@ -5,7 +5,6 @@
 // </copyright>
 // <summary>Interface defining the members of the data portal type</summary>
 //-----------------------------------------------------------------------
-using System.Threading.Tasks;
 
 namespace Csla
 {
@@ -92,6 +91,14 @@ namespace Csla
     /// <param name="obj">A reference to the Command object to be executed.</param>
     /// <returns>A reference to the updated Command object.</returns>
     object Execute(object obj);
+    /// <summary>
+    /// Execute a command on the logical server.
+    /// </summary>
+    /// <param name="criteria">
+    /// Criteria provided to the command object.
+    /// </param>
+    /// <returns>The resulting command object.</returns>
+    object Execute(params object[] criteria);
     /// <summary>
     /// Insert, update or delete an object in the database.
     /// </summary>

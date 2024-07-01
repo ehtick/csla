@@ -5,14 +5,12 @@
 // </copyright>
 // <summary>Business object type for use in tests</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
+
 using System.ComponentModel.DataAnnotations;
-using System.Text;
 
 namespace Csla.Test.Server.Interceptors
 {
-  [Serializable()]
+  [Serializable]
   public class Root : BusinessBase<Root>
   {
     public static PropertyInfo<string> DataProperty = RegisterProperty<string>(c => c.Data);
@@ -38,7 +36,7 @@ namespace Csla.Test.Server.Interceptors
       private set { LoadProperty(ChildrenProperty, value); }
     }
 
-    [Serializable()]
+    [Serializable]
     public class Criteria
     {
       public string _data;
@@ -50,7 +48,7 @@ namespace Csla.Test.Server.Interceptors
 
       public Criteria(string data)
       {
-        this._data = data;
+        _data = data;
       }
     }
 

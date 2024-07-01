@@ -5,7 +5,7 @@
 // </copyright>
 // <summary>Wraps a System.ComponentModel.BackgroundWorker and transfers ApplicationContext.User, ClientContest, CurrentCulture and CurrentUICulture to background thread.</summary>
 //-----------------------------------------------------------------------
-using System;
+
 using System.ComponentModel;
 
 namespace Csla.Threading
@@ -14,7 +14,7 @@ namespace Csla.Threading
   /// A BackgroundWorker that wraps a System.ComponentModel.BackgroundWorkertransfers ApplicationContext.User, ClientContext, CurrentCulture 
   /// and CurrentUICulture to the background thread.
   /// </summary>
-  public class BackgroundWorker : System.ComponentModel.Component
+  public class BackgroundWorker : Component
   {
     private readonly System.ComponentModel.BackgroundWorker _myWorker = new System.ComponentModel.BackgroundWorker();
     /// <summary>
@@ -22,13 +22,13 @@ namespace Csla.Threading
     /// </summary>
     public BackgroundWorker(ApplicationContext applicationContext)
     {
-      ApplicationContext = applicationContext;
+      _applicationContext = applicationContext;
       _myWorker.DoWork += InternalDoWork;
       _myWorker.RunWorkerCompleted += InternalRunWorkerCompleted;
       _myWorker.ProgressChanged += InternalProgressChanged;
     }
 
-    private ApplicationContext ApplicationContext { get; set; }
+    private ApplicationContext _applicationContext;
 
     // overridden event handler to be invoked by this class
     private DoWorkEventHandler _myDoWork;
@@ -171,7 +171,7 @@ namespace Csla.Threading
       public WorkerAsyncRequest(ApplicationContext applicationContext, object argument)
         : base(applicationContext)
       {
-        this.Argument = argument;
+        Argument = argument;
       }
     }
 
@@ -183,8 +183,8 @@ namespace Csla.Threading
 
       public WorkerAsyncResult(object result, Exception error)
       {
-        this.Result = result;
-        this.Error = error;
+        Result = result;
+        Error = error;
       }
     }
 
@@ -215,7 +215,7 @@ namespace Csla.Threading
     /// </exception>
     public void RunWorkerAsync(object argument)
     {
-      _myWorker.RunWorkerAsync(new WorkerAsyncRequest(ApplicationContext, argument));
+      _myWorker.RunWorkerAsync(new WorkerAsyncRequest(_applicationContext, argument));
     }
 
 
@@ -240,21 +240,14 @@ namespace Csla.Threading
       try
       {
         var doWorkEventArgs = new DoWorkEventArgs(request.Argument);
-        if (_myDoWork != null)
-        {
-          _myDoWork.Invoke(this, doWorkEventArgs);
-        }
-#pragma warning disable CS0618 // Type or member is obsolete
+        _myDoWork?.Invoke(this, doWorkEventArgs);
         e.Result = new WorkerAsyncResult(doWorkEventArgs.Result, null);
-#pragma warning restore CS0618 // Type or member is obsolete
         e.Cancel = doWorkEventArgs.Cancel;
       }
       // must implement exception handling and return exception in WorkerAsyncResult
       catch (Exception ex)
       {
-#pragma warning disable CS0618 // Type or member is obsolete
         e.Result = new WorkerAsyncResult(null, ex);
-#pragma warning restore CS0618 // Type or member is obsolete
       }
     }
 
@@ -286,10 +279,7 @@ namespace Csla.Threading
       }
 
 
-      if (_myWorkerCompleted != null)
-      {
-        _myWorkerCompleted.Invoke(this, new RunWorkerCompletedEventArgs(result, error, e.Cancelled));
-      }
+      _myWorkerCompleted?.Invoke(this, new RunWorkerCompletedEventArgs(result, error, e.Cancelled));
     }
 
     /// <summary>
@@ -302,10 +292,7 @@ namespace Csla.Threading
     /// </exception>
     private void InternalProgressChanged(object sender, ProgressChangedEventArgs e)
     {
-      if (_myWorkerProgressChanged != null)
-      {
-        _myWorkerProgressChanged.Invoke(this, new ProgressChangedEventArgs(e.ProgressPercentage, e.UserState));
-      }
+      _myWorkerProgressChanged?.Invoke(this, new ProgressChangedEventArgs(e.ProgressPercentage, e.UserState));
     }
 
     /// <summary>

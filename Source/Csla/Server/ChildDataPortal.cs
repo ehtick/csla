@@ -5,8 +5,6 @@
 // </copyright>
 // <summary>Invoke data portal methods on child</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Threading.Tasks;
 
 namespace Csla.Server
 {
@@ -22,13 +20,13 @@ namespace Csla.Server
     /// <param name="applicationContext"></param>
     public ChildDataPortal(ApplicationContext applicationContext)
     {
-      ApplicationContext = applicationContext;
+      _applicationContext = applicationContext;
     }
 
     /// <summary>
     /// Gets or sets the current ApplicationContext object.
     /// </summary>
-    private ApplicationContext ApplicationContext { get; set; }
+    private ApplicationContext _applicationContext;
 
     /// <summary>
     /// Create a new business object.
@@ -90,7 +88,7 @@ namespace Csla.Server
       var eventArgs = new DataPortalEventArgs(null, objectType, parameters, DataPortalOperations.Create);
       try
       {
-        obj = ApplicationContext.CreateInstanceDI<DataPortalTarget>(ApplicationContext.CreateInstanceDI(objectType));
+        obj = _applicationContext.CreateInstanceDI<DataPortalTarget>(_applicationContext.CreateInstanceDI(objectType));
         //ApplicationContext.DataPortalActivator.InitializeInstance(obj.Instance);
         obj.Child_OnDataPortalInvoke(eventArgs);
         obj.MarkAsChild();
@@ -104,8 +102,7 @@ namespace Csla.Server
       {
         try
         {
-          if (obj != null)
-            obj.Child_OnDataPortalException(eventArgs, ex);
+          obj?.Child_OnDataPortalException(eventArgs, ex);
         }
         catch
         {
@@ -186,7 +183,7 @@ namespace Csla.Server
       try
       {
         // create an instance of the business object
-        obj = ApplicationContext.CreateInstanceDI<DataPortalTarget>(ApplicationContext.CreateInstanceDI(objectType));
+        obj = _applicationContext.CreateInstanceDI<DataPortalTarget>(_applicationContext.CreateInstanceDI(objectType));
         //ApplicationContext.DataPortalActivator.InitializeInstance(obj.Instance);
 
         obj.Child_OnDataPortalInvoke(eventArgs);
@@ -200,8 +197,7 @@ namespace Csla.Server
       {
         try
         {
-          if (obj != null)
-            obj.Child_OnDataPortalException(eventArgs, ex);
+          obj?.Child_OnDataPortalException(eventArgs, ex);
         }
         catch
         {
@@ -257,9 +253,9 @@ namespace Csla.Server
     /// Update a business object.
     /// </summary>
     /// <param name="obj">Business object to update.</param>
-    public async Task UpdateAsync(object obj)
+    public Task UpdateAsync(object obj)
     {
-      await DoUpdateAsync(obj, false, null).ConfigureAwait(false);
+      return DoUpdateAsync(obj, false, null);
     }
 
     /// <summary>
@@ -269,9 +265,9 @@ namespace Csla.Server
     /// <param name="parameters">
     /// Parameters passed to method.
     /// </param>
-    public async Task UpdateAsync(object obj, params object[] parameters)
+    public Task UpdateAsync(object obj, params object[] parameters)
     {
-      await DoUpdateAsync(obj, false, parameters).ConfigureAwait(false);
+      return DoUpdateAsync(obj, false, parameters);
     }
 
     /// <summary>
@@ -299,9 +295,9 @@ namespace Csla.Server
     /// Update a business object. Include objects which are not dirty.
     /// </summary>
     /// <param name="obj">Business object to update.</param>
-    public async Task UpdateAllAsync(object obj)
+    public Task UpdateAllAsync(object obj)
     {
-      await DoUpdateAsync(obj, true, null).ConfigureAwait(false);
+      return DoUpdateAsync(obj, true, null);
     }
 
     /// <summary>
@@ -311,9 +307,9 @@ namespace Csla.Server
     /// <param name="parameters">
     /// Parameters passed to method.
     /// </param>
-    public async Task UpdateAllAsync(object obj, params object[] parameters)
+    public Task UpdateAllAsync(object obj, params object[] parameters)
     {
-      await DoUpdateAsync(obj, true, parameters).ConfigureAwait(false);
+      return DoUpdateAsync(obj, true, parameters);
     }
 
     private async Task DoUpdateAsync(object obj, bool bypassIsDirtyTest, params object[] parameters)
@@ -329,7 +325,7 @@ namespace Csla.Server
 
       var operation = DataPortalOperations.Update;
       Type objectType = obj.GetType();
-      DataPortalTarget lb = ApplicationContext.CreateInstanceDI<DataPortalTarget>(obj);
+      DataPortalTarget lb = _applicationContext.CreateInstanceDI<DataPortalTarget>(obj);
       //ApplicationContext.DataPortalActivator.InitializeInstance(lb.Instance);
 
       try
@@ -344,9 +340,8 @@ namespace Csla.Server
       {
         try
         {
-          if (lb != null)
-            lb.Child_OnDataPortalException(
-              new DataPortalEventArgs(null, objectType, obj, operation), ex);
+          lb?.Child_OnDataPortalException(
+            new DataPortalEventArgs(null, objectType, obj, operation), ex);
         }
         catch
         {

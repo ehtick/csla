@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Csla.Core.LoadManager
+﻿namespace Csla.Core.LoadManager
 {
 
   internal class TaskDataPortalResult : IDataPortalResult
@@ -34,11 +28,11 @@ namespace Csla.Core.LoadManager
       try
       {
         var o = await _loader;
-        result = new TaskDataPortalResult() { Error = null, Object = o };
+        result = new TaskDataPortalResult { Error = null, Object = o };
       }
       catch (Exception ex)
       {
-        result = new TaskDataPortalResult() { Error = ex, Object = null };
+        result = new TaskDataPortalResult { Error = ex, Object = null };
       }
 
       callback(this, result);

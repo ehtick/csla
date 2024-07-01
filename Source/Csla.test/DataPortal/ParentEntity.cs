@@ -5,20 +5,15 @@
 // </copyright>
 // <summary>DO NOT USE in UI - use the factory method instead</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Data;
-using System.Data.SqlClient;
 
 namespace Csla.Test.DataBinding
 {
-  [Serializable()]
+  [Serializable]
   public class ParentEntity : BusinessBase<ParentEntity>
   {
     #region "Business methods"
 
-    [NotUndoable()]
+    [NotUndoable]
     private string _notUndoable;
 
     public string NotUndoable
@@ -101,14 +96,14 @@ namespace Csla.Test.DataBinding
 
     #region "Criteria"
 
-    [Serializable()]
+    [Serializable]
     private class Criteria
     {
       public int _id;
 
       public Criteria(int id)
       {
-        this._id = id;
+        _id = id;
       }
     }
 

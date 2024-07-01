@@ -1,4 +1,4 @@
-﻿#if !NETFX_CORE && !IOS
+﻿#if !IOS
 
 //-----------------------------------------------------------------------
 // <copyright file="UndoableHandler.cs" company="Marimer LLC">
@@ -7,10 +7,8 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
 using System.Reflection;
-#if NET5_0_OR_GREATER
+#if NET8_0_OR_GREATER
 using System.Runtime.Loader;
 
 using Csla.Runtime;
@@ -21,18 +19,17 @@ namespace Csla.Core
 {
     internal static class UndoableHandler
     {
-#if NET5_0_OR_GREATER
-        private static readonly Dictionary<Type, Tuple<string, List<DynamicMemberHandle>>> _undoableFieldCache = 
-          new Dictionary<Type, Tuple<string,  List<DynamicMemberHandle>>>();
+#if NET8_0_OR_GREATER
+        private static readonly Dictionary<Type, Tuple<string, List<DynamicMemberHandle>>> _undoableFieldCache = [];
 #else
-        private static readonly Dictionary<Type, List<DynamicMemberHandle>> _undoableFieldCache = new Dictionary<Type, List<DynamicMemberHandle>>();
+        private static readonly Dictionary<Type, List<DynamicMemberHandle>> _undoableFieldCache = [];
 #endif
 
         public static List<DynamicMemberHandle> GetCachedFieldHandlers(Type type)
         {
             List<DynamicMemberHandle> handlers;
 
-#if NET5_0_OR_GREATER
+#if NET8_0_OR_GREATER
             var found = _undoableFieldCache.TryGetValue(type, out var handlersInfo);
 
             handlers = handlersInfo?.Item2;
@@ -108,7 +105,7 @@ namespace Csla.Core
             // see if this field is marked as not undoable or IsInitOnly (ie: readonly property)
             return field.IsInitOnly || Attribute.IsDefined(field, typeof(NotUndoableAttribute));
         }
-#if NET5_0_OR_GREATER
+#if NET8_0_OR_GREATER
 
         private static void OnAssemblyLoadContextUnload(AssemblyLoadContext context)
         {

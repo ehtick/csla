@@ -4,7 +4,6 @@
   {
     public static class AnalyzerIdentifiers
     {
-      public const string IsBusinessObjectSerializable = "CSLA0001";
       public const string IsOperationMethodPublic = "CSLA0002";
       public const string PublicNoArgumentConstructorIsMissing = "CSLA0003";
       public const string ConstructorHasParameters = "CSLA0004";
@@ -23,6 +22,9 @@
       public const string BusinessRuleContextUsage = "CSLA0017";
       public const string CompleteInExecuteAsync = "CSLA0018";
       public const string RefOrOutParameterInOperation = "CSLA0019";
+      public const string ObjectAuthorizationRulesAttributeMissing = "CSLA0020";
+      public const string ObjectAuthorizationRulesPublic = "CSLA0021";
+      public const string ObjectAuthorizationRulesStatic = "CSLA0022";
     }
 
     public static class Categories

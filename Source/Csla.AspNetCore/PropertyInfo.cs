@@ -5,11 +5,8 @@
 // </copyright>
 // <summary>Exposes metastate for a property</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Linq;
-using System.Collections.Generic;
+
 using System.ComponentModel;
-using System.Text;
 using Csla.Rules;
 
 namespace Csla.AspNetCore
@@ -19,7 +16,7 @@ namespace Csla.AspNetCore
   /// </summary>
   public class PropertyInfo : INotifyPropertyChanged
   {
-    private object Model { get; }
+    private object? Model { get; }
     private string PropertyName { get; }
 
     /// <summary>
@@ -27,7 +24,7 @@ namespace Csla.AspNetCore
     /// </summary>
     /// <param name="model">Model object</param>
     /// <param name="propertyName">Property name</param>
-    public PropertyInfo(object model, string propertyName)
+    public PropertyInfo(object? model, string propertyName)
     {
       Model = model;
       PropertyName = propertyName;
@@ -37,7 +34,7 @@ namespace Csla.AspNetCore
       }
     }
 
-    private void Npc_PropertyChanged(object sender, PropertyChangedEventArgs e)
+    private void Npc_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
       if (e.PropertyName == "IsBusy")
         OnPropertyChanged(nameof(IsBusy));
@@ -49,7 +46,7 @@ namespace Csla.AspNetCore
     /// </summary>
     public void Refresh()
     {
-      foreach (var item in this.GetType().GetProperties())
+      foreach (var item in GetType().GetProperties())
         OnPropertyChanged(item.Name);
     }
 
@@ -57,7 +54,6 @@ namespace Csla.AspNetCore
     /// Gets the validation error messages for a
     /// property on the Model
     /// </summary>
-    /// <returns></returns>
     public string ErrorText
     {
       get
@@ -73,7 +69,6 @@ namespace Csla.AspNetCore
     /// Gets the validation warning messages for a
     /// property on the Model
     /// </summary>
-    /// <returns></returns>
     public string WarningText
     {
       get
@@ -89,7 +84,6 @@ namespace Csla.AspNetCore
     /// Gets the validation information messages for a
     /// property on the Model
     /// </summary>
-    /// <returns></returns>
     public string InformationText
     {
       get
@@ -105,7 +99,6 @@ namespace Csla.AspNetCore
     /// Gets a value indicating whether the current user
     /// is authorized to read the property on the Model
     /// </summary>
-    /// <returns></returns>
     public bool CanRead
     {
       get
@@ -121,7 +114,6 @@ namespace Csla.AspNetCore
     /// Gets a value indicating whether the current user
     /// is authorized to change the property on the Model
     /// </summary>
-    /// <returns></returns>
     public bool CanWrite
     {
       get
@@ -137,7 +129,6 @@ namespace Csla.AspNetCore
     /// Gets a value indicating whether the property 
     /// on the Model is busy
     /// </summary>
-    /// <returns></returns>
     public bool IsBusy
     {
       get
@@ -152,7 +143,7 @@ namespace Csla.AspNetCore
     /// <summary>
     /// Event raised when a property changes.
     /// </summary>
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     private void OnPropertyChanged(string propertyName)
     {

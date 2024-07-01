@@ -5,11 +5,6 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Csla;
-using Csla.Serialization;
 
 namespace Csla.Test.ValidationRules
 {
@@ -25,7 +20,7 @@ namespace Csla.Test.ValidationRules
 
     protected override void AddBusinessRules()
     {
-      BusinessRules.AddRule(new Csla.Rules.CommonRules.Required(TestProperty));
+      BusinessRules.AddRule(new Rules.CommonRules.Required(TestProperty));
       BusinessRules.AddRule(new AlwaysWarns { PrimaryProperty = TestProperty });
       BusinessRules.AddRule(new AlwaysFails { PrimaryProperty = TestProperty, Priority = 10 });
     }

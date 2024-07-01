@@ -5,22 +5,8 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnitDriven;
-#if !NUNIT
+
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.IO;
-using Csla.Reflection;
-#else
-using NUnit.Framework;
-using TestClass = NUnit.Framework.TestFixtureAttribute;
-using TestInitialize = NUnit.Framework.SetUpAttribute;
-using TestCleanup = NUnit.Framework.TearDownAttribute;
-using TestMethod = NUnit.Framework.TestAttribute;
-#endif
 
 namespace Csla.Test.MethodCaller
 {
@@ -71,7 +57,7 @@ namespace Csla.Test.MethodCaller
     {
       var expected = "two";
       Csla.Reflection.MethodCaller.CallPropertySetter(this, "Test2", expected);
-      Assert.AreEqual(expected, this.one);
+      Assert.AreEqual(expected, one);
     }
 
     [TestMethod]
@@ -79,7 +65,7 @@ namespace Csla.Test.MethodCaller
     {
       var expected = "three";
       Csla.Reflection.MethodCaller.CallPropertySetter(this, "Test3", expected);
-      Assert.AreEqual(expected, this.three);
+      Assert.AreEqual(expected, three);
     }
 
   }

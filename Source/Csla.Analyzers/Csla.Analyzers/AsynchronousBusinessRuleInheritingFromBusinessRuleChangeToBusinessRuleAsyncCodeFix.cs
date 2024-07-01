@@ -1,7 +1,5 @@
 ﻿using System.Collections.Immutable;
 using System.Composition;
-using System.Linq;
-using System.Threading.Tasks;
 using Csla.Analyzers.Extensions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
@@ -18,7 +16,7 @@ namespace Csla.Analyzers
     : CodeFixProvider
   {
     public override ImmutableArray<string> FixableDiagnosticIds =>
-      ImmutableArray.Create(Constants.AnalyzerIdentifiers.AsynchronousBusinessRuleInheritance);
+      ImmutableArray.Create(AnalyzerIdentifiers.AsynchronousBusinessRuleInheritance);
 
     public sealed override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
 

@@ -4,12 +4,7 @@ using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Csla.Analyzers.Tests
 {
@@ -31,12 +26,14 @@ namespace Csla.Analyzers.Tests
     public async Task VerifyGetFixesWhenConstructorNoArgumentsDoesNotExist()
     {
       var code =
-@"using Csla;
+        """
+        using Csla;
 
-public class A : BusinessBase<A>
-{
-  private A(int a) { }
-}";
+        public class A : BusinessBase<A>
+        {
+          private A(int a) { }
+        }
+        """;
       var document = TestHelpers.Create(code);
       var tree = await document.GetSyntaxTreeAsync();
       var diagnostics = await TestHelpers.GetDiagnosticsAsync(code, new CheckConstructorsAnalyzer());
@@ -68,12 +65,14 @@ public class A : BusinessBase<A>
     public async Task VerifyGetFixesWhenPrivateConstructorNoArgumentsExists()
     {
       var code =
-@"using Csla;
+        """
+        using Csla;
 
-public class A : BusinessBase<A>
-{
-  private A() { }
-}";
+        public class A : BusinessBase<A>
+        {
+          private A() { }
+        }
+        """;
       var document = TestHelpers.Create(code);
       var tree = await document.GetSyntaxTreeAsync();
       var diagnostics = await TestHelpers.GetDiagnosticsAsync(code, new CheckConstructorsAnalyzer());
@@ -105,13 +104,15 @@ public class A : BusinessBase<A>
     public async Task VerifyGetFixesWhenPrivateConstructorNoArgumentsExistsAndLeadingTriviaExists()
     {
       var code =
-@"using Csla;
+        """
+        using Csla;
 
-public class A : BusinessBase<A>
-{
-  // Hey! Don't loose me! 
-  private A() { }
-}";
+        public class A : BusinessBase<A>
+        {
+          // Hey! Don't loose me!
+          private A() { }
+        }
+        """;
       var document = TestHelpers.Create(code);
       var tree = await document.GetSyntaxTreeAsync();
       var diagnostics = await TestHelpers.GetDiagnosticsAsync(code, new CheckConstructorsAnalyzer());
@@ -145,12 +146,14 @@ public class A : BusinessBase<A>
     public async Task VerifyGetFixesWhenPrivateConstructorNoArgumentsExistsAndTrailingTriviaExists()
     {
       var code =
-@"using Csla;
+        """
+        using Csla;
 
-public class A : BusinessBase<A>
-{
-  private A()/* And not this either */ { }
-}";
+        public class A : BusinessBase<A>
+        {
+          private A()/* And not this either */ { }
+        }
+        """;
       var document = TestHelpers.Create(code);
       var tree = await document.GetSyntaxTreeAsync();
       var diagnostics = await TestHelpers.GetDiagnosticsAsync(code, new CheckConstructorsAnalyzer());
@@ -181,21 +184,71 @@ public class A : BusinessBase<A>
     }
 
     [TestMethod]
+    public async Task VerifyGetFixesWhenPrivateConstructorNoArgumentsExists2()
+    {
+      var code =
+        """
+        using Csla;
+
+        namespace BusinessLibrary
+        {
+
+          [Serializable]
+          public class A : BusinessBase<A>
+          {
+            private static int x = 5;
+
+            private A()
+            {
+            }
+          }
+        }
+        """;
+      var document = TestHelpers.Create(code);
+      var tree = await document.GetSyntaxTreeAsync();
+      var diagnostics = await TestHelpers.GetDiagnosticsAsync(code, new CheckConstructorsAnalyzer());
+
+      var actions = new List<CodeAction>();
+      var codeActionRegistration = new Action<CodeAction, ImmutableArray<Diagnostic>>(
+        (a, _) => { actions.Add(a); });
+
+      var fix = new CheckConstructorsAnalyzerPublicConstructorCodeFix();
+      var codeFixContext = new CodeFixContext(document, diagnostics[0],
+        codeActionRegistration, new CancellationToken(false));
+      await fix.RegisterCodeFixesAsync(codeFixContext);
+
+      Assert.AreEqual(1, actions.Count, nameof(actions.Count));
+
+      await TestHelpers.VerifyChangesAsync(actions,
+        CheckConstructorsAnalyzerPublicConstructorCodeFixConstants.UpdateNonPublicConstructorToPublicDescription, document,
+        (model, newRoot) =>
+        {
+          var classNode = newRoot.DescendantNodes(_ => true).OfType<ClassDeclarationSyntax>().Single();
+          var classSymbol = model.GetDeclaredSymbol(classNode);
+          var methodSymbol = classSymbol.GetMembers().OfType<IMethodSymbol>()
+            .Single(_ => _.MethodKind == MethodKind.Constructor && _.Name == ".ctor" && _.DeclaredAccessibility == Accessibility.Public);
+          Assert.IsTrue(methodSymbol.Parameters.Length == 0);
+        });
+    }
+
+    [TestMethod]
     public async Task VerifyGetFixesWhenPrivateConstructorNoArgumentsExistsWithNestedClasses()
     {
       var code =
-@"using Csla;
+        """
+        using Csla;
 
-public class A : BusinessBase<A>
-{
-  public A() { }
-
-  public class B
-    : BusinessBase<B>
-  {
-    private B() { }
-  }
-}";
+        public class A : BusinessBase<A>
+        {
+          public A() { }
+        
+          public class B
+            : BusinessBase<B>
+          {
+            private B() { }
+          }
+        }
+        """;
       var document = TestHelpers.Create(code);
       var tree = await document.GetSyntaxTreeAsync();
       var diagnostics = await TestHelpers.GetDiagnosticsAsync(code, new CheckConstructorsAnalyzer());

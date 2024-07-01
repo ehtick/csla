@@ -5,8 +5,8 @@
 // </copyright>
 // <summary>Base class used to create business and validation</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
+
+using Csla.Core;
 using Csla.Properties;
 
 namespace Csla.Rules
@@ -17,11 +17,12 @@ namespace Csla.Rules
   /// </summary>
   public abstract class BusinessRuleBase : IBusinessRuleBase
   {
-    private Csla.Core.IPropertyInfo _primaryProperty;
+    private IPropertyInfo _primaryProperty;
     private RunModes _runMode;
     private bool _provideTargetWhenAsync;
     private int _priority;
     private RuleUri _ruleUri;
+    private int _displayIndex;
 
     /// <summary>
     /// If true, rule will only cascade if the primary property
@@ -39,14 +40,14 @@ namespace Csla.Rules
     /// <summary>
     /// Gets or sets the primary property affected by this rule.
     /// </summary>
-    public virtual Csla.Core.IPropertyInfo PrimaryProperty
+    public virtual IPropertyInfo PrimaryProperty
     {
       get { return _primaryProperty; }
       set
       {
-        CanWriteProperty("PrimaryProperty");
+        CanWriteProperty(nameof(PrimaryProperty));
         _primaryProperty = value;
-        this.RuleUri = new RuleUri(this, value);
+        RuleUri = new RuleUri(this, value);
         if (_primaryProperty != null)
           AffectedProperties.Add(_primaryProperty);
       }
@@ -57,13 +58,13 @@ namespace Csla.Rules
     /// properties are executed after rules for the primary
     /// property.
     /// </summary>
-    public List<Csla.Core.IPropertyInfo> AffectedProperties { get; }
+    public List<IPropertyInfo> AffectedProperties { get; }
 
     /// <summary>
     /// Gets a list of secondary property values to be supplied to the
     /// rule when it is executed.
     /// </summary>
-    public List<Csla.Core.IPropertyInfo> InputProperties { get; protected set; }
+    public List<IPropertyInfo> InputProperties { get; }
 
     /// <summary>
     /// Gets a value indicating whether the rule will run
@@ -81,7 +82,7 @@ namespace Csla.Rules
       get { return _provideTargetWhenAsync; }
       protected set
       {
-        CanWriteProperty("ProvideTargetWhenAsync");
+        CanWriteProperty(nameof(ProvideTargetWhenAsync));
         _provideTargetWhenAsync = value;
       }
     }
@@ -91,7 +92,7 @@ namespace Csla.Rules
     /// of the rule within the context of the business object
     /// where the rule is used.
     /// </summary>
-    public string RuleName { get { return this.RuleUri.ToString(); } }
+    public string RuleName { get { return RuleUri.ToString(); } }
 
     /// <summary>
     /// Sets or gets the rule:// URI object for this rule.
@@ -101,7 +102,7 @@ namespace Csla.Rules
       get { return _ruleUri; }
       set
       {
-        CanWriteProperty("RuleUri");
+        CanWriteProperty(nameof(RuleUri));
         _ruleUri = value;
       }
     }
@@ -114,7 +115,7 @@ namespace Csla.Rules
       get { return _priority; }
       set
       {
-        CanWriteProperty("Priority");
+        CanWriteProperty(nameof(Priority));
         _priority = value;
       }
     }
@@ -128,8 +129,20 @@ namespace Csla.Rules
       get { return _runMode; }
       set
       {
-        CanWriteProperty("RunMode");
+        CanWriteProperty(nameof(RunMode));
         _runMode = value;
+      }
+    }
+    /// <summary>
+    /// Gets the rule DisplayIndex in UI.
+    /// </summary>
+    public int DisplayIndex
+    {
+      get { return _displayIndex; }
+      set
+      {
+        CanWriteProperty(nameof(DisplayIndex));
+        _displayIndex = value;
       }
     }
 
@@ -139,8 +152,8 @@ namespace Csla.Rules
     /// <param name="argument"></param>
     protected void CanWriteProperty(string argument)
     {
-      if (PropertiesLocked) throw
-        new ArgumentException(string.Format("{0} ({1})", Resources.PropertySetNotAllowed, argument), argument);
+      if (PropertiesLocked) 
+        throw new ArgumentException($"{Resources.PropertySetNotAllowed} ({argument})", argument);
     }
 
     /// <summary>
@@ -148,12 +161,12 @@ namespace Csla.Rules
     /// to a specfic property.
     /// </summary>
     /// <param name="primaryProperty">Primary property for this rule.</param>
-    protected BusinessRuleBase(Csla.Core.IPropertyInfo primaryProperty)
+    protected BusinessRuleBase(IPropertyInfo primaryProperty)
     {
-      AffectedProperties = new List<Core.IPropertyInfo>();
-      InputProperties = new List<Core.IPropertyInfo>();
+      AffectedProperties = [];
+      InputProperties = [];
       PrimaryProperty = primaryProperty;
-      this.RuleUri = new RuleUri(this, primaryProperty);
+      RuleUri = new RuleUri(this, primaryProperty);
       RunMode = RunModes.Default;
     }
 
@@ -175,9 +188,9 @@ namespace Csla.Rules
     /// Loading values does not cause validation rules to be
     /// invoked.
     /// </remarks>
-    protected void LoadProperty(object obj, Csla.Core.IPropertyInfo propertyInfo, object newValue)
+    protected void LoadProperty(object obj, IPropertyInfo propertyInfo, object newValue)
     {
-      if (obj is Core.IManageProperties target)
+      if (obj is IManageProperties target)
         target.LoadProperty(propertyInfo, newValue);
       else
         throw new ArgumentException(Resources.IManagePropertiesRequiredException);
@@ -194,9 +207,9 @@ namespace Csla.Rules
     /// <remarks>
     /// No authorization checks occur when this method is called.
     /// </remarks>
-    protected object ReadProperty(object obj, Csla.Core.IPropertyInfo propertyInfo)
+    protected object ReadProperty(object obj, IPropertyInfo propertyInfo)
     {
-      if (obj is Core.IManageProperties target)
+      if (obj is IManageProperties target)
         return target.ReadProperty(propertyInfo);
       else
         throw new ArgumentException(Resources.IManagePropertiesRequiredException);

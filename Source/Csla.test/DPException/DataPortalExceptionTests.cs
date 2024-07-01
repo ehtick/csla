@@ -5,30 +5,13 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Csla.Test.Security;
-using System.Data;
-using System.Data.SqlClient;
+
 using Csla.TestHelpers;
-using Csla.Configuration;
-
-
-#if !NUNIT
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-#else
-using NUnit.Framework;
-using TestClass = NUnit.Framework.TestFixtureAttribute;
-using TestInitialize = NUnit.Framework.SetUpAttribute;
-using TestCleanup = NUnit.Framework.TearDownAttribute;
-using TestMethod = NUnit.Framework.TestAttribute;
-#endif
 
 namespace Csla.Test.DPException
 {
-  [TestClass()]
+  [TestClass]
   public class DataPortalExceptionTests
   {
     private static TestDIContext _testDIContext;
@@ -46,8 +29,8 @@ namespace Csla.Test.DPException
     }
 
 #if DEBUG
-    [TestMethod()]
-
+    [TestMethod]
+    [TestCategory("SkipOnCIServer")]
     public void CheckInnerExceptionsOnSave()
     {
       IDataPortal<DataPortal.TransactionalRoot> dataPortal = _testDIContext.CreateDataPortal<DataPortal.TransactionalRoot>();
@@ -66,7 +49,7 @@ namespace Csla.Test.DPException
       {
         root = root.Save();
       }
-      catch (Csla.DataPortalException ex)
+      catch (DataPortalException ex)
       {
         baseException = ex.Message;
         baseInnerException = ex.InnerException.Message;
@@ -97,7 +80,7 @@ namespace Csla.Test.DPException
     }
 #endif
 
-    [TestMethod()]
+    [TestMethod]
     public void CheckInnerExceptionsOnDelete()
     {
       IDataPortal<DataPortal.TransactionalRoot> dataPortal = _testDIContext.CreateDataPortal<DataPortal.TransactionalRoot>();
@@ -109,9 +92,9 @@ namespace Csla.Test.DPException
       try
       {
         //this will throw an exception
-        Csla.Test.DataPortal.TransactionalRoot.DeleteTransactionalRoot(13, dataPortal);
+        DataPortal.TransactionalRoot.DeleteTransactionalRoot(13, dataPortal);
       }
-      catch (Csla.DataPortalException ex)
+      catch (DataPortalException ex)
       {
         baseException = ex.Message;
         baseInnerException = ex.InnerException.Message;
@@ -128,7 +111,7 @@ namespace Csla.Test.DPException
       Assert.AreEqual("Called", TestResults.GetResult("OnDataPortalException"));
     }
 
-    [TestMethod()]
+    [TestMethod]
     public void CheckInnerExceptionsOnFetch()
     {
       IDataPortal<DataPortal.TransactionalRoot> dataPortal = _testDIContext.CreateDataPortal<DataPortal.TransactionalRoot>();
@@ -140,10 +123,10 @@ namespace Csla.Test.DPException
       try
       {
         //this will throw an exception
-        Csla.Test.DataPortal.TransactionalRoot root =
-            Csla.Test.DataPortal.TransactionalRoot.GetTransactionalRoot(13, dataPortal);
+        DataPortal.TransactionalRoot root =
+            DataPortal.TransactionalRoot.GetTransactionalRoot(13, dataPortal);
       }
-      catch (Csla.DataPortalException ex)
+      catch (DataPortalException ex)
       {
         baseException = ex.Message;
         baseInnerException = ex.InnerException.Message;
@@ -167,7 +150,7 @@ namespace Csla.Test.DPException
 
       try 
       {
-        Csla.Test.DataPortal.TransactionalRoot root = Csla.Test.DataPortal.TransactionalRoot.GetTransactionalRoot(13, dataPortal);
+        DataPortal.TransactionalRoot root = DataPortal.TransactionalRoot.GetTransactionalRoot(13, dataPortal);
 
         Assert.Fail("The previous operation should have thrown an Exception and not executed successfully.");
       } 

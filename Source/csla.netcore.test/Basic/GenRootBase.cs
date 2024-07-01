@@ -5,13 +5,10 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Csla.Test.Basic
 {
-  [Serializable()]
+  [Serializable]
   public abstract class GenRootBase : BusinessBase<GenRoot>
   {
     private string _data = "";
@@ -34,7 +31,7 @@ namespace Csla.Test.Basic
       }
     }
 
-    [Serializable()]
+    [Serializable]
     public class Criteria : CriteriaBase<Criteria>
     {
       public string _data;
@@ -46,7 +43,7 @@ namespace Csla.Test.Basic
 
       public Criteria(string data)
       {
-        this._data = data;
+        _data = data;
       }
     }
 

@@ -5,25 +5,9 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Csla.Threading;
-using UnitDriven;
 using Csla.Core;
-using System.ComponentModel;
-
-#if NUNIT
-using NUnit.Framework;
-using TestClass = NUnit.Framework.TestFixtureAttribute;
-using TestInitialize = NUnit.Framework.SetUpAttribute;
-using TestCleanup = NUnit.Framework.TearDownAttribute;
-using TestMethod = NUnit.Framework.TestAttribute;
-using TestSetup = NUnit.Framework.SetUpAttribute;
-#elif MSTEST
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-#endif
 
 namespace Csla.Test.Threading
 {
@@ -42,18 +26,17 @@ namespace Csla.Test.Threading
       public void MarkBusy(bool busy)
       {
         IsBusy = busy;
-        if (BusyChanged != null)
-          BusyChanged(this, new BusyChangedEventArgs("", busy));
+        BusyChanged?.Invoke(this, new BusyChangedEventArgs("", busy));
       }
 
-      public event BusyChangedEventHandler BusyChanged;      
+      public event BusyChangedEventHandler BusyChanged;
 
-      public event EventHandler<ErrorEventArgs> UnhandledAsyncException;
+      public event EventHandler<Core.ErrorEventArgs> UnhandledAsyncException;
 
       protected virtual void OnUnhandledAsyncException()
       {
         if (UnhandledAsyncException != null)
-          UnhandledAsyncException(this, new ErrorEventArgs(null, null));
+          UnhandledAsyncException(this, new Core.ErrorEventArgs(null, null));
       }
     }
 
@@ -65,7 +48,7 @@ namespace Csla.Test.Threading
       System.ComponentModel.BackgroundWorker worker = new System.ComponentModel.BackgroundWorker();
       worker.DoWork += (_, _) => 
       {
-        System.Threading.Thread.Sleep(10);
+        Thread.Sleep(10);
         busy.MarkBusy(false);
       };
       worker.RunWorkerAsync();

@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 
 namespace Csla.Analyzers.Extensions
 {
@@ -76,6 +75,21 @@ namespace Csla.Analyzers.Extensions
           @this.Name == CslaMemberConstants.Operations.ChildExecute;
         var byAttribute = @this.GetAttributes().Any(_ => _.AttributeClass.IsDataPortalChildOperationAttribute());
         return new DataPortalOperationQualification(byNamingConvention, byAttribute);
+      }
+    }
+
+    internal static CslaOperationQualification IsAddObjectAuthorizationRulesOperation(this IMethodSymbol @this)
+    {
+      if (@this is null)
+      {
+        return new CslaOperationQualification();
+      }
+      else
+      {
+        var byNamingConvention =
+          @this.Name == CslaMemberConstants.Operations.AddObjectAuthorizationRules;
+        var byAttribute = @this.GetAttributes().Any(_ => _.AttributeClass.IsObjectAuthorizationRulesAttribute());
+        return new CslaOperationQualification(byNamingConvention, byAttribute);
       }
     }
   }

@@ -3,13 +3,8 @@ using Csla.Core;
 using Csla.TestHelpers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Csla.Test.ChildChanged
 {
@@ -41,7 +36,7 @@ namespace Csla.Test.ChildChanged
     private static int _SequenceID = 0;
     protected static int NextSequenceID => _SequenceID++;
 
-    protected static List<EventDetail> EventDetails = new List<EventDetail>();
+    protected static List<EventDetail> EventDetails = [];
 
 
     [Serializable]
@@ -76,7 +71,7 @@ namespace Csla.Test.ChildChanged
       {
         base.AddBusinessRules();
 
-        BusinessRules.AddRule(new Csla.Rules.CommonRules.Required(NameProperty));
+        BusinessRules.AddRule(new Rules.CommonRules.Required(NameProperty));
 
       }
 
@@ -107,13 +102,13 @@ namespace Csla.Test.ChildChanged
 
       protected override void OnPropertyChanged(string propertyName)
       {
-        EventDetails.Add(new EventDetail() { BO = enumBO.SimpleBO, Depth = Depth, Event = enumEvent.OnPropertyChanged, UniqueID = UniqueID, PropertyName = propertyName });
+        EventDetails.Add(new EventDetail { BO = enumBO.SimpleBO, Depth = Depth, Event = enumEvent.OnPropertyChanged, UniqueID = UniqueID, PropertyName = propertyName });
         base.OnPropertyChanged(propertyName);
       }
 
       protected override void OnChildChanged(ChildChangedEventArgs e)
       {
-        EventDetails.Add(new EventDetail() { BO = enumBO.SimpleBO, Depth = Depth, Event = enumEvent.OnChildChanged, UniqueID = UniqueID, PropertyName = e.PropertyChangedArgs?.PropertyName });
+        EventDetails.Add(new EventDetail { BO = enumBO.SimpleBO, Depth = Depth, Event = enumEvent.OnChildChanged, UniqueID = UniqueID, PropertyName = e.PropertyChangedArgs?.PropertyName });
         base.OnChildChanged(e);
       }
 
@@ -134,13 +129,13 @@ namespace Csla.Test.ChildChanged
 
       protected override void OnPropertyChanged(PropertyChangedEventArgs e)
       {
-        EventDetails.Add(new EventDetail() { BO = enumBO.SimpleBOList, Depth = Depth, Event = enumEvent.OnPropertyChanged, UniqueID = UniqueID, PropertyName = e?.PropertyName });
+        EventDetails.Add(new EventDetail { BO = enumBO.SimpleBOList, Depth = Depth, Event = enumEvent.OnPropertyChanged, UniqueID = UniqueID, PropertyName = e?.PropertyName });
         base.OnPropertyChanged(e);
       }
 
       protected override void OnChildChanged(ChildChangedEventArgs e)
       {
-        EventDetails.Add(new EventDetail() { BO = enumBO.SimpleBOList, Depth = Depth, Event = enumEvent.OnChildChanged, UniqueID = UniqueID, PropertyName = e.PropertyChangedArgs?.PropertyName });
+        EventDetails.Add(new EventDetail { BO = enumBO.SimpleBOList, Depth = Depth, Event = enumEvent.OnChildChanged, UniqueID = UniqueID, PropertyName = e.PropertyChangedArgs?.PropertyName });
         base.OnChildChanged(e);
       }
 
@@ -179,19 +174,19 @@ namespace Csla.Test.ChildChanged
     private void ChildList_ChildChanged(object sender, ChildChangedEventArgs e)
     {
       var list = sender as SimpleBOList ?? throw new ArgumentNullException("Not a SimpleBOList");
-      EventDetails.Add(new EventDetail() { BO = enumBO.SimpleBOList, Depth = list[0].Depth, Event = enumEvent.ChildChanged, UniqueID = list.UniqueID, PropertyName = e.PropertyChangedArgs?.PropertyName });
+      EventDetails.Add(new EventDetail { BO = enumBO.SimpleBOList, Depth = list[0].Depth, Event = enumEvent.ChildChanged, UniqueID = list.UniqueID, PropertyName = e.PropertyChangedArgs?.PropertyName });
     }
 
     private void Result_ChildChanged(object sender, ChildChangedEventArgs e)
     {
       var bo = sender as SimpleBO ?? throw new ArgumentNullException("Not a SimpleBO");
-      EventDetails.Add(new EventDetail() { BO = enumBO.SimpleBO, Depth = bo.Depth, Event = enumEvent.ChildChanged, UniqueID = bo.UniqueID, PropertyName = e.PropertyChangedArgs?.PropertyName });
+      EventDetails.Add(new EventDetail { BO = enumBO.SimpleBO, Depth = bo.Depth, Event = enumEvent.ChildChanged, UniqueID = bo.UniqueID, PropertyName = e.PropertyChangedArgs?.PropertyName });
     }
 
     private void Result_PropertyChanged(object sender, PropertyChangedEventArgs e)
     {
       var bo = sender as SimpleBO ?? throw new ArgumentNullException("Not a SimpleBO");
-      EventDetails.Add(new EventDetail() { BO = enumBO.SimpleBO, Depth = bo.Depth, Event = enumEvent.PropertyChanged, UniqueID = bo.UniqueID, PropertyName = e.PropertyName });
+      EventDetails.Add(new EventDetail { BO = enumBO.SimpleBO, Depth = bo.Depth, Event = enumEvent.PropertyChanged, UniqueID = bo.UniqueID, PropertyName = e.PropertyName });
     }
 
     [ClassInitialize]

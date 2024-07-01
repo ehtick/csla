@@ -5,20 +5,10 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Csla.TestHelpers;
 
-#if !NUNIT
+using Csla.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-#else
-using NUnit.Framework;
-using TestClass = NUnit.Framework.TestFixtureAttribute;
-using TestInitialize = NUnit.Framework.SetUpAttribute;
-using TestCleanup = NUnit.Framework.TearDownAttribute;
-using TestMethod = NUnit.Framework.TestAttribute;
-#endif 
+
 
 namespace Csla.Test.IO
 {
@@ -43,7 +33,7 @@ namespace Csla.Test.IO
     [TestCategory("SkipWhenLiveUnitTesting")]
     public void SaveNewRoot()
     {
-      Csla.Test.Basic.Root root = NewRoot();
+      Basic.Root root = NewRoot();
 
       root.Data = "saved";
       Assert.AreEqual("saved", root.Data);
@@ -66,7 +56,7 @@ namespace Csla.Test.IO
     [TestCategory("SkipWhenLiveUnitTesting")]
     public void SaveOldRoot()
     {
-      Csla.Test.Basic.Root root = GetRoot("old");
+      Basic.Root root = GetRoot("old");
 
       root.Data = "saved";
       Assert.AreEqual("saved", root.Data);
@@ -88,7 +78,7 @@ namespace Csla.Test.IO
     [TestCategory("SkipWhenLiveUnitTesting")]
     public void LoadRoot()
     {
-      Csla.Test.Basic.Root root = GetRoot("loaded");
+      Basic.Root root = GetRoot("loaded");
       Assert.IsNotNull(root);
       Assert.AreEqual("Fetched", TestResults.GetResult("Root"));
       Assert.AreEqual("loaded", root.Data);
@@ -102,7 +92,7 @@ namespace Csla.Test.IO
     [TestCategory("SkipWhenLiveUnitTesting")]
     public void DeleteNewRoot()
     {
-      Csla.Test.Basic.Root root = NewRoot();
+      Basic.Root root = NewRoot();
 
       TestResults.Reinitialise();
       root.Delete();
@@ -122,7 +112,7 @@ namespace Csla.Test.IO
     [TestCategory("SkipWhenLiveUnitTesting")]
     public void DeleteOldRoot()
     {
-      Csla.Test.Basic.Root root = GetRoot("old");
+      Basic.Root root = GetRoot("old");
 
       TestResults.Reinitialise();
       root.Delete();

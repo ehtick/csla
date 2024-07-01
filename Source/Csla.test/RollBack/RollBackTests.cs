@@ -5,20 +5,10 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Csla.TestHelpers;
 
-#if !NUNIT
+using Csla.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-#else
-using NUnit.Framework;
-using TestClass = NUnit.Framework.TestFixtureAttribute;
-using TestInitialize = NUnit.Framework.SetUpAttribute;
-using TestCleanup = NUnit.Framework.TearDownAttribute;
-using TestMethod = NUnit.Framework.TestAttribute;
-#endif
+
 
 namespace Csla.Test.RollBack
 {
@@ -45,7 +35,7 @@ namespace Csla.Test.RollBack
     {
       IDataPortal<RollbackRoot> dataPortal = _testDIContext.CreateDataPortal<RollbackRoot>();
 
-      RollbackRoot root = Csla.Test.RollBack.RollbackRoot.NewRoot(dataPortal);
+      RollbackRoot root = RollbackRoot.NewRoot(dataPortal);
 
       root.BeginEdit();
       root.Data = "saved";
@@ -74,7 +64,7 @@ namespace Csla.Test.RollBack
     {
       IDataPortal<RollbackRoot> dataPortal = _testDIContext.CreateDataPortal<RollbackRoot>();
 
-      RollbackRoot root = Csla.Test.RollBack.RollbackRoot.NewRoot(dataPortal);
+      RollbackRoot root = RollbackRoot.NewRoot(dataPortal);
 
       root.BeginEdit();
       root.Data = "saved";
@@ -112,7 +102,7 @@ namespace Csla.Test.RollBack
     {
       IDataPortal<RollbackRoot> dataPortal = _testDIContext.CreateDataPortal<RollbackRoot>();
 
-      RollbackRoot root = Csla.Test.RollBack.RollbackRoot.NewRoot(dataPortal);
+      RollbackRoot root = RollbackRoot.NewRoot(dataPortal);
       Assert.AreEqual(true, root.IsDirty, "isdirty is true");
       Assert.AreEqual("<new>", root.Data, "data is '<new>'");
 
@@ -152,7 +142,7 @@ namespace Csla.Test.RollBack
     {
       IDataPortal<DataBinding.ParentEntity> dataPortal = _testDIContext.CreateDataPortal<DataBinding.ParentEntity>();
 
-      Csla.Test.DataBinding.ParentEntity p = Csla.Test.DataBinding.ParentEntity.NewParentEntity(dataPortal);
+      DataBinding.ParentEntity p = DataBinding.ParentEntity.NewParentEntity(dataPortal);
       p.PropertyChanged += p_PropertyChanged;
 
       p.BeginEdit();

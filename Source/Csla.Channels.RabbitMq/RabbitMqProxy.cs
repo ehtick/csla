@@ -5,8 +5,8 @@
 // </copyright>
 // <summary>Implements a data portal proxy to relay data portal</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Threading.Tasks;
+
+using System.Diagnostics.CodeAnalysis;
 using Csla.DataPortalClient;
 using Csla.Server;
 using RabbitMQ.Client;
@@ -25,51 +25,52 @@ namespace Csla.Channels.RabbitMq
     /// </summary>
     /// <param name="applicationContext"></param>
     /// <param name="options">Proxy options</param>
+    /// <exception cref="ArgumentNullException"><paramref name="applicationContext"/> or <paramref name="options"/> is <see langword="null"/>.</exception>
     public RabbitMqProxy(ApplicationContext applicationContext, RabbitMqProxyOptions options)
       : base(applicationContext)
     {
-      DataPortalUrl = options.DataPortalUrl;
-    }
+      if (options is null)
+        throw new ArgumentNullException(nameof(options));
 
-    /// <summary>
-    /// Gets or sets the timeout for network
-    /// operations in seconds (default is 30 seconds).
-    /// </summary>
-    public override int Timeout { get; set; } = 30;
+      DataPortalUrl = options.DataPortalUrl;
+      Timeout = (int)options.Timeout.TotalSeconds;
+    }
 
     /// <summary>
     /// Gets or sets the connection to the RabbitMQ service.
     /// </summary>
-    protected IConnection Connection { get; set; }
+    protected IConnection? Connection { get; set; }
 
     /// <summary>
     /// Gets or sets the channel (model) for RabbitMQ.
     /// </summary>
-    protected IModel Channel { get; set; }
+    protected IModel? Channel { get; set; }
 
     /// <summary>
     /// Gets or sets the name of the data portal
     /// service queue.
     /// </summary>
-    protected string DataPortalQueueName { get; set; }
+    protected string DataPortalQueueName { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the queue listener that handles
     /// reply messages.
     /// </summary>
-    private ProxyListener QueueListener { get; set; }
+    private ProxyListener? QueueListener { get; set; }
 
     /// <summary>
     /// Method responsible for creating the Connection,
     /// Channel, ReplyQueue, and DataPortalQueueName values
     /// used for bi-directional communication.
     /// </summary>
+#if NET8_0_OR_GREATER
+    [MemberNotNull(nameof(Connection), nameof(Channel), nameof(QueueListener))]
+#endif
     protected virtual void InitializeRabbitMQ()
     {
-      if (Connection == null)
+      if (Connection == null || Channel == null || QueueListener == null)
       {
         var url = new Uri(DataPortalUrl);
-        Console.WriteLine($"Initializing {DataPortalUrl}");
         if (url.Scheme != "rabbitmq")
           throw new UriFormatException("Scheme != rabbitmq://");
         if (string.IsNullOrWhiteSpace(url.Host))
@@ -77,8 +78,7 @@ namespace Csla.Channels.RabbitMq
         DataPortalQueueName = url.AbsolutePath.Substring(1);
         if (string.IsNullOrWhiteSpace(DataPortalQueueName))
           throw new UriFormatException("DataPortalQueueName");
-        Console.WriteLine($"Will send to queue {DataPortalQueueName}");
-        var factory = new ConnectionFactory() { HostName = url.Host };
+        var factory = new ConnectionFactory { HostName = url.Host };
         if (url.Port < 0)
           factory.Port = url.Port;
         var userInfo = url.UserInfo.Split(':');
@@ -99,7 +99,6 @@ namespace Csla.Channels.RabbitMq
     private void DisposeRabbitMq()
     {
       QueueListener?.Dispose();
-      Connection?.Close();
       Channel?.Dispose();
       Connection?.Dispose();
       Channel = null;
@@ -219,21 +218,21 @@ namespace Csla.Channels.RabbitMq
     protected override async Task<byte[]> CallDataPortalServer(byte[] serialized, string operation, string routingToken, bool isSync)
     {
       var correlationId = Guid.NewGuid().ToString();
-      var resetEvent = new Csla.Threading.AsyncManualResetEvent();
-      var wip = Wip.WorkInProgress.GetOrAdd(correlationId, new WipItem { ResetEvent = resetEvent });
+      var resetEvent = new Threading.AsyncManualResetEvent();
+      var wip = Wip.WorkInProgress.GetOrAdd(correlationId, new WipItem(resetEvent));
 
-      SendMessage(QueueListener.ReplyQueue.QueueName, correlationId, operation, serialized);
+      SendMessage(QueueListener!.ReplyQueue!.QueueName, correlationId, operation, serialized);
 
       var timeout = Task.Delay(Timeout * 1000);
       if (await Task.WhenAny(wip.ResetEvent.WaitAsync(), timeout) == timeout)
         throw new TimeoutException();
 
-      return wip.Response;
+      return wip.Response!;
     }
 
     private void SendMessage(string sender, string correlationId, string operation, byte[] request)
     {
-      var props = Channel.CreateBasicProperties();
+      var props = Channel!.CreateBasicProperties();
       if (!string.IsNullOrWhiteSpace(sender))
         props.ReplyTo = sender;
       props.CorrelationId = correlationId;

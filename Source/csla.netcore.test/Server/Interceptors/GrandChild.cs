@@ -5,15 +5,13 @@
 // </copyright>
 // <summary>Business object type for use in tests</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Text;
+
 using System.Data;
 using System.ComponentModel.DataAnnotations;
 
 namespace Csla.Test.Server.Interceptors
 {
-  [Serializable()]
+  [Serializable]
   public class GrandChild : BusinessBase<GrandChild>
   {
     public static readonly PropertyInfo<string> DataProperty = RegisterProperty<string>(c => c.Data);

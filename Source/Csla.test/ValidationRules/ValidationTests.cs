@@ -5,31 +5,17 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Linq;
-using System.Collections.Generic;
+
 using System.ComponentModel;
-using System.Text;
 using Csla.Core;
 using Csla.Rules;
 using UnitDriven;
-using Csla.Serialization;
-using System.Threading.Tasks;
 using Csla.TestHelpers;
-
-#if NUNIT
-using NUnit.Framework;
-using TestClass = NUnit.Framework.TestFixtureAttribute;
-using TestInitialize = NUnit.Framework.SetUpAttribute;
-using TestCleanup = NUnit.Framework.TearDownAttribute;
-using TestMethod = NUnit.Framework.TestAttribute;
-#elif MSTEST
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-#endif
 
 namespace Csla.Test.ValidationRules
 {
-  [TestClass()]
+  [TestClass]
   public class ValidationTests : TestBase
   {
 
@@ -47,7 +33,7 @@ namespace Csla.Test.ValidationRules
       TestResults.Reinitialise();
     }
 
-    [TestMethod()]
+    [TestMethod]
     public async Task TestValidationRulesWithPrivateMember()
     {
       //works now because we are calling ValidationRules.CheckRules() in DataPortal_Create
@@ -78,7 +64,7 @@ namespace Csla.Test.ValidationRules
       context.Complete();
     }
 
-    [TestMethod()]
+    [TestMethod]
     public async Task TestValidationRulesWithPublicProperty()
     {
       //should work since ValidationRules.CheckRules() is called in DataPortal_Create
@@ -107,7 +93,7 @@ namespace Csla.Test.ValidationRules
       Assert.AreEqual("Name required", root.BrokenRulesCollection.GetFirstBrokenRule(HasRulesManager2.NameProperty).Description);
     }
 
-    [TestMethod()]
+    [TestMethod]
     public async Task TestValidationAfterEditCycle()
     {
       //should work since ValidationRules.CheckRules() is called in DataPortal_Create
@@ -185,7 +171,7 @@ namespace Csla.Test.ValidationRules
       context.Complete();
     }
 
-    [TestMethod()]
+    [TestMethod]
     public async Task TestValidationRulesAfterClone()
     {
       //this test uses HasRulesManager2, which assigns criteria._name to its public
@@ -205,7 +191,7 @@ namespace Csla.Test.ValidationRules
       Assert.AreEqual(true, rootClone.IsValid);
     }
 
-    [TestMethod()]
+    [TestMethod]
 
     public async Task BreakRequiredRule()
     {
@@ -216,7 +202,7 @@ namespace Csla.Test.ValidationRules
       Assert.AreEqual("Name required", root.BrokenRulesCollection[0].Description);
     }
 
-    [TestMethod()]
+    [TestMethod]
 
     public async Task BreakLengthRule()
     {
@@ -235,7 +221,7 @@ namespace Csla.Test.ValidationRules
       context.Complete();
     }
 
-    [TestMethod()]
+    [TestMethod]
 
     public async Task BreakLengthRuleAndClone()
     {
@@ -260,7 +246,7 @@ namespace Csla.Test.ValidationRules
       context.Complete();
     }
 
-    [TestMethod()]
+    [TestMethod]
     public void RegExSSN()
     {
       UnitTestContext context = GetContext();
@@ -288,7 +274,7 @@ namespace Csla.Test.ValidationRules
       UnitTestContext context = GetContext();
       var root = CreateWithoutCriteria<BrokenRulesMergeRoot>();
       root.Validate();
-      Csla.Rules.BrokenRulesCollection list = root.BrokenRulesCollection;
+      BrokenRulesCollection list = root.BrokenRulesCollection;
       context.Assert.AreEqual(2, list.Count, "Should have 2 broken rules");
       context.Assert.AreEqual("rule://csla.test.validationrules.brokenrulesmergeroot-rulebroken/Test1", list[0].RuleName);
 
@@ -297,27 +283,38 @@ namespace Csla.Test.ValidationRules
     }
 
     [TestMethod]
-    public async Task VerifyUndoableStateStackOnClone()
+    public void BusinessRuleDisplayIndex()
     {
-      using (UnitTestContext context = GetContext())
-      {
-        var root = await CreateHasRulesManager2Async();
-        string expected = root.Name;
-        root.BeginEdit();
-        root.Name = "";
-        HasRulesManager2 rootClone = root.Clone();
-        rootClone.CancelEdit();
+      UnitTestContext context = GetContext();
+      var root = CreateWithoutCriteria<RuleDisplayIndex>();
+      root.Validate();
+      BrokenRulesCollection list = root.BrokenRulesCollection;
+      context.Assert.AreEqual(2, list[0].DisplayIndex, "Should have DisplayIndex");
 
-        string actual = rootClone.Name;
-        context.Assert.AreEqual(expected, actual);
-        context.Assert.Try(rootClone.ApplyEdit);
-
-        context.Assert.Success();
-        context.Complete();
-      }
+      context.Assert.Success();
+      context.Complete();
     }
 
-    [TestMethod()]
+    [TestMethod]
+    public async Task VerifyUndoableStateStackOnClone()
+    {
+      using UnitTestContext context = GetContext();
+      var root = await CreateHasRulesManager2Async();
+      string expected = root.Name;
+      root.BeginEdit();
+      root.Name = "";
+      HasRulesManager2 rootClone = root.Clone();
+      rootClone.CancelEdit();
+
+      string actual = rootClone.Name;
+      context.Assert.AreEqual(expected, actual);
+      context.Assert.Try(rootClone.ApplyEdit);
+
+      context.Assert.Success();
+      context.Complete();
+    }
+
+    [TestMethod]
     public async Task ListChangedEventTrigger()
     {
       UnitTestContext context = GetContext();
@@ -448,20 +445,20 @@ namespace Csla.Test.ValidationRules
       var rule = new TwoProps(TwoPropertyRules.Value1Property, TwoPropertyRules.Value2Property);
 
       var applicationContext = _testDIContext.CreateTestApplicationContext();
-      var ctx = new Csla.Rules.RuleContext(applicationContext, null, rule, root,
-        new Dictionary<Core.IPropertyInfo, object> { 
+      var ctx = new RuleContext(applicationContext, null, rule, root,
+        new Dictionary<IPropertyInfo, object> { 
           { TwoPropertyRules.Value1Property, "a" },
           { TwoPropertyRules.Value2Property, "b" } 
         });
-      ((Csla.Rules.IBusinessRule)rule).Execute(ctx);
+      ((IBusinessRule)rule).Execute(ctx);
       context.Assert.AreEqual(0, ctx.Results.Count);
 
-      ctx = new Csla.Rules.RuleContext(applicationContext, null, rule, root,
-        new Dictionary<Core.IPropertyInfo, object> { 
+      ctx = new RuleContext(applicationContext, null, rule, root,
+        new Dictionary<IPropertyInfo, object> { 
           { TwoPropertyRules.Value1Property, "" },
           { TwoPropertyRules.Value2Property, "a" } 
         });
-      ((Csla.Rules.IBusinessRule)rule).Execute(ctx);
+      ((IBusinessRule)rule).Execute(ctx);
       context.Assert.AreEqual(1, ctx.Results.Count);
 
       context.Assert.Success();
@@ -533,6 +530,22 @@ namespace Csla.Test.ValidationRules
       context.Complete();
     }
 
+    [TestMethod]
+    public void BrokenRulesPriority()
+    {
+      UnitTestContext context = GetContext();
+      var root = CreateWithoutCriteria<BrokenRulesPriority>();
+      root.Name = "z";
+      root.Validate();
+      Csla.Rules.BrokenRulesCollection list = root.BrokenRulesCollection;
+
+      context.Assert.AreEqual(1, list[0].Priority, "Priority of Broken rule.");
+      Assert.AreEqual("Check capitalization", root.BrokenRulesCollection.GetFirstBrokenRule("Name").Description, "'Check capitalization' should be broken (GetFirstBrokenRule)");
+
+      context.Assert.Success();
+      context.Complete();
+    }
+
     private T CreateWithoutCriteria<T>()
     {
       IDataPortal<T> dataPortal = _testDIContext.CreateDataPortal<T>();
@@ -592,7 +605,7 @@ namespace Csla.Test.ValidationRules
       BusinessRules.CheckRules();
     }
 
-    public new Rules.BrokenRulesCollection GetBrokenRules()
+    public new BrokenRulesCollection GetBrokenRules()
     {
       return BusinessRules.GetBrokenRules();
     }
@@ -603,9 +616,9 @@ namespace Csla.Test.ValidationRules
       BusinessRules.AddRule(new BadRule());
     }
 
-    private class BadRule : Rules.BusinessRule
+    private class BadRule : BusinessRule
     {
-      protected override void Execute(Rules.IRuleContext context)
+      protected override void Execute(IRuleContext context)
       {
         throw new InvalidOperationException();
       }
@@ -633,7 +646,7 @@ namespace Csla.Test.ValidationRules
       BusinessRules.CheckRules();
     }
 
-    protected override object ReadProperty(Core.IPropertyInfo propertyInfo)
+    protected override object ReadProperty(IPropertyInfo propertyInfo)
     {
       if (ReferenceEquals(propertyInfo, NameProperty))
         return _name;
@@ -644,7 +657,7 @@ namespace Csla.Test.ValidationRules
     protected override void AddBusinessRules()
     {
       base.AddBusinessRules();
-      BusinessRules.AddRule(new Csla.Rules.CommonRules.Required(NameProperty));
+      BusinessRules.AddRule(new Rules.CommonRules.Required(NameProperty));
     }
 
     [Create]
@@ -680,11 +693,11 @@ namespace Csla.Test.ValidationRules
     protected override void AddBusinessRules()
     {
       base.AddBusinessRules();
-      BusinessRules.AddRule(new Csla.Rules.CommonRules.MinValue<int>(DataProperty, 5));
-      BusinessRules.AddRule(new Csla.Rules.CommonRules.MaxValue<int>(DataProperty, 15));
+      BusinessRules.AddRule(new Rules.CommonRules.MinValue<int>(DataProperty, 5));
+      BusinessRules.AddRule(new Rules.CommonRules.MaxValue<int>(DataProperty, 15));
 
-      BusinessRules.AddRule(new Csla.Rules.CommonRules.MinLength(MinCheckProperty, 5));
-      BusinessRules.AddRule(new Csla.Rules.CommonRules.MaxLength(MaxCheckProperty, 5));
+      BusinessRules.AddRule(new Rules.CommonRules.MinLength(MinCheckProperty, 5));
+      BusinessRules.AddRule(new Rules.CommonRules.MaxLength(MaxCheckProperty, 5));
     }
 
     [Create]
@@ -708,8 +721,8 @@ namespace Csla.Test.ValidationRules
     {
       base.AddBusinessRules();
 
-      BusinessRules.AddRule(new Csla.Rules.CommonRules.MinValue<int>(DataNullableProperty, 5));
-      BusinessRules.AddRule(new Csla.Rules.CommonRules.MaxValue<int>(DataNullableProperty, 15));
+      BusinessRules.AddRule(new Rules.CommonRules.MinValue<int>(DataNullableProperty, 5));
+      BusinessRules.AddRule(new Rules.CommonRules.MaxValue<int>(DataNullableProperty, 15));
     }
 
     [Create]
@@ -744,23 +757,24 @@ namespace Csla.Test.ValidationRules
     }
   }
 
-  public class TwoProps : Csla.Rules.BusinessRule
+  public class TwoProps : BusinessRule
   {
-    public Csla.Core.IPropertyInfo SecondaryProperty { get; set; }
-    public TwoProps(Csla.Core.IPropertyInfo primaryProperty, Csla.Core.IPropertyInfo secondProperty)
+    public IPropertyInfo SecondaryProperty { get; set; }
+    public TwoProps(IPropertyInfo primaryProperty, IPropertyInfo secondProperty)
       : base(primaryProperty)
     {
       SecondaryProperty = secondProperty;
       AffectedProperties.Add(SecondaryProperty);
-      InputProperties = [PrimaryProperty, SecondaryProperty];
+      InputProperties.Add(PrimaryProperty);
+      InputProperties.Add(SecondaryProperty);
     }
 
-    protected override void Execute(Rules.IRuleContext context)
+    protected override void Execute(IRuleContext context)
     {
       var v1 = (string)context.InputPropertyValues[PrimaryProperty];
       var v2 = (string)context.InputPropertyValues[SecondaryProperty];
       if (string.IsNullOrEmpty(v1) || string.IsNullOrEmpty(v2))
-        context.AddErrorResult(string.Format("v1:{0}, v2:{1}", v1, v2));
+        context.AddErrorResult($"v1:{v1}, v2:{v2}");
     }
   }
 
@@ -811,12 +825,12 @@ namespace Csla.Test.ValidationRules
       BusinessRules.AddRule(new ToUpper(Value1Property));
     }
 
-    private class ToUpper : Csla.Rules.BusinessRule
+    private class ToUpper : BusinessRule
     {
       public ToUpper(IPropertyInfo primaryProperty)
         : base(primaryProperty)
       {
-        InputProperties = [primaryProperty];
+        InputProperties.Add(primaryProperty);
       }
 
       protected override void Execute(IRuleContext context)
@@ -848,15 +862,15 @@ namespace Csla.Test.ValidationRules
   }
 
 
-  public class CheckLazyInputFieldExists : Csla.Rules.BusinessRule
+  public class CheckLazyInputFieldExists : BusinessRule
   {
-    public CheckLazyInputFieldExists(Csla.Core.IPropertyInfo primaryProperty)
+    public CheckLazyInputFieldExists(IPropertyInfo primaryProperty)
       : base(primaryProperty)
     {
-      InputProperties = [primaryProperty];
+      InputProperties.Add(primaryProperty);
     }
 
-    protected override void Execute(Rules.IRuleContext context)
+    protected override void Execute(IRuleContext context)
     {
       if (context.InputPropertyValues.ContainsKey(PrimaryProperty))
       {
@@ -891,8 +905,8 @@ namespace Csla.Test.ValidationRules
       var rule = new TwoProps(TwoPropertyRules.Value1Property, TwoPropertyRules.Value2Property);
 
       var applicationContext = _testDIContext.CreateTestApplicationContext();
-      var ctx = new Csla.Rules.RuleContext(applicationContext, null, rule, root,
-                                           new Dictionary<Core.IPropertyInfo, object>
+      var ctx = new RuleContext(applicationContext, null, rule, root,
+                                           new Dictionary<IPropertyInfo, object>
                                                {
                                                  {TwoPropertyRules.Value1Property, "a"},
                                                  {TwoPropertyRules.Value2Property, "b"}
@@ -909,8 +923,8 @@ namespace Csla.Test.ValidationRules
       var rule = new TwoProps(TwoPropertyRules.Value1Property, TwoPropertyRules.Value2Property);
 
       var applicationContext = _testDIContext.CreateTestApplicationContext();
-      var ctx = new Csla.Rules.RuleContext(applicationContext, null, rule, root,
-                                           new Dictionary<Core.IPropertyInfo, object>
+      var ctx = new RuleContext(applicationContext, null, rule, root,
+                                           new Dictionary<IPropertyInfo, object>
                                                {
                                                  {TwoPropertyRules.Value1Property, "a"},
                                                  {TwoPropertyRules.Value2Property, "b"}
@@ -927,8 +941,8 @@ namespace Csla.Test.ValidationRules
       var rule = new TwoProps(TwoPropertyRules.Value1Property, TwoPropertyRules.Value2Property);
 
       var applicationContext = _testDIContext.CreateTestApplicationContext();
-      var ctx = new Csla.Rules.RuleContext(applicationContext, null, rule, root,
-                                           new Dictionary<Core.IPropertyInfo, object>
+      var ctx = new RuleContext(applicationContext, null, rule, root,
+                                           new Dictionary<IPropertyInfo, object>
                                                {
                                                  {TwoPropertyRules.Value1Property, "a"},
                                                  {TwoPropertyRules.Value2Property, "b"}
@@ -945,8 +959,8 @@ namespace Csla.Test.ValidationRules
       var rule = new TwoProps(TwoPropertyRules.Value1Property, TwoPropertyRules.Value2Property);
 
       var applicationContext = _testDIContext.CreateTestApplicationContext();
-      var ctx = new Csla.Rules.RuleContext(applicationContext, null, rule, root,
-                                           new Dictionary<Core.IPropertyInfo, object>
+      var ctx = new RuleContext(applicationContext, null, rule, root,
+                                           new Dictionary<IPropertyInfo, object>
                                                {
                                                  {TwoPropertyRules.Value1Property, "a"},
                                                  {TwoPropertyRules.Value2Property, "b"}
@@ -963,8 +977,8 @@ namespace Csla.Test.ValidationRules
       var rule = new TwoProps(TwoPropertyRules.Value1Property, TwoPropertyRules.Value2Property);
 
       var applicationContext = _testDIContext.CreateTestApplicationContext();
-      var ctx = new Csla.Rules.RuleContext(applicationContext, null, rule, root,
-                                           new Dictionary<Core.IPropertyInfo, object>
+      var ctx = new RuleContext(applicationContext, null, rule, root,
+                                           new Dictionary<IPropertyInfo, object>
                                                {
                                                  {TwoPropertyRules.Value1Property, "a"},
                                                  {TwoPropertyRules.Value2Property, "b"}
@@ -981,8 +995,8 @@ namespace Csla.Test.ValidationRules
       var rule = new TwoProps(TwoPropertyRules.Value1Property, TwoPropertyRules.Value2Property);
 
       var applicationContext = _testDIContext.CreateTestApplicationContext();
-      var ctx = new Csla.Rules.RuleContext(applicationContext, null, rule, root,
-                                           new Dictionary<Core.IPropertyInfo, object>
+      var ctx = new RuleContext(applicationContext, null, rule, root,
+                                           new Dictionary<IPropertyInfo, object>
                                                {
                                                  {TwoPropertyRules.Value1Property, "a"},
                                                  {TwoPropertyRules.Value2Property, "b"}
@@ -999,8 +1013,8 @@ namespace Csla.Test.ValidationRules
       var rule = new TwoProps(TwoPropertyRules.Value1Property, TwoPropertyRules.Value2Property);
 
       var applicationContext = _testDIContext.CreateTestApplicationContext();
-      var ctx = new Csla.Rules.RuleContext(applicationContext, null, rule, root,
-                                           new Dictionary<Core.IPropertyInfo, object>
+      var ctx = new RuleContext(applicationContext, null, rule, root,
+                                           new Dictionary<IPropertyInfo, object>
                                                {
                                                  {TwoPropertyRules.Value1Property, "a"},
                                                  {TwoPropertyRules.Value2Property, "b"}

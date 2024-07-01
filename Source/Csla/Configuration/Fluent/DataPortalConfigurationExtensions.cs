@@ -5,7 +5,7 @@
 // </copyright>
 // <summary>Use this type to configure the settings for CSLA .NET</summary>
 //-----------------------------------------------------------------------
-using System;
+
 using Csla.DataPortalClient;
 using Csla.Server;
 using Microsoft.Extensions.DependencyInjection;
@@ -42,7 +42,7 @@ namespace Csla.Configuration
     /// </summary>
     /// <param name="config"></param>
     /// <param name="options"></param>
-    public static DataPortalOptions ClientSideDataPortal(this DataPortalOptions config, Action<DataPortalClientOptions> options)
+    public static DataPortalOptions AddClientSideDataPortal(this DataPortalOptions config, Action<DataPortalClientOptions> options)
     {
       options?.Invoke(config.DataPortalClientOptions);
       return config;

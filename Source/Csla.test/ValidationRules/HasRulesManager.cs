@@ -5,16 +5,13 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Csla.Serialization;
+
 using Csla.Serialization.Mobile;
 using Csla.Core;
 
 namespace Csla.Test.ValidationRules
 {
-  [Serializable()]
+  [Serializable]
   public partial class HasRulesManager : BusinessBase<HasRulesManager>
   {
     public static PropertyInfo<string> NameProperty = RegisterProperty<string>(c => c.Name);
@@ -26,11 +23,11 @@ namespace Csla.Test.ValidationRules
 
     protected override void AddBusinessRules()
     {
-      BusinessRules.AddRule(new Csla.Rules.CommonRules.Required(NameProperty));
-      BusinessRules.AddRule(new Csla.Rules.CommonRules.MaxLength(NameProperty, 10));
+      BusinessRules.AddRule(new Rules.CommonRules.Required(NameProperty));
+      BusinessRules.AddRule(new Rules.CommonRules.MaxLength(NameProperty, 10));
     }
 
-    [Serializable()]
+    [Serializable]
     public class Criteria : CriteriaBase<Criteria>
     {
       public string _name;
@@ -42,7 +39,7 @@ namespace Csla.Test.ValidationRules
 
       public Criteria(string name)
       {
-        this._name = name;
+        _name = name;
       }
 
       protected override void OnGetState(SerializationInfo info, StateMode mode)

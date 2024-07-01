@@ -5,14 +5,8 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+
 using Csla;
-using Csla.Security;
-using Csla.Core;
-using Csla.Serialization;
 using Csla.Test;
 
 namespace cslalighttest.CslaDataProvider
@@ -121,14 +115,14 @@ namespace cslalighttest.CslaDataProvider
     protected void Child_Insert()
     {
       TestResults.Add("CustomerContactInsert", "Inserted Customer Contact" + GetProperty<string>(FirstNameProperty) + ", " + GetProperty<string>(LastNameProperty));
-      CustomerContactList parent = this.Parent as CustomerContactList;
+      CustomerContactList parent = Parent as CustomerContactList;
       Customer grandParent = parent.MyParent;
       LoadProperty(ParentNameProperty, grandParent.Name);
     }
     protected void Child_Update()
     {
       TestResults.Add("CustomerContactUpdate", "Updated  Customer Contact" + GetProperty<string>(FirstNameProperty) + ", " + GetProperty<string>(LastNameProperty));
-      CustomerContactList parent = this.Parent as CustomerContactList;
+      CustomerContactList parent = Parent as CustomerContactList;
       Customer grandParent = parent.MyParent;
       LoadProperty(ParentNameProperty,grandParent.Name);
     }

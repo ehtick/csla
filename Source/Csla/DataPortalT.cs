@@ -5,11 +5,8 @@
 // </copyright>
 // <summary>Client side data portal used for making asynchronous</summary>
 //-----------------------------------------------------------------------
-using System;
+
 using System.Globalization;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Csla.Configuration;
 using Csla.DataPortalClient;
 using Csla.Properties;
@@ -34,7 +31,7 @@ namespace Csla
     /// <param name="dataPortalOptions"></param>
     public DataPortal(ApplicationContext applicationContext, IDataPortalProxy proxy, IDataPortalCache dataPortalCache, DataPortalOptions dataPortalOptions)
     {
-      ApplicationContext = applicationContext;
+      _applicationContext = applicationContext;
       DataPortalProxy = proxy;
       Cache = dataPortalCache;
       DataPortalClientOptions = dataPortalOptions.DataPortalClientOptions;
@@ -43,19 +40,19 @@ namespace Csla
     /// <summary>
     /// Gets or sets the current ApplicationContext object.
     /// </summary>
-    private ApplicationContext ApplicationContext { get; set; }
-    private DataPortalClient.IDataPortalProxy DataPortalProxy { get; set; }
+    private ApplicationContext _applicationContext;
+    private IDataPortalProxy DataPortalProxy { get; set; }
 
     private IDataPortalCache Cache { get; set; }
     private DataPortalClientOptions DataPortalClientOptions { get; set; }
 
     private class DataPortalAsyncRequest
     {
-      private ApplicationContext ApplicationContext { get; set; }
+      private ApplicationContext _applicationContext;
 
       public object Argument { get; set; }
       public System.Security.Principal.IPrincipal Principal { get; set; }
-      public Csla.Core.ContextDictionary ClientContext { get; set; }
+      public Core.IContextDictionary ClientContext { get; set; }
       public object UserState { get; set; }
       // passes CurrentCulture and CurrentUICulture to the async thread
       public CultureInfo CurrentCulture;
@@ -63,13 +60,13 @@ namespace Csla
 
       public DataPortalAsyncRequest(ApplicationContext applicationContext, object argument, object userState)
       {
-        ApplicationContext = applicationContext;
-        this.Argument = argument;
-        this.Principal = ApplicationContext.User;
-        this.ClientContext = ApplicationContext.ClientContext;
-        this.UserState = userState;
-        this.CurrentCulture = System.Globalization.CultureInfo.CurrentCulture;
-        this.CurrentUICulture = System.Globalization.CultureInfo.CurrentUICulture;
+        _applicationContext = applicationContext;
+        Argument = argument;
+        Principal = _applicationContext.User;
+        ClientContext = _applicationContext.ClientContext;
+        UserState = userState;
+        CurrentCulture = CultureInfo.CurrentCulture;
+        CurrentUICulture = CultureInfo.CurrentUICulture;
       }
     }
 
@@ -81,9 +78,9 @@ namespace Csla
 
       public DataPortalAsyncResult(T result, Exception error, object userState)
       {
-        this.Result = result;
-        this.UserState = userState;
-        this.Error = error;
+        Result = result;
+        UserState = userState;
+        Error = error;
       }
     }
 
@@ -93,18 +90,18 @@ namespace Csla
       get
       {
         if (serviceProviderMethodCaller == null)
-          serviceProviderMethodCaller = (Reflection.ServiceProviderMethodCaller)ApplicationContext.CreateInstanceDI(typeof(Reflection.ServiceProviderMethodCaller));
+          serviceProviderMethodCaller = (Reflection.ServiceProviderMethodCaller)_applicationContext.CreateInstanceDI(typeof(Reflection.ServiceProviderMethodCaller));
         return serviceProviderMethodCaller;
       }
     }
 
-    private async Task<object> DoCreateAsync(Type objectType, object criteria, bool isSync)
+    private async Task<object> DoCreateAsync(Type objectType, object criteria, bool isSync, CancellationToken ct = default)
     {
       Server.DataPortalResult result = null;
       Server.DataPortalContext dpContext = null;
       try
       {
-        if (!Csla.Rules.BusinessRules.HasPermission(ApplicationContext, Rules.AuthorizationActions.CreateObject, objectType, Server.DataPortal.GetCriteriaArray(criteria)))
+        if (!await Csla.Rules.BusinessRules.HasPermissionAsync(_applicationContext, Rules.AuthorizationActions.CreateObject, objectType, Server.DataPortal.GetCriteriaArray(criteria), ct))
           throw new Csla.Security.SecurityException(string.Format(
             Resources.UserNotAuthorizedException,
             "create",
@@ -117,11 +114,11 @@ namespace Csla
         var proxy = GetDataPortalProxy(method);
 
         dpContext =
-          new Csla.Server.DataPortalContext(ApplicationContext, proxy.IsServerRemote);
+          new Server.DataPortalContext(_applicationContext, proxy.IsServerRemote);
 
         try
         {
-          result = await Cache.GetDataPortalResultAsync(objectType, criteria, DataPortalOperations.Create, 
+          result = await Cache.GetDataPortalResultAsync(objectType, criteria, DataPortalOperations.Create,
             async () => await proxy.Create(objectType, criteria, dpContext, isSync));
         }
         catch (AggregateException ex)
@@ -131,9 +128,7 @@ namespace Csla
             if (ex.InnerExceptions[0] is Server.DataPortalException dpe)
               HandleCreateDataPortalException(dpe);
           }
-          throw new DataPortalException(
-            string.Format("DataPortal.Create {0}", Resources.Failed),
-            ex, null);
+          throw new DataPortalException($"DataPortal.Create {Resources.Failed}", ex, null);
         }
         catch (Server.DataPortalException ex)
         {
@@ -197,7 +192,7 @@ namespace Csla
       return (T)await DoCreateAsync(typeof(T), Server.DataPortal.GetCriteriaFromArray(criteria), false);
     }
 
-    private async Task<object> DoFetchAsync(Type objectType, object criteria, bool isSync)
+    private async Task<object> DoFetchAsync(Type objectType, object criteria, bool isSync, CancellationToken ct = default)
     {
       if (typeof(Core.ICommandObject).IsAssignableFrom(objectType))
       {
@@ -209,7 +204,7 @@ namespace Csla
       Reflection.ServiceProviderMethodInfo method = null;
       try
       {
-        if (!Csla.Rules.BusinessRules.HasPermission(ApplicationContext, Rules.AuthorizationActions.GetObject, objectType, Server.DataPortal.GetCriteriaArray(criteria)))
+        if (!await Csla.Rules.BusinessRules.HasPermissionAsync(_applicationContext, Rules.AuthorizationActions.GetObject, objectType, Server.DataPortal.GetCriteriaArray(criteria), ct))
           throw new Csla.Security.SecurityException(string.Format(
             Resources.UserNotAuthorizedException,
             "get",
@@ -219,7 +214,7 @@ namespace Csla
         var proxy = GetDataPortalProxy(method);
 
         dpContext =
-          new Csla.Server.DataPortalContext(ApplicationContext, proxy.IsServerRemote);
+          new Server.DataPortalContext(_applicationContext, proxy.IsServerRemote);
 
         try
         {
@@ -233,9 +228,7 @@ namespace Csla
             if (ex.InnerExceptions[0] is Server.DataPortalException dpe)
               HandleFetchDataPortalException(dpe);
           }
-          throw new DataPortalException(
-            string.Format("DataPortal.Fetch {0}", Resources.Failed),
-            ex, null);
+          throw new DataPortalException($"DataPortal.Fetch {Resources.Failed}", ex, null);
         }
         catch (Server.DataPortalException ex)
         {
@@ -249,14 +242,14 @@ namespace Csla
       return result.ReturnObject;
     }
 
-    private async Task<object> DoExecuteAsync(Type objectType, object criteria, bool isSync)
+    private async Task<object> DoExecuteAsync(Type objectType, object criteria, bool isSync, CancellationToken ct = default)
     {
       Server.DataPortalResult result = null;
       Server.DataPortalContext dpContext = null;
       Reflection.ServiceProviderMethodInfo method = null;
       try
       {
-        if (!Csla.Rules.BusinessRules.HasPermission(ApplicationContext, Rules.AuthorizationActions.EditObject, objectType, Server.DataPortal.GetCriteriaArray(criteria)))
+        if (!await Csla.Rules.BusinessRules.HasPermissionAsync(_applicationContext, Rules.AuthorizationActions.EditObject, objectType, Server.DataPortal.GetCriteriaArray(criteria), ct))
           throw new Csla.Security.SecurityException(string.Format(Resources.UserNotAuthorizedException,
             "execute",
             objectType.Name));
@@ -265,7 +258,7 @@ namespace Csla
         var proxy = GetDataPortalProxy(method);
 
         dpContext =
-          new Csla.Server.DataPortalContext(ApplicationContext, proxy.IsServerRemote);
+          new Server.DataPortalContext(_applicationContext, proxy.IsServerRemote);
 
         try
         {
@@ -279,9 +272,7 @@ namespace Csla
             if (ex.InnerExceptions[0] is Server.DataPortalException dpe)
               HandleDataPortalException("Execute", dpe);
           }
-          throw new DataPortalException(
-            string.Format("DataPortal.Execute {0}", Resources.Failed),
-            ex, null);
+          throw new DataPortalException($"DataPortal.Execute {Resources.Failed}", ex, null);
         }
         catch (Server.DataPortalException ex)
         {
@@ -344,7 +335,7 @@ namespace Csla
       return (T)await DoFetchAsync(typeof(T), Server.DataPortal.GetCriteriaFromArray(criteria), false);
     }
 
-    internal async Task<T> DoUpdateAsync(T obj, bool isSync)
+    internal async Task<T> DoUpdateAsync(T obj, bool isSync, CancellationToken ct = default)
     {
       Server.DataPortalResult result = null;
       Server.DataPortalContext dpContext = null;
@@ -352,18 +343,18 @@ namespace Csla
       Type objectType = obj.GetType();
       try
       {
-        DataPortalClient.IDataPortalProxy proxy = null;
-        var factoryInfo = Csla.Server.ObjectFactoryAttribute.GetObjectFactoryAttribute(objectType);
+        IDataPortalProxy proxy = null;
+        var factoryInfo = Server.ObjectFactoryAttribute.GetObjectFactoryAttribute(objectType);
         if (factoryInfo != null)
         {
-          Csla.Server.DataPortalMethodInfo method = null;
-          var factoryLoader = ApplicationContext.CurrentServiceProvider.GetService(typeof(Server.IObjectFactoryLoader)) as Server.IObjectFactoryLoader;
+          Server.DataPortalMethodInfo method = null;
+          var factoryLoader = _applicationContext.CurrentServiceProvider.GetService(typeof(Server.IObjectFactoryLoader)) as Server.IObjectFactoryLoader;
           var factoryType = factoryLoader?.GetFactoryType(factoryInfo.FactoryTypeName);
 
           if (obj is Core.ICommandObject)
           {
             operation = DataPortalOperations.Execute;
-            if (!Csla.Rules.BusinessRules.HasPermission(ApplicationContext, Rules.AuthorizationActions.EditObject, obj))
+            if (!await Csla.Rules.BusinessRules.HasPermissionAsync(_applicationContext, Rules.AuthorizationActions.EditObject, obj, ct))
               throw new Csla.Security.SecurityException(string.Format(Resources.UserNotAuthorizedException,
                 "execute",
                 objectType.Name));
@@ -376,7 +367,7 @@ namespace Csla
             {
               if (bbase.IsDeleted)
               {
-                if (!Csla.Rules.BusinessRules.HasPermission(ApplicationContext, Rules.AuthorizationActions.DeleteObject, obj))
+                if (!await Csla.Rules.BusinessRules.HasPermissionAsync(_applicationContext, Rules.AuthorizationActions.DeleteObject, obj, ct))
                   throw new Csla.Security.SecurityException(string.Format(Resources.UserNotAuthorizedException,
                                                                             "delete",
                                                                             objectType.Name));
@@ -386,7 +377,7 @@ namespace Csla
               // must check the same authorization rules as for DataPortal_XYZ methods 
               else if (bbase.IsNew)
               {
-                if (!Csla.Rules.BusinessRules.HasPermission(ApplicationContext, Rules.AuthorizationActions.CreateObject, obj))
+                if (!await Csla.Rules.BusinessRules.HasPermissionAsync(_applicationContext, Rules.AuthorizationActions.CreateObject, obj, ct))
                   throw new Csla.Security.SecurityException(string.Format(Resources.UserNotAuthorizedException,
                                                                             "create",
                                                                             objectType.Name));
@@ -395,7 +386,7 @@ namespace Csla
               }
               else
               {
-                if (!Csla.Rules.BusinessRules.HasPermission(ApplicationContext, Rules.AuthorizationActions.EditObject, obj))
+                if (!await Csla.Rules.BusinessRules.HasPermissionAsync(_applicationContext, Rules.AuthorizationActions.EditObject, obj, ct))
                   throw new Csla.Security.SecurityException(string.Format(Resources.UserNotAuthorizedException,
                                                                             "save",
                                                                             objectType.Name));
@@ -405,7 +396,7 @@ namespace Csla
             }
             else
             {
-              if (!Csla.Rules.BusinessRules.HasPermission(ApplicationContext, Rules.AuthorizationActions.EditObject, obj))
+              if (!await Csla.Rules.BusinessRules.HasPermissionAsync(_applicationContext, Rules.AuthorizationActions.EditObject, obj, ct))
                 throw new Csla.Security.SecurityException(string.Format(Resources.UserNotAuthorizedException,
                                                                           "save",
                                                                           objectType.Name));
@@ -415,7 +406,7 @@ namespace Csla
             }
           }
           if (method == null)
-            method = new Csla.Server.DataPortalMethodInfo();
+            method = new Server.DataPortalMethodInfo();
           proxy = GetDataPortalProxy(method.RunLocal);
         }
         else
@@ -425,7 +416,7 @@ namespace Csla
           if (obj is Core.ICommandObject)
           {
             operation = DataPortalOperations.Execute;
-            if (!Csla.Rules.BusinessRules.HasPermission(ApplicationContext, Rules.AuthorizationActions.EditObject, obj))
+            if (!await Csla.Rules.BusinessRules.HasPermissionAsync(_applicationContext, Rules.AuthorizationActions.EditObject, obj, ct))
               throw new Csla.Security.SecurityException(string.Format(Resources.UserNotAuthorizedException,
                 "execute",
                 objectType.Name));
@@ -437,7 +428,7 @@ namespace Csla
             {
               if (bbase.IsDeleted)
               {
-                if (!Csla.Rules.BusinessRules.HasPermission(ApplicationContext, Rules.AuthorizationActions.DeleteObject, obj))
+                if (!await Csla.Rules.BusinessRules.HasPermissionAsync(_applicationContext, Rules.AuthorizationActions.DeleteObject, obj, ct))
                   throw new Csla.Security.SecurityException(string.Format(Resources.UserNotAuthorizedException,
                     "delete",
                     objectType.Name));
@@ -445,7 +436,7 @@ namespace Csla
               }
               else if (bbase.IsNew)
               {
-                if (!Csla.Rules.BusinessRules.HasPermission(ApplicationContext, Rules.AuthorizationActions.CreateObject, obj))
+                if (!await Csla.Rules.BusinessRules.HasPermissionAsync(_applicationContext, Rules.AuthorizationActions.CreateObject, obj, ct))
                   throw new Csla.Security.SecurityException(string.Format(Resources.UserNotAuthorizedException,
                     "create",
                     objectType.Name));
@@ -453,7 +444,7 @@ namespace Csla
               }
               else
               {
-                if (!Csla.Rules.BusinessRules.HasPermission(ApplicationContext, Rules.AuthorizationActions.EditObject, obj))
+                if (!await Csla.Rules.BusinessRules.HasPermissionAsync(_applicationContext, Rules.AuthorizationActions.EditObject, obj, ct))
                   throw new Csla.Security.SecurityException(string.Format(Resources.UserNotAuthorizedException,
                     "save",
                     objectType.Name));
@@ -469,7 +460,7 @@ namespace Csla
         }
 
         dpContext =
-          new Server.DataPortalContext(ApplicationContext, proxy.IsServerRemote);
+          new Server.DataPortalContext(_applicationContext, proxy.IsServerRemote);
 
         try
         {
@@ -490,9 +481,7 @@ namespace Csla
             if (ex.InnerExceptions[0] is Server.DataPortalException dpe)
               HandleUpdateDataPortalException(dpe);
           }
-          throw new DataPortalException(
-            string.Format("DataPortal.Update {0}", Resources.Failed),
-            ex, null);
+          throw new DataPortalException($"DataPortal.Update {Resources.Failed}", ex, null);
         }
         catch (Server.DataPortalException ex)
         {
@@ -552,13 +541,13 @@ namespace Csla
       return DoUpdateAsync(obj, false);
     }
 
-    internal async Task DoDeleteAsync(Type objectType, object criteria, bool isSync)
+    internal async Task DoDeleteAsync(Type objectType, object criteria, bool isSync, CancellationToken ct = default)
     {
       Server.DataPortalResult result = null;
       Server.DataPortalContext dpContext = null;
       try
       {
-        if (!Csla.Rules.BusinessRules.HasPermission(ApplicationContext, Rules.AuthorizationActions.DeleteObject, objectType, Server.DataPortal.GetCriteriaArray(criteria)))
+        if (!await Csla.Rules.BusinessRules.HasPermissionAsync(_applicationContext, Rules.AuthorizationActions.DeleteObject, objectType, Server.DataPortal.GetCriteriaArray(criteria), ct))
           throw new Csla.Security.SecurityException(string.Format(Resources.UserNotAuthorizedException,
             "delete",
             objectType.Name));
@@ -566,7 +555,7 @@ namespace Csla
         var method = ServiceProviderMethodCaller.FindDataPortalMethod<DeleteAttribute>(objectType, Server.DataPortal.GetCriteriaArray(criteria), false);
         var proxy = GetDataPortalProxy(method);
 
-        dpContext = new Server.DataPortalContext(ApplicationContext, proxy.IsServerRemote);
+        dpContext = new Server.DataPortalContext(_applicationContext, proxy.IsServerRemote);
 
         try
         {
@@ -577,13 +566,10 @@ namespace Csla
         {
           if (ex.InnerExceptions.Count > 0)
           {
-            var dpe = ex.InnerExceptions[0] as Server.DataPortalException;
-            if (dpe != null)
+            if (ex.InnerExceptions[0] is Server.DataPortalException dpe)
               HandleDeleteDataPortalException(dpe);
           }
-          throw new DataPortalException(
-            string.Format("DataPortal.Delete {0}", Resources.Failed),
-            ex, null);
+          throw new DataPortalException($"DataPortal.Delete {Resources.Failed}", ex, null);
         }
         catch (Server.DataPortalException ex)
         {
@@ -641,9 +627,9 @@ namespace Csla
     /// by the UI to delete an object.
     /// </summary>
     /// <param name="criteria">Object-specific criteria.</param>
-    public async Task DeleteAsync(params object[] criteria)
+    public Task DeleteAsync(params object[] criteria)
     {
-      await DoDeleteAsync(typeof(T), Server.DataPortal.GetCriteriaFromArray(criteria), false);
+      return DoDeleteAsync(typeof(T), Server.DataPortal.GetCriteriaFromArray(criteria), false);
     }
 
     /// <summary>
@@ -654,6 +640,18 @@ namespace Csla
     public T Execute(T command)
     {
       return Update(command);
+    }
+
+    /// <summary>
+    /// Execute a command on the logical server.
+    /// </summary>
+    /// <param name="criteria">
+    /// Criteria provided to the command object.
+    /// </param>
+    /// <returns>The resulting command object.</returns>
+    public T Execute(params object[] criteria)
+    {
+        return (T)DoFetchAsync(typeof(T), Server.DataPortal.GetCriteriaFromArray(criteria), true).Result;
     }
 
     /// <summary>
@@ -675,10 +673,10 @@ namespace Csla
     /// <returns>The resulting command object.</returns>
     public async Task<T> ExecuteAsync(params object[] criteria)
     {
-      return (T)await DoFetchAsync(typeof(T), criteria, false);
+      return (T)await DoFetchAsync(typeof(T), Server.DataPortal.GetCriteriaFromArray(criteria), false);
     }
 
-    private DataPortalClient.IDataPortalProxy GetDataPortalProxy(Reflection.ServiceProviderMethodInfo method)
+    private IDataPortalProxy GetDataPortalProxy(Reflection.ServiceProviderMethodInfo method)
     {
       if (method != null)
         return GetDataPortalProxy(method.MethodInfo.RunLocal());
@@ -686,10 +684,10 @@ namespace Csla
         return GetDataPortalProxy(false);
     }
 
-    private DataPortalClient.IDataPortalProxy GetDataPortalProxy(bool forceLocal)
+    private IDataPortalProxy GetDataPortalProxy(bool forceLocal)
     {
-      if (forceLocal || ApplicationContext.IsOffline)
-        return ApplicationContext.CreateInstanceDI<Csla.Channels.Local.LocalProxy>();
+      if (forceLocal || _applicationContext.IsOffline)
+        return _applicationContext.CreateInstanceDI<Channels.Local.LocalProxy>();
       else
         return DataPortalProxy;
     }
@@ -700,7 +698,7 @@ namespace Csla
     /// </summary>
     public T CreateChild()
     {
-      var portal = new Server.ChildDataPortal(ApplicationContext);
+      var portal = new Server.ChildDataPortal(_applicationContext);
       return (T)(portal.Create(typeof(T)));
     }
 
@@ -713,7 +711,7 @@ namespace Csla
     /// </param>
     public T CreateChild(params object[] parameters)
     {
-      var portal = new Server.ChildDataPortal(ApplicationContext);
+      var portal = new Server.ChildDataPortal(_applicationContext);
       return (T)(portal.Create(typeof(T), parameters));
     }
 
@@ -723,7 +721,7 @@ namespace Csla
     /// </summary>
     public async Task<T> CreateChildAsync()
     {
-      var portal = new Server.ChildDataPortal(ApplicationContext);
+      var portal = new Server.ChildDataPortal(_applicationContext);
       return await portal.CreateAsync<T>();
     }
 
@@ -736,7 +734,7 @@ namespace Csla
     /// </param>
     public async Task<T> CreateChildAsync(params object[] parameters)
     {
-      var portal = new Server.ChildDataPortal(ApplicationContext);
+      var portal = new Server.ChildDataPortal(_applicationContext);
       return await portal.CreateAsync<T>(parameters);
     }
 
@@ -746,7 +744,7 @@ namespace Csla
     /// </summary>
     public T FetchChild()
     {
-      var portal = new Server.ChildDataPortal(ApplicationContext);
+      var portal = new Server.ChildDataPortal(_applicationContext);
       return (T)(portal.Fetch(typeof(T)));
     }
 
@@ -759,7 +757,7 @@ namespace Csla
     /// </param>
     public T FetchChild(params object[] parameters)
     {
-      var portal = new Server.ChildDataPortal(ApplicationContext);
+      var portal = new Server.ChildDataPortal(_applicationContext);
       return (T)(portal.Fetch(typeof(T), parameters));
     }
 
@@ -769,7 +767,7 @@ namespace Csla
     /// </summary>
     public async Task<T> FetchChildAsync()
     {
-      var portal = new Server.ChildDataPortal(ApplicationContext);
+      var portal = new Server.ChildDataPortal(_applicationContext);
       return await portal.FetchAsync<T>();
     }
 
@@ -782,7 +780,7 @@ namespace Csla
     /// </param>
     public async Task<T> FetchChildAsync(params object[] parameters)
     {
-      var portal = new Server.ChildDataPortal(ApplicationContext);
+      var portal = new Server.ChildDataPortal(_applicationContext);
       return await portal.FetchAsync<T>(parameters);
     }
 
@@ -795,7 +793,7 @@ namespace Csla
     /// </param>
     public void UpdateChild(T child)
     {
-      var portal = new Server.ChildDataPortal(ApplicationContext);
+      var portal = new Server.ChildDataPortal(_applicationContext);
       portal.Update(child);
     }
 
@@ -811,7 +809,7 @@ namespace Csla
     /// </param>
     public void UpdateChild(object child, params object[] parameters)
     {
-      var portal = new Server.ChildDataPortal(ApplicationContext);
+      var portal = new Server.ChildDataPortal(_applicationContext);
       portal.Update(child, parameters);
     }
 
@@ -827,7 +825,7 @@ namespace Csla
     /// </param>
     public void UpdateChild(T child, params object[] parameters)
     {
-      var portal = new Server.ChildDataPortal(ApplicationContext);
+      var portal = new Server.ChildDataPortal(_applicationContext);
       portal.Update(child, parameters);
     }
 
@@ -840,7 +838,7 @@ namespace Csla
     /// </param>
     public async Task UpdateChildAsync(T child)
     {
-      var portal = new Server.ChildDataPortal(ApplicationContext);
+      var portal = new Server.ChildDataPortal(_applicationContext);
       await portal.UpdateAsync(child).ConfigureAwait(false);
     }
 
@@ -856,7 +854,7 @@ namespace Csla
     /// </param>
     public async Task UpdateChildAsync(T child, params object[] parameters)
     {
-      var portal = new Server.ChildDataPortal(ApplicationContext);
+      var portal = new Server.ChildDataPortal(_applicationContext);
       await portal.UpdateAsync(child, parameters).ConfigureAwait(false);
     }
 
@@ -868,6 +866,7 @@ namespace Csla
     object IDataPortal.Create(params object[] criteria) => Create(criteria);
     object IDataPortal.Fetch(params object[] criteria) => Fetch(criteria);
     object IDataPortal.Execute(object obj) => Execute((T)obj);
+    object IDataPortal.Execute(params object[] criteria) => Execute(criteria);
     object IDataPortal.Update(object obj) => Update((T)obj);
 
     async Task<object> IChildDataPortal.CreateChildAsync(params object[] criteria) => Task.FromResult(await CreateChildAsync(criteria));

@@ -5,45 +5,36 @@
 // </copyright>
 // <summary>Use this type to configure the settings for serialization.</summary>
 //-----------------------------------------------------------------------
-using System;
-using Csla.Serialization.Mobile;
+
+using Csla.Serialization;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Csla.Configuration
 {
   /// <summary>
   /// Use this type to configure the settings for serialization.
   /// </summary>
-  public class SerializationOptions
+  /// <param name="cslaOptions">The CSLA options.</param>
+  public class SerializationOptions(CslaOptions cslaOptions)
   {
+    /// <summary>
+    /// Gets the CSLA .NET configuration options.
+    /// </summary>
+    protected CslaOptions CslaOptions => cslaOptions;
+
+    /// <summary>
+    /// Gets the current services collection.
+    /// </summary>
+    public IServiceCollection Services => CslaOptions.Services;
+
     /// <summary>
     /// Sets the serialization formatter type used by CSLA .NET
     /// for all explicit object serialization (such as cloning,
     /// n-level undo, etc). Default is MobileFormatter.
     /// </summary>
-    /// <param name="formatterType">Serialization formatter type.</param>
-    public SerializationOptions SerializationFormatter(Type formatterType)
+    public SerializationOptions UseSerializationFormatter<T>() where T : ISerializationFormatter
     {
-      ApplicationContext.SerializationFormatter = formatterType;
-      return this;
-    }
-
-    /// <summary>
-    /// Sets type of the writer that is used to write data to 
-    /// serialization stream in SerializationFormatterFactory.GetFormatter().
-    /// </summary>
-    public SerializationOptions MobileWriter<T>() where T : ICslaWriter
-    {
-      CslaReaderWriterFactory.WriterType = typeof(T);
-      return this;
-    }
-
-    /// <summary>
-    /// Sets type of the writer that is used to read data to 
-    /// serialization stream in SerializationFormatterFactory.GetFormatter().
-    /// </summary>
-    public SerializationOptions MobileReader<T>() where T : ICslaReader
-    {
-      CslaReaderWriterFactory.ReaderType = typeof(T);
+      CslaOptions.Services.AddTransient(typeof(ISerializationFormatter), typeof(T));
       return this;
     }
   }

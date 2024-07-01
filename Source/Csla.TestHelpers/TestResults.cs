@@ -5,21 +5,26 @@
 // </copyright>
 // <summary>Static, dictionary-style container for test results</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
 
 namespace Csla.Test
 {
-
   /// <summary>
   /// Static dictionary-like class that offers similar functionality to GlobalContext
   /// This is used in tests to record the completion of operations, for testing that the operation occurred
   /// </summary>
   public class TestResults
   {
-    private static readonly AsyncLocal<Dictionary<string, string>> _testResults = new();
+    private static AsyncLocal<Dictionary<string, string>> _testResults;
+
+    private static AsyncLocal<Dictionary<string, string>> TestResultsInternal
+    {
+      get
+      {
+        _testResults ??= new();
+        _testResults.Value ??= new();
+        return _testResults;
+      }
+    }
 
     /// <summary>
     /// Add an item to the test results, to indicate an outcome of a particular operation
@@ -28,7 +33,7 @@ namespace Csla.Test
     /// <param name="value">The outcome recorded against the operation</param>
     public static void Add(string key, string value)
     {
-      _testResults.Value.Add(key, value);
+      TestResultsInternal.Value.Add(key, value);
     }
 
     /// <summary>
@@ -38,7 +43,7 @@ namespace Csla.Test
     /// <param name="value">The outcome recorded against the operation</param>
     public static void AddOrOverwrite(string key, string value)
     {
-      _testResults.Value[key] = value;
+      TestResultsInternal.Value[key] = value;
     }
 
     /// <summary>
@@ -48,7 +53,8 @@ namespace Csla.Test
     /// <returns>The value recorded against the operation, or an empty string if no result is found</returns>
     public static string GetResult(string key)
     {
-      if (!_testResults.Value.TryGetValue(key, out var result)) return string.Empty;
+      if (!TestResultsInternal.Value.TryGetValue(key, out var result)) 
+        return string.Empty;
 
       return result;
     }
@@ -60,7 +66,7 @@ namespace Csla.Test
     /// <returns>Whether the key is present in the dictionary of results</returns>
     public static bool ContainsResult(string key)
     {
-      return _testResults.Value.ContainsKey(key);
+      return TestResultsInternal.Value.ContainsKey(key);
     }
 
     /// <summary>
@@ -68,8 +74,9 @@ namespace Csla.Test
     /// </summary>
     public static void Reinitialise()
     {
-      if (_testResults.Value is null) _testResults.Value = new Dictionary<string, string>();
-      _testResults.Value.Clear();
+      if (TestResultsInternal.Value is null)
+        TestResultsInternal.Value = new Dictionary<string, string>();
+      TestResultsInternal.Value.Clear();
     }
 
   }

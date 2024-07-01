@@ -6,17 +6,14 @@
 // </copyright>
 // <summary>Wraps and creates a CSLA .NET-style object </summary>
 //-----------------------------------------------------------------------
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
 using System.Windows.Data;
 using System.Reflection;
+using Csla.Core;
 using Csla.Reflection;
 using Csla.Properties;
-using System.Threading.Tasks;
 
 namespace Csla.Xaml
 {
@@ -40,7 +37,7 @@ namespace Csla.Xaml
     /// <summary>
     /// Event raised when the object has been saved.
     /// </summary>
-    public event EventHandler<Csla.Core.SavedEventArgs> Saved;
+    public event EventHandler<SavedEventArgs> Saved;
     /// <summary>
     /// Raise the Saved event when the object has been saved.
     /// </summary>
@@ -51,8 +48,7 @@ namespace Csla.Xaml
     /// <param name="userState">Reference to a userstate object.</param>
     protected virtual void OnSaved(object newObject, Exception error, object userState)
     {
-      if (Saved != null)
-        Saved(this, new Csla.Core.SavedEventArgs(newObject, error, userState));
+      Saved?.Invoke(this, new SavedEventArgs(newObject, error, userState));
     }
 
     void _factoryParameters_CollectionChanged(
@@ -132,8 +128,7 @@ namespace Csla.Xaml
       set
       {
         _dataChangedHandler = value;
-        var dialog = value as IErrorDialog;
-        if (dialog != null)
+        if (value is IErrorDialog dialog)
           dialog.Register(this);
         OnPropertyChanged(new PropertyChangedEventArgs("DataChangedHandler"));
       }
@@ -271,7 +266,7 @@ namespace Csla.Xaml
         return;
       }
 
-      if (this.IsRefreshDeferred)
+      if (IsRefreshDeferred)
         return;
 
       QueryRequest request = new QueryRequest();
@@ -283,7 +278,7 @@ namespace Csla.Xaml
       IsBusy = true;
 
       if (IsAsynchronous)
-        System.Threading.ThreadPool.QueueUserWorkItem(DoQuery, request);
+        ThreadPool.QueueUserWorkItem(DoQuery, request);
       else
         DoQuery(request);
     }
@@ -304,17 +299,16 @@ namespace Csla.Xaml
       {
         result = factory();
       }
-      catch (Csla.DataPortalException ex)
+      catch (DataPortalException ex)
       {
         exceptionResult = ex.BusinessException;
       }
-      catch (System.Reflection.TargetInvocationException ex)
+      catch (TargetInvocationException ex)
       {
         if (ex.InnerException != null)
         {
           exceptionResult = ex.InnerException;
-          var dpe = exceptionResult as Csla.DataPortalException;
-          if (dpe != null && dpe.BusinessException != null)
+          if (exceptionResult is DataPortalException dpe && dpe.BusinessException != null)
             exceptionResult = dpe.BusinessException;
         }
         else
@@ -327,8 +321,7 @@ namespace Csla.Xaml
 
       if (ManageObjectLifetime && result != null)
       {
-        var undo = result as Csla.Core.ISupportUndo;
-        if (undo != null)
+        if (result is ISupportUndo undo)
           undo.BeginEdit();
       }
 
@@ -345,7 +338,6 @@ namespace Csla.Xaml
     /// </summary>
     /// <typeparam name="T">Type of ObjectInstance</typeparam>
     /// <param name="factory">Async data portal or factory method</param>
-    /// <returns></returns>
     public async void Refresh<T>(Func<Task<T>> factory)
     {
       T result = default(T);
@@ -356,17 +348,16 @@ namespace Csla.Xaml
       {
         result = await factory();
       }
-      catch (Csla.DataPortalException ex)
+      catch (DataPortalException ex)
       {
         exceptionResult = ex.BusinessException;
       }
-      catch (System.Reflection.TargetInvocationException ex)
+      catch (TargetInvocationException ex)
       {
         if (ex.InnerException != null)
         {
           exceptionResult = ex.InnerException;
-          var dpe = exceptionResult as Csla.DataPortalException;
-          if (dpe != null && dpe.BusinessException != null)
+          if (exceptionResult is DataPortalException dpe && dpe.BusinessException != null)
             exceptionResult = dpe.BusinessException;
         }
         else
@@ -379,8 +370,7 @@ namespace Csla.Xaml
 
       if (ManageObjectLifetime && result != null)
       {
-        var undo = result as Csla.Core.ISupportUndo;
-        if (undo != null)
+        if (result is ISupportUndo undo)
           undo.BeginEdit();
       }
 
@@ -434,17 +424,16 @@ namespace Csla.Xaml
         {
           result = factory.Invoke(null, parameters);
         }
-        catch (Csla.DataPortalException ex)
+        catch (DataPortalException ex)
         {
           exceptionResult = ex.BusinessException;
         }
-        catch (System.Reflection.TargetInvocationException ex)
+        catch (TargetInvocationException ex)
         {
           if (ex.InnerException != null)
           {
             exceptionResult = ex.InnerException;
-            var dpe = exceptionResult as Csla.DataPortalException;
-            if (dpe != null && dpe.BusinessException != null)
+            if (exceptionResult is DataPortalException dpe && dpe.BusinessException != null)
               exceptionResult = dpe.BusinessException;
           }
           else
@@ -462,8 +451,7 @@ namespace Csla.Xaml
 
       if (request.ManageObjectLifetime && result != null)
       {
-        var undo = result as Csla.Core.ISupportUndo;
-        if (undo != null)
+        if (result is ISupportUndo undo)
           undo.BeginEdit();
       }
 
@@ -531,8 +519,7 @@ namespace Csla.Xaml
     /// </remarks>
     public void Cancel()
     {
-      var undo = this.Data as Csla.Core.ISupportUndo;
-      if (undo != null && _manageLifetime)
+      if (Data is ISupportUndo undo && _manageLifetime)
       {
         IsBusy = true;
         undo.CancelEdit();
@@ -565,7 +552,7 @@ namespace Csla.Xaml
     {
       // only do something if the object implements
       // ISavable
-      if (this.Data is Csla.Core.ISavable savable)
+      if (Data is ISavable savable)
       {
         object result = savable;
         Exception exceptionResult = null;
@@ -575,25 +562,25 @@ namespace Csla.Xaml
 
           // clone the object if possible
           if (savable is ICloneable cloneable)
-            savable = (Csla.Core.ISavable)cloneable.Clone();
+            savable = (ISavable)cloneable.Clone();
 
           // apply edits in memory
-          if (savable is Csla.Core.ISupportUndo undo && _manageLifetime)
+          if (savable is ISupportUndo undo && _manageLifetime)
             undo.ApplyEdit();
 
 
           // save the clone
           result = savable.Save();
 
-          if (!ReferenceEquals(savable, this.Data))
+          if (!ReferenceEquals(savable, Data))
           {
             // raise Saved event from original object
-            var original = this.Data as Core.ISavable;
+            var original = Data as ISavable;
             original?.SaveComplete(result);
           }
 
           // start editing the resulting object
-          undo = result as Csla.Core.ISupportUndo;
+          undo = result as ISupportUndo;
           if (undo != null && _manageLifetime)
             undo.BeginEdit();
         }
@@ -619,8 +606,7 @@ namespace Csla.Xaml
     {
       // only do something if the object implements
       // IBindingList
-      IBindingList list = this.Data as IBindingList;
-      if (list != null && list.AllowNew)
+      if (Data is IBindingList list && list.AllowNew)
         return list.AddNew();
       else
         return null;
@@ -642,11 +628,10 @@ namespace Csla.Xaml
       // only do something if the object implements
       // IBindingList
       IBindingList list;
-      var bb = item as Csla.Core.BusinessBase;
-      if (bb != null)
+      if (item is BusinessBase bb)
         list = bb.Parent as IBindingList;
       else
-        list = this.Data as IBindingList;
+        list = Data as IBindingList;
       if (list != null && list.AllowRemove)
         list.Remove(item);
     }

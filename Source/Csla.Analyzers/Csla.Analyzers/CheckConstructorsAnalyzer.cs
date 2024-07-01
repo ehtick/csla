@@ -2,7 +2,6 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using static Csla.Analyzers.Extensions.ITypeSymbolExtensions;
 
@@ -76,7 +75,7 @@ namespace Csla.Analyzers
 
         if (!hasPublicNoArgumentConstructor)
         {
-          var properties = new Dictionary<string, string>()
+          var properties = new Dictionary<string, string>
           {
             [PublicNoArgumentConstructorIsMissingConstants.HasNonPublicNoArgumentConstructor] = hasNonPublicNoArgumentConstructor.ToString()
           }.ToImmutableDictionary();

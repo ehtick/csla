@@ -5,14 +5,9 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+
 using Csla;
-using Csla.Security;
 using Csla.Core;
-using Csla.Serialization;
 
 namespace cslalighttest.CslaDataProvider
 {
@@ -89,7 +84,7 @@ namespace cslalighttest.CslaDataProvider
     }
 
 
-    [Serializable()]
+    [Serializable]
     public class FetchCriteria : CriteriaBase<FetchCriteria>
     {
       public FetchCriteria() { }
@@ -133,7 +128,7 @@ namespace cslalighttest.CslaDataProvider
     protected void DataPortal_Fetch(int criteria)
     {
       LoadProperty(IdProperty, criteria);
-      LoadProperty(NameProperty, "CustomerWithError Name for Id: " + criteria.ToString());
+      LoadProperty(NameProperty, $"CustomerWithError Name for Id: {criteria}");
 
       if (criteria == CustomerWithErrorIDThrowsException)
         throw new ApplicationException("Test for Silverlight DataSource Error!");
@@ -142,7 +137,7 @@ namespace cslalighttest.CslaDataProvider
     protected void DataPortal_Create(int criteria)
     {
       LoadProperty(IdProperty, criteria);
-      LoadProperty(NameProperty, "New CustomerWithError for Id: " + criteria.ToString());
+      LoadProperty(NameProperty, $"New CustomerWithError for Id: {criteria}");
     }
 
     [DeleteSelf]
@@ -154,7 +149,7 @@ namespace cslalighttest.CslaDataProvider
     [Delete]
     protected void DataPortal_Delete(int criteria)
     {
-      Method = "Deleted CustomerWithError ID " + criteria.ToString();
+      Method = $"Deleted CustomerWithError ID {criteria}";
     }
 
     [Insert]

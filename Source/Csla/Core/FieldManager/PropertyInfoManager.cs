@@ -5,11 +5,9 @@
 // </copyright>
 // <summary>Indicates that the specified property belongs</summary>
 //-----------------------------------------------------------------------
-using System;
+
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-#if NET5_0_OR_GREATER
+#if NET8_0_OR_GREATER
 using System.Runtime.Loader;
 
 using Csla.Runtime;
@@ -36,7 +34,7 @@ namespace Csla.Core.FieldManager
   {
     private static readonly object _cacheLock = new object();
 
-#if NET5_0_OR_GREATER
+#if NET8_0_OR_GREATER
     private static ConcurrentDictionary<Type, Tuple<string, PropertyInfoList>> _propertyInfoCache;
 
     private static ConcurrentDictionary<Type, Tuple<string, PropertyInfoList>> PropertyInfoCache
@@ -52,7 +50,7 @@ namespace Csla.Core.FieldManager
         {
           lock (_cacheLock)
           {
-#if NET5_0_OR_GREATER
+#if NET8_0_OR_GREATER
             if (_propertyInfoCache == null)
               _propertyInfoCache = new ConcurrentDictionary<Type, Tuple<string, PropertyInfoList>>();
 #else
@@ -70,7 +68,7 @@ namespace Csla.Core.FieldManager
     {
       var cache = PropertyInfoCache;
 
-#if NET5_0_OR_GREATER
+#if NET8_0_OR_GREATER
       var list = cache.GetOrAdd(objectType, type => 
       {
         lock (_cacheLock) 
@@ -176,12 +174,11 @@ namespace Csla.Core.FieldManager
     /// </summary>
     /// <param name="objectType">The business object type.</param>
     /// <param name="propertyName">The name of the property.</param>
-    /// <returns></returns>
     public static IPropertyInfo GetRegisteredProperty(Type objectType, string propertyName)
     {
       return GetRegisteredProperties(objectType).FirstOrDefault(p => p.Name == propertyName);
     }
-#if NET5_0_OR_GREATER
+#if NET8_0_OR_GREATER
 
     private static void OnAssemblyLoadContextUnload(AssemblyLoadContext context)
     {

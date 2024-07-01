@@ -5,13 +5,10 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Csla.Test.EditableRootList
 {
-  public class ERlist : Csla.DynamicBindingListBase<ERitem>
+  public class ERlist : DynamicBindingListBase<ERitem>
   {
     public ERlist()
     {

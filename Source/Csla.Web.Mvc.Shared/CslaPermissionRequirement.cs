@@ -5,9 +5,7 @@
 // </copyright>
 // <summary>Restricts callers to an action method.</summary>
 //-----------------------------------------------------------------------
-#if NETSTANDARD2_0 || NET5_0_OR_GREATER || NETCOREAPP3_1
-using System;
-using System.Threading.Tasks;
+#if NETSTANDARD2_0 || NET8_0_OR_GREATER 
 using Csla.Rules;
 using Microsoft.AspNetCore.Authorization;
 
@@ -44,7 +42,7 @@ namespace Csla.Web.Mvc
   /// </summary>
   public class CslaPermissionHandler : AuthorizationHandler<CslaPermissionRequirement>
   {
-    private ApplicationContext ApplicationContext { get; set; }
+    private ApplicationContext _applicationContext;
 
     /// <summary>
     /// Creates an instance of the type.
@@ -52,20 +50,18 @@ namespace Csla.Web.Mvc
     /// <param name="applicationContext">ApplicationContext instance.</param>
     public CslaPermissionHandler(ApplicationContext applicationContext)
     {
-      ApplicationContext = applicationContext;
+      _applicationContext = applicationContext;
     }
 
     /// <summary>
     /// Handles CSLA permissions
     /// </summary>
     /// <param name="context">Authorization handler context</param>
-    /// <returns></returns>
-    public override Task HandleAsync(AuthorizationHandlerContext context)
+    public override async Task HandleAsync(AuthorizationHandlerContext context)
     {
       foreach (var item in context.PendingRequirements)
         if (item is CslaPermissionRequirement cr)
-          HandleRequirementAsync(context, cr);
-      return Task.CompletedTask;
+          await HandleRequirementAsync(context, cr);
     }
 
     /// <summary>
@@ -73,15 +69,13 @@ namespace Csla.Web.Mvc
     /// </summary>
     /// <param name="context">Authorization handler context</param>
     /// <param name="requirement">CSLA permissions requirement</param>
-    /// <returns></returns>
-    protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, 
+    protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context,
       CslaPermissionRequirement requirement)
     {
-      if (context.User == null || !context.User.Identity.IsAuthenticated)
+      if (context.User == null || context.User.Identity?.IsAuthenticated != true)
         context.Fail();
-      else if (BusinessRules.HasPermission(ApplicationContext, requirement.Action, requirement.ObjectType))
+      else if (await BusinessRules.HasPermissionAsync(_applicationContext, requirement.Action, requirement.ObjectType, CancellationToken.None))
         context.Succeed(requirement);
-      return Task.CompletedTask;
     }
   }
 }

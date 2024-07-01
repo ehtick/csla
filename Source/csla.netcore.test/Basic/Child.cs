@@ -5,14 +5,12 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Text;
+
 using System.Data;
 
 namespace Csla.Test.Basic
 {
-  [Serializable()]
+  [Serializable]
   public class Child : BusinessBase<Child>
   {
     public static readonly PropertyInfo<string> DataProperty = RegisterProperty<string>(c => c.Data);
@@ -22,7 +20,7 @@ namespace Csla.Test.Basic
       set { SetProperty(DataProperty, value); }
     }
 
-    public Guid Guid { get; } = System.Guid.NewGuid();
+    public Guid Guid { get; } = Guid.NewGuid();
 
     public static readonly PropertyInfo<GrandChildren> GrandChildrenProperty = RegisterProperty<GrandChildren>(c => c.GrandChildren);
     public GrandChildren GrandChildren

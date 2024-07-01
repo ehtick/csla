@@ -5,25 +5,11 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Linq;
+
 using System.Reflection;
-using System.Text;
 using Csla;
 using Csla.TestHelpers;
-
-#if !NUNIT
-
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-#else
-using NUnit.Framework;
-using TestClass = NUnit.Framework.TestFixtureAttribute;
-using TestInitialize = NUnit.Framework.SetUpAttribute;
-using TestCleanup = NUnit.Framework.TearDownAttribute;
-using TestMethod = NUnit.Framework.TestAttribute;
-#endif
 
 namespace csla.netcore.test.DataPortal
 {
@@ -113,11 +99,11 @@ namespace csla.netcore.test.DataPortal
     {
       Csla.Channels.Http.HttpProxy proxy;
       Csla.Channels.Http.HttpProxyOptions proxyOptions;
-      System.Net.Http.HttpClient httpClient;
+      HttpClient httpClient;
 
       var applicationContext = _testDIContext.CreateTestApplicationContext();
       var dataPortalOptions = applicationContext.GetRequiredService<Csla.Configuration.DataPortalOptions>();
-      httpClient = new System.Net.Http.HttpClient();
+      httpClient = new HttpClient();
       proxyOptions = new Csla.Channels.Http.HttpProxyOptions();
       proxy = new Csla.Channels.Http.HttpProxy(applicationContext, httpClient, proxyOptions, dataPortalOptions);
 

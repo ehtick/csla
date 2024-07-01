@@ -5,13 +5,10 @@
 // </copyright>
 // <summary>Inherit from this base class to easily</summary>
 //-----------------------------------------------------------------------
-using System;
+
 using System.ComponentModel;
-using System.Collections.Generic;
 using Csla.Serialization.Mobile;
 using Csla.Properties;
-using System.Reflection;
-using Csla.Reflection;
 using System.Diagnostics;
 
 namespace Csla.Core
@@ -144,7 +141,7 @@ namespace Csla.Core
       info.AddValue("Csla.Core.MobileList.AllowNew", AllowNew);
       info.AddValue("Csla.Core.MobileList.AllowRemove", AllowRemove);
       info.AddValue("Csla.Core.MobileList.RaiseListChangedEvents", RaiseListChangedEvents);
-#if (ANDROID || IOS) || NETFX_CORE
+#if (ANDROID || IOS)
       info.AddValue("Csla.Core.MobileList._supportsChangeNotificationCore", SupportsChangeNotificationCore);
 #endif
     }
@@ -162,7 +159,7 @@ namespace Csla.Core
         throw new InvalidOperationException(Resources.CannotSerializeCollectionsNotOfIMobileObject);
 
       List<int> references = new List<int>();
-      for (int x = 0; x < this.Count; x++)
+      for (int x = 0; x < Count; x++)
       {
         T child = this[x];
         if (child != null)
@@ -211,11 +208,11 @@ namespace Csla.Core
       if (!typeof(IMobileObject).IsAssignableFrom(typeof(T)))
         throw new InvalidOperationException(Resources.CannotSerializeCollectionsNotOfIMobileObject);
 
-      bool originalRaiseListChangedEvents = this.RaiseListChangedEvents;
+      bool originalRaiseListChangedEvents = RaiseListChangedEvents;
 
       try
       {
-        this.RaiseListChangedEvents = false;
+        RaiseListChangedEvents = false;
 
         if (info.Values.TryGetValue("$list", out var value))
         {
@@ -226,19 +223,19 @@ namespace Csla.Core
             if (child is IBusinessBase bb)
             {
               var editLevelAdded = bb.EditLevelAdded;
-              this.Add(child);
+              Add(child);
               bb.EditLevelAdded = editLevelAdded;
             }
             else
             {
-              this.Add(child);
+              Add(child);
             }
           }
         }
       }
       finally
       {
-          this.RaiseListChangedEvents = originalRaiseListChangedEvents;
+          RaiseListChangedEvents = originalRaiseListChangedEvents;
       }
     }
 

@@ -5,15 +5,9 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 using Csla;
-using Csla.Security;
 using Csla.Core;
-using Csla.Serialization;
 
 namespace cslalighttest.CslaDataProvider
 {
@@ -177,7 +171,7 @@ namespace cslalighttest.CslaDataProvider
     }
 
 
-    [Serializable()]
+    [Serializable]
     public class FetchCriteria : CriteriaBase<FetchCriteria>
     {
       public FetchCriteria() { }
@@ -213,7 +207,7 @@ namespace cslalighttest.CslaDataProvider
     protected void DataPortal_Fetch(int criteria, [Inject] IChildDataPortal<CustomerContactList> childDataPortal)
     {
       LoadProperty(IdProperty, criteria);
-      LoadProperty(NameProperty, "Customer Name for Id: " + criteria.ToString());
+      LoadProperty(NameProperty, $"Customer Name for Id: {criteria}");
       LoadProperty(DateCreatedProperty, new SmartDate(new DateTime(2000 + criteria, 1, 1)));
       LoadProperty(ContactsProperty, childDataPortal.FetchChild(criteria));
       LoadProperty(DateTimeOffsetNotNullProperty, DateTimeOffset.Now);
@@ -226,7 +220,7 @@ namespace cslalighttest.CslaDataProvider
     protected void DataPortal_Create(int criteria, [Inject] IChildDataPortal<CustomerContactList> childDataPortal)
     {
       LoadProperty(IdProperty, criteria);
-      LoadProperty(NameProperty, "New Customer for Id: " + criteria.ToString());
+      LoadProperty(NameProperty, $"New Customer for Id: {criteria}");
       LoadProperty(DateCreatedProperty, new SmartDate(DateTime.Today));
       LoadProperty(DateTimeOffsetNotNullProperty, DateTimeOffset.Now);
       LoadProperty(ContactsProperty, childDataPortal.FetchChild(0));
@@ -241,7 +235,7 @@ namespace cslalighttest.CslaDataProvider
     [Delete]
     protected void DataPortal_Delete(int criteria)
     {
-      Method = "Deleted Customer ID " + criteria.ToString();
+      Method = $"Deleted Customer ID {criteria}";
     }
 
     [Insert]
@@ -264,9 +258,9 @@ namespace cslalighttest.CslaDataProvider
   public class CustomerWO_DP_XYZ : BusinessBase<CustomerWO_DP_XYZ>
   {
     [Create]
-    private async Task Create()
+    private Task Create()
     {
-      await BusinessRules.CheckRulesAsync();
+      return BusinessRules.CheckRulesAsync();
     }
   }
 }

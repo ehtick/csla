@@ -1,4 +1,4 @@
-#if !NETSTANDARD2_0 && !NET6_0_OR_GREATER
+#if !NETSTANDARD2_0 && !NET8_0_OR_GREATER
 //-----------------------------------------------------------------------
 // <copyright file="ServicedDataPortal.cs" company="Marimer LLC">
 //     Copyright (c) Marimer LLC. All rights reserved.
@@ -6,10 +6,8 @@
 // </copyright>
 // <summary>Implements the server-side Serviced </summary>
 //-----------------------------------------------------------------------
-using System;
 using System.EnterpriseServices;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 
 namespace Csla.Server
 {

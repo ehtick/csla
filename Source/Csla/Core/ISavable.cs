@@ -5,8 +5,6 @@
 // </copyright>
 // <summary>Specifies that the object can save</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Threading.Tasks;
 
 namespace Csla.Core
 {
@@ -16,7 +14,7 @@ namespace Csla.Core
   /// </summary>
   public interface ISavable
   {
-#if !(ANDROID || IOS) && !NETFX_CORE
+#if !(ANDROID || IOS)
     /// <summary>
     /// Saves the object to the database.
     /// </summary>

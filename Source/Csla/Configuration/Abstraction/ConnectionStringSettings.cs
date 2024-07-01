@@ -5,7 +5,6 @@
 // </copyright>
 // <summary>Information about a connection string</summary>
 //-----------------------------------------------------------------------
-using System;
 
 namespace Csla.Configuration
 {
@@ -21,7 +20,7 @@ namespace Csla.Configuration
     public ConnectionStringSettings()
     { }
 
-#if !NETSTANDARD2_0 && !NET6_0_OR_GREATER
+#if !NETSTANDARD2_0 && !NET8_0_OR_GREATER
     /// <summary>
     /// Creates an instance of the type.
     /// </summary>

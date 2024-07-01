@@ -5,7 +5,7 @@
 // </copyright>
 // <summary>Contains a field value and related metadata.</summary>
 //-----------------------------------------------------------------------
-using System;
+
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using Csla.Serialization.Mobile;
@@ -16,7 +16,7 @@ namespace Csla.Core.FieldManager
   /// Contains a field value and related metadata.
   /// </summary>
   /// <typeparam name="T">Type of field value contained.</typeparam>
-  [Serializable()]
+  [Serializable]
   public class FieldData<T> : IFieldData<T>
   {
     [NonSerialized]
@@ -66,14 +66,14 @@ namespace Csla.Core.FieldManager
     {
       get
       {
-        return this.Value;
+        return Value;
       }
       set
       {
         if (value == null)
-          this.Value = default(T);
+          Value = default(T);
         else
-          this.Value = (T)value;
+          Value = (T)value;
       }
     }
 
@@ -184,7 +184,7 @@ namespace Csla.Core.FieldManager
     /// </summary>
     [Browsable(false)]
     [Display(AutoGenerateField = false)]
-    [System.ComponentModel.DataAnnotations.ScaffoldColumn(false)]
+    [ScaffoldColumn(false)]
     public bool IsBusy
     {
       get

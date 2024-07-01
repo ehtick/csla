@@ -5,22 +5,8 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnitDriven;
-#if !NUNIT
+
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.IO;
-using Csla.Reflection;
-#else
-using NUnit.Framework;
-using TestClass = NUnit.Framework.TestFixtureAttribute;
-using TestInitialize = NUnit.Framework.SetUpAttribute;
-using TestCleanup = NUnit.Framework.TearDownAttribute;
-using TestMethod = NUnit.Framework.TestAttribute;
-#endif
 
 namespace Csla.Test.MethodCaller
 {
@@ -40,7 +26,7 @@ namespace Csla.Test.MethodCaller
     {
       var instance = new Test1();
       var expected = "private";
-      var actual = Csla.Data.DataMapper.GetFieldValue(instance, "_f1");
+      var actual = Data.DataMapper.GetFieldValue(instance, "_f1");
       Assert.AreEqual(expected, actual);
     }
 
@@ -49,8 +35,8 @@ namespace Csla.Test.MethodCaller
     {
       var instance = new Test1();
       var expected = "success";
-      Csla.Data.DataMapper.SetFieldValue(instance, "_f1", expected);
-      var actual = Csla.Data.DataMapper.GetFieldValue(instance, "_f1");
+      Data.DataMapper.SetFieldValue(instance, "_f1", expected);
+      var actual = Data.DataMapper.GetFieldValue(instance, "_f1");
       Assert.AreEqual(expected, actual);
     }
 
@@ -59,7 +45,7 @@ namespace Csla.Test.MethodCaller
     {
       var instance = new Test1();
       var expected = "public";
-      var actual = Csla.Data.DataMapper.GetFieldValue(instance, "_f2");
+      var actual = Data.DataMapper.GetFieldValue(instance, "_f2");
       Assert.AreEqual(expected, actual);
     }
 
@@ -68,7 +54,7 @@ namespace Csla.Test.MethodCaller
     {
       var instance = new Test1();
       var expected = "one";
-      Csla.Data.DataMapper.SetFieldValue(instance, "_f2", expected);
+      Data.DataMapper.SetFieldValue(instance, "_f2", expected);
 
       var actual = instance._f2;
       Assert.AreEqual(expected, actual);

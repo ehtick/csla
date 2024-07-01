@@ -5,7 +5,6 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
 
 namespace Csla.Reflection
 {
@@ -18,27 +17,24 @@ namespace Csla.Reflection
 
     public MethodCacheKey(string typeName, string methodName, Type[] paramTypes)
     {
-      this.TypeName = typeName;
-      this.MethodName = methodName;
-      this.ParamTypes = paramTypes;
+      TypeName = typeName;
+      MethodName = methodName;
+      ParamTypes = paramTypes;
 
       _hashKey = typeName.GetHashCode();
-      _hashKey = _hashKey ^ methodName.GetHashCode();
+      _hashKey ^= methodName.GetHashCode();
       foreach (Type item in paramTypes)
-#if NETFX_CORE
-        _hashKey = _hashKey ^ item.Name().GetHashCode();
-#else
-        _hashKey = _hashKey ^ item.Name.GetHashCode();
-#endif
+      {
+        _hashKey ^= item.Name.GetHashCode();
+      }
     }
 
     public override bool Equals(object obj)
     {
-      MethodCacheKey key = obj as MethodCacheKey;
-      if (key != null &&
-          key.TypeName == this.TypeName &&
-          key.MethodName == this.MethodName &&
-          ArrayEquals(key.ParamTypes, this.ParamTypes))
+      if (obj is MethodCacheKey key &&
+          key.TypeName == TypeName &&
+          key.MethodName == MethodName &&
+          ArrayEquals(key.ParamTypes, ParamTypes))
         return true;
 
       return false;

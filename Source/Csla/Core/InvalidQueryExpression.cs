@@ -5,12 +5,12 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
+
 using Csla.Properties;
 
 namespace Csla.Core
 {
-  class InvalidQueryException : System.Exception
+  class InvalidQueryException : Exception
   {
     private string message;
 

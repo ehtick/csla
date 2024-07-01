@@ -5,7 +5,6 @@
 // </copyright>
 // <summary>Use this type to configure the settings</summary>
 //-----------------------------------------------------------------------
-using System;
 
 namespace Csla.Configuration
 {
@@ -14,6 +13,14 @@ namespace Csla.Configuration
   /// </summary>
   public static class SerializationConfigurationExtensions
   {
+    /// <summary>
+    /// Extension method for CslaSerializationConfiguration
+    /// </summary>
+    public static CslaOptions Serialization(this CslaOptions config)
+    {
+      return Serialization(config, null);
+    }
+
     /// <summary>
     /// Extension method for CslaSerializationConfiguration
     /// </summary>

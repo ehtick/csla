@@ -5,8 +5,7 @@
 // </copyright>
 // <summary>Provides access to the correct current application</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
+
 using Csla.Runtime;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -42,7 +41,7 @@ namespace Csla.Core
       }
       if (ContextManager is null)
       {
-        ContextManager = new Core.ApplicationContextManagerAsyncLocal();
+        ContextManager = new ApplicationContextManagerAsyncLocal();
       }
     }
 

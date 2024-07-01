@@ -5,12 +5,6 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System.Collections.Generic;
-using System.Text;
-
-using Csla;
-using System;
-using Csla.Core;
 
 namespace Csla.Test.DataPortalTest
 {
@@ -121,7 +115,7 @@ namespace Csla.Test.DataPortalTest
     {
       TestResults.Reinitialise();
       TestResults.Add("PrimitiveCriteriaSingle", "Deleted");
-      MethodCalled = "Deleted+" + id.ToString();
+      MethodCalled = $"Deleted+{id}";
     }
 
     #endregion

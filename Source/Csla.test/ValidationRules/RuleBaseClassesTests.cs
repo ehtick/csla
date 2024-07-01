@@ -1,8 +1,5 @@
-﻿using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Globalization;
-using System.Linq;
-using System.Threading;
 using Csla.Rules;
 using Csla.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -15,7 +12,7 @@ namespace Csla.Test.ValidationRules
   ///This is a test class for RootTest and is intended
   ///to contain all RootTest Unit Tests
   ///</summary>
-  [TestClass()]
+  [TestClass]
   public class RuleBaseClassesTests
   {
     private static TestDIContext _testDIContext;
@@ -38,7 +35,7 @@ namespace Csla.Test.ValidationRules
       TestResults.Reinitialise();
     }
 
-    [TestMethod()]
+    [TestMethod]
     public void LookupRuleDefaultCanXYZValues()
     {
       
@@ -49,7 +46,7 @@ namespace Csla.Test.ValidationRules
       Assert.IsFalse(rule.CanRunAsAffectedProperty);
     }
 
-    [TestMethod()]
+    [TestMethod]
     public void PropertyRuleDefaultCanXYZVaules()
     {
       var rule = new LessThan(RuleBaseClassesRoot.StartDateProperty, RuleBaseClassesRoot.EndDateProperty);
@@ -59,7 +56,7 @@ namespace Csla.Test.ValidationRules
       Assert.IsTrue(rule.CanRunAsAffectedProperty);
     }
 
-    [TestMethod()]
+    [TestMethod]
     public void PropertyEditRuleDefaultCanXYZVaules()
     {
       var rule = new CalcSum(RuleBaseClassesRoot.NameProperty);
@@ -69,7 +66,7 @@ namespace Csla.Test.ValidationRules
       Assert.IsTrue(rule.CanRunAsAffectedProperty);
     }
 
-    [TestMethod()]
+    [TestMethod]
     [ExpectedException(typeof(ArgumentException))]
     public void ObjectRuleThrowsExceptionIfPrimareyPropertyIsSet()
     {
@@ -79,7 +76,7 @@ namespace Csla.Test.ValidationRules
 
     // TODO: fix test
     [Ignore]
-    [TestMethod()]    
+    [TestMethod]    
     public void LessThanSetsErrorOnBothFields()
     {
       IDataPortal<RuleBaseClassesRoot> dataPortal = _testDIContext.CreateDataPortal<RuleBaseClassesRoot>();
@@ -109,7 +106,7 @@ namespace Csla.Test.ValidationRules
       Assert.AreEqual(string.Empty, err2);
     }
 
-    [TestMethod()]
+    [TestMethod]
     public void AsyncLookupDoNotRunServerSide()
     {
       IDataPortal<RuleBaseClassesRoot> dataPortal = _testDIContext.CreateDataPortal<RuleBaseClassesRoot>();
@@ -121,8 +118,9 @@ namespace Csla.Test.ValidationRules
       Assert.AreEqual(string.Empty, actual.Name);
     }
 
-    [TestMethod()]
+    [TestMethod]
     [TestCategory("SkipWhenLiveUnitTesting")]
+    [TestCategory("SkipOnCIServer")]
     public void AsyncLookupCustomerSetsCustomerName()
     {
       IDataPortal<RuleBaseClassesRoot> dataPortal = _testDIContext.CreateDataPortal<RuleBaseClassesRoot>();
@@ -144,7 +142,7 @@ namespace Csla.Test.ValidationRules
     }
 
 
-    [TestMethod()]
+    [TestMethod]
     public void NameRequiredIsBrokenOnNewRoot()
     {
       IDataPortal<RuleBaseClassesRoot> dataPortal = _testDIContext.CreateDataPortal<RuleBaseClassesRoot>();
@@ -161,7 +159,7 @@ namespace Csla.Test.ValidationRules
       Assert.IsTrue(err1.Length > 0);             // name has broken rule with message
     }
 
-    [TestMethod()]
+    [TestMethod]
     [TestCategory("SkipWhenLiveUnitTesting")]
     public void NameRequiredIsNotBrokenAfterLookupCustomer()
     {
@@ -185,7 +183,7 @@ namespace Csla.Test.ValidationRules
       Assert.IsTrue(actual.IsSelfValid);    // is valid after 
     }
 
-    [TestMethod()]
+    [TestMethod]
     public void NewObjectWithObjectRulesIsValid()
     {
       IDataPortal<RuleBaseClassesRoot> dataPortal = _testDIContext.CreateDataPortal<RuleBaseClassesRoot>();
@@ -195,7 +193,7 @@ namespace Csla.Test.ValidationRules
       Assert.IsTrue(actual.IsSelfValid);
     }
 
-    [TestMethod()]
+    [TestMethod]
     public void NewObjectWithObjectRulesHas3ErrorForCustomerId4()
     {
       IDataPortal<RuleBaseClassesRoot> dataPortal = _testDIContext.CreateDataPortal<RuleBaseClassesRoot>();
@@ -205,10 +203,10 @@ namespace Csla.Test.ValidationRules
 
       actual.CustomerId = 4;
       Assert.IsFalse(actual.IsValid);
-      Assert.AreEqual(3, actual.BrokenRulesCollection.Where(p => p.Severity == RuleSeverity.Error).Count());
+      Assert.AreEqual(3, actual.BrokenRulesCollection.Count(p => p.Severity == RuleSeverity.Error));
     }
 
-    [TestMethod()]
+    [TestMethod]
     public void NewObjectWithObjectRulesHas3WarningsForCustomerId5()
     {
       IDataPortal<RuleBaseClassesRoot> dataPortal = _testDIContext.CreateDataPortal<RuleBaseClassesRoot>();
@@ -218,10 +216,10 @@ namespace Csla.Test.ValidationRules
 
       actual.CustomerId = 5;
       Assert.IsTrue(actual.IsValid);
-      Assert.AreEqual(3, actual.BrokenRulesCollection.Where(p => p.Severity == RuleSeverity.Warning).Count());
+      Assert.AreEqual(3, actual.BrokenRulesCollection.Count(p => p.Severity == RuleSeverity.Warning));
     }
 
-    [TestMethod()]
+    [TestMethod]
     public void NewObjectWithObjectRulesHas3InfosForCustomerId6()
     {
       IDataPortal<RuleBaseClassesRoot> dataPortal = _testDIContext.CreateDataPortal<RuleBaseClassesRoot>();
@@ -231,13 +229,13 @@ namespace Csla.Test.ValidationRules
 
       actual.CustomerId = 6;
       Assert.IsTrue(actual.IsValid);
-      Assert.AreEqual(3, actual.BrokenRulesCollection.Where(p => p.Severity == RuleSeverity.Information).Count());
+      Assert.AreEqual(3, actual.BrokenRulesCollection.Count(p => p.Severity == RuleSeverity.Information));
     }
 
 
     // TODO: fix test
     [Ignore]
-    [TestMethod()]
+    [TestMethod]
     public void MessageDelegateAndResources()
     {
       IDataPortal<RuleBaseClassesRoot> dataPortal = _testDIContext.CreateDataPortal<RuleBaseClassesRoot>();

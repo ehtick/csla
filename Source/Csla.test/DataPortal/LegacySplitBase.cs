@@ -5,14 +5,11 @@
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Csla.Test.DataPortalTest
 {
-  [Serializable()]
-  public abstract class LegacySplitBase<T> : Csla.BusinessBase<T>
+  [Serializable]
+  public abstract class LegacySplitBase<T> : BusinessBase<T>
       where T : LegacySplitBase<T>
   {
     #region Business Methods
@@ -29,7 +26,7 @@ namespace Csla.Test.DataPortalTest
 
     #region Data Access
 
-    [Serializable()]
+    [Serializable]
     internal class Criteria : CriteriaBase<Criteria>
     {
       public int Id { get; }
